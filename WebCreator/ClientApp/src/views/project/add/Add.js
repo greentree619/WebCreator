@@ -29,7 +29,7 @@ const Add = (props) => {
     location.state != null ? location.state.project.name : '',
   )
   const [ipAddress, setIpAddress] = useState(
-    location.state != null ? location.state.project.ip : '',
+    location.state != null ? location.state.project.ip : '127.0.0.1',
   )
   const [searchKeyword, setSearchKeyword] = useState(
     location.state != null ? location.state.project.keyword : '',
@@ -46,6 +46,12 @@ const Add = (props) => {
   )
   const [languageValue, setLanguageValue] = useState('en')
   const navigate = useNavigate()
+
+  let ipAddressMap = [
+    { ip: '3.14.14.86', value: '3.14.14.86' },
+    { ip: '3.131.110.136', value: '3.131.110.136' },
+    { ip: '3.142.69.221', value: '3.142.69.221' },
+  ]
 
   let languageMap = [
     { lang: 'Abkhazian', value: 'ab' },
@@ -149,13 +155,13 @@ const Add = (props) => {
 
   const handleSubmit = (event) => {
     const form = event.currentTarget
+    event.preventDefault()
 
     if (location.state != null && location.state.mode == 'EDIT') {
       postAddProject()
     } else if (location.state != null && location.state.mode == 'VIEW') {
       navigate(-1)
     } else {
-      event.preventDefault()
       if (form.checkValidity() === false) {
         event.stopPropagation()
       } else {
@@ -205,6 +211,19 @@ const Add = (props) => {
     return (
       <CDropdownItem key={value} onClick={() => handleClick(lang, value)}>
         {lang}
+      </CDropdownItem>
+    )
+  }
+
+  const handleIpAddrClick = (ipAddr) => {
+    setIpAddress(ipAddr)
+    //console.log('clicked ' + i + ', state.value = ' + languageValue)
+  }
+
+  const renderIpAddrItem = (ipaddr) => {
+    return (
+      <CDropdownItem key={ipaddr} onClick={() => handleIpAddrClick(ipaddr)}>
+        {ipaddr}
       </CDropdownItem>
     )
   }
@@ -272,15 +291,27 @@ const Add = (props) => {
             </div>
             <div className="mb-3">
               <CFormLabel htmlFor="exampleFormControlInput1">IP Address</CFormLabel>
-              <CFormInput
-                type="text"
-                id="ipAddressFormControlInput"
-                placeholder="127.0.0.1"
-                aria-label="IP Address"
-                onChange={(e) => inputChangeHandler(setIpAddress, e)}
+              &nbsp;
+              <CDropdown
+                id="axes-dd"
+                className="float-right mr-0"
+                size="sm"
                 disabled={location.state != null && location.state.mode == 'VIEW'}
-                value={ipAddress}
-              />
+              >
+                <CDropdownToggle
+                  id="axes-ddt"
+                  color="secondary"
+                  size="sm"
+                  disabled={location.state != null && location.state.mode == 'VIEW'}
+                >
+                  {ipAddress}
+                </CDropdownToggle>
+                <CDropdownMenu>
+                  {ipAddressMap.map((ipAddr, index) => {
+                    return renderIpAddrItem(ipAddr.ip)
+                  })}
+                </CDropdownMenu>
+              </CDropdown>
             </div>
             <div className="mb-3">
               <CFormLabel htmlFor="exampleFormControlInput1">

@@ -133,7 +133,7 @@ namespace WebCreator.Controllers
                 if (snapshot.Exists)
                 {
                     var prevProj = snapshot.ConvertTo<Project>();
-                    //Omitted Task.Run(() => new CloudFlareAPI().UpdateDnsThreadAsync(prevProj.Name, project.Name, project.Ip));
+                    Task.Run(() => new CloudFlareAPI().UpdateDnsThreadAsync(prevProj.Name, project.Name, project.Ip));
                 }
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()

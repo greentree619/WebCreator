@@ -33,15 +33,15 @@ namespace UnitTest.Lib
                 String[] domainInfo = domain.Split(".");
                 if (domainInfo.Length >= 2)
                 {
-                    domain = domainInfo[domainInfo.Length - 2] + "." + domainInfo[domainInfo.Length-1];
-                    CreateZone(domain);
+                    String zone = domainInfo[domainInfo.Length - 2] + "." + domainInfo[domainInfo.Length - 1];
+                    CreateZone(zone);
                     GetZoneID();
-                    CreateDns(domain, domain, ip);
-                    ListDns(domain, domain);
+                    CreateDns(zone, domain, ip);
+                    ListDns(zone, domain);
                 }
             }
             catch (Exception e) {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("[CloudFlare] =========> " + e.Message);
             }
         }
 
@@ -49,12 +49,36 @@ namespace UnitTest.Lib
         {
             try
             {
-                GetZoneID();
-                UpdateDns(domain, newDomain, ip);
+                String[] domainInfo = domain.Split(".");
+                String[] newDomainInfo = newDomain.Split(".");
+                if (domainInfo.Length < 2 || newDomainInfo.Length < 2) return;
+
+                String zone = domainInfo[domainInfo.Length - 2] + "." + domainInfo[domainInfo.Length - 1];
+                String newZone = newDomainInfo[newDomainInfo.Length - 2] + "." + newDomainInfo[newDomainInfo.Length - 1];
+
+                if (domain.CompareTo(newDomain) != 0)
+                {   
+                    GetZoneID();
+                    ListZone(zone, "");
+                    ListDns(zone, domain);
+                    DeleteDns(zone, domain);
+                    CreateDns(newZone, newDomain, ip);
+                    ListDns(zone, domain);
+                }
+                else
+                {
+                    ListZone(zone, "");
+                    ListDns(zone, domain);
+                    if (UpdateDns(newZone, domain, newDomain, ip))
+                    {
+                        CreateDns(newZone, newDomain, ip);
+                    }
+                    ListDns(newZone, newDomain);
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("[CloudFlare] =========> " + e.Message);
             }
         }
 
@@ -65,14 +89,15 @@ namespace UnitTest.Lib
                 String[] domainInfo = domain.Split(".");
                 if (domainInfo.Length >= 2)
                 {
-                    domain = domainInfo[domainInfo.Length - 2] + "." + domainInfo[domainInfo.Length - 1];
-                    DeleteZone(domain, "");
-                    ListZone(domain, "");
+                    String zone = domainInfo[domainInfo.Length - 2] + "." + domainInfo[domainInfo.Length - 1];
+                    ListDns(zone, domain);
+                    DeleteDns(zone, domain);//DeleteZone(domain, "");
+                    ListDns(zone, domain);//ListZone(domain, "");
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("[CloudFlare] =========> " + e.Message);
             }
         }
 
@@ -123,11 +148,11 @@ namespace UnitTest.Lib
                 for (int i = 0; i < zoneAry.Count; i++)
                 {
                     zoneMap.Add(zoneAry[i]["name"].ToString(), zoneAry[i]["id"].ToString());
-                    Console.WriteLine("Zone name:" + zoneAry[i]["name"].ToString() + " Zone ID:" + zoneAry[i]["id"].ToString());
+                    Console.WriteLine("[CloudFlare] =========> Zone name:" + zoneAry[i]["name"].ToString() + " Zone ID:" + zoneAry[i]["id"].ToString());
                 }
             }
             catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("[CloudFlare] =========> " + ex.Message);
             }
             
             return jResult.success;
@@ -173,12 +198,12 @@ namespace UnitTest.Lib
                 {
                     for (int i = 0; i < zoneAry.Count; i++)
                     {
-                        Console.WriteLine("Zone name:" + zoneAry[i]["name"].ToString() + " Zone ID:" + zoneAry[i]["id"].ToString());
+                        Console.WriteLine("[CloudFlare] =========> Zone name:" + zoneAry[i]["name"].ToString() + " Zone ID:" + zoneAry[i]["id"].ToString());
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("[CloudFlare] =========> " + ex.Message);
                 }
             }
             catch (Exception ex)
@@ -228,12 +253,12 @@ namespace UnitTest.Lib
                 using (WebResponse response = e.Response)
                 {
                     HttpWebResponse httpResponse = (HttpWebResponse)response;
-                    Console.WriteLine("Error code: {0}", httpResponse.StatusCode);
+                    Console.WriteLine("[CloudFlare] =========> Error code: {0}", httpResponse.StatusCode);
                     using (Stream data = response.GetResponseStream())
                     using (var reader = new StreamReader(data))
                     {
                         string sResult = reader.ReadToEnd();
-                        Console.WriteLine(sResult);
+                        Console.WriteLine("[CloudFlare] =========> " + sResult);
 
                         dynamic jResult = JsonConvert.DeserializeObject(sResult);
                         ret = jResult.success;
@@ -348,12 +373,12 @@ namespace UnitTest.Lib
                 using (response = e.Response)
                 {
                     HttpWebResponse httpResponse = (HttpWebResponse)response;
-                    Console.WriteLine("Error code: {0}", httpResponse.StatusCode);
+                    //Console.WriteLine("Error code: {0}", httpResponse.StatusCode);
                     using (Stream data = response.GetResponseStream())
                     using (var reader = new StreamReader(data))
                     {
                         string sResult = reader.ReadToEnd();
-                        //Console.WriteLine(text);
+                        Console.WriteLine("[CloudFlare] =========> " + sResult);
 
                         dynamic jResult = JsonConvert.DeserializeObject(sResult);
                         ret = jResult.success;
@@ -400,12 +425,12 @@ namespace UnitTest.Lib
                     for (int i = 0; i < ary.Count; i++)
                     {
                         dnsMap[ary[i]["name"].ToString()] = ary[i]["id"].ToString();
-                        Console.WriteLine("DNS name:" + ary[i]["name"].ToString() + " Dns ID:" + ary[i]["id"].ToString());
+                        Console.WriteLine("[CloudFlare] =========> " + "DNS name:" + ary[i]["name"].ToString() + " Dns ID:" + ary[i]["id"].ToString());
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("[CloudFlare] =========> " + ex.Message);
                 }
                 ret = jResult.success;
                 /*
@@ -453,7 +478,7 @@ namespace UnitTest.Lib
         public bool DeleteDns(String zone, String dns) {
             bool ret = false;
             bool result = false;
-            if (dns.CompareTo(zone) != 0) dns = dns + "." + zone;
+            
             if (zoneMap[zone] == null || dnsMap[dns] == null) return false;
 
             String param = "/" + zoneMap[zone] + "/dns_records/" + dnsMap[dns];
@@ -477,7 +502,7 @@ namespace UnitTest.Lib
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("[CloudFlare] =========> " + ex.Message);
             }
             return ret;
         }
@@ -528,7 +553,7 @@ namespace UnitTest.Lib
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("[CloudFlare] =========> " + ex.Message);
             }
             return ret;
         }

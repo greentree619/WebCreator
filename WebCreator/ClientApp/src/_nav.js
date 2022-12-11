@@ -52,6 +52,22 @@ const _nav = [
   },
   {
     component: CNavTitle,
+    name: 'Domain Management',
+  },
+  {
+    component: CNavItem,
+    name: 'Zone',
+    to: '/cloudflare/zone/',
+    icon: <CIcon icon={cilNoteAdd} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'DNS Records',
+    to: '/cloudflare/dns',
+    icon: <CIcon icon={cilWindow} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
     name: 'Components',
   },
   {

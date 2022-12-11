@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
@@ -164,8 +165,9 @@ namespace UnitTest.Lib
              -H "X-Auth-Key: c2547eb745079dac9320b638f5e225cf483cc5cfdda41" \
              -H "Content-Type: application/json"
          */
-        public String ListZone(String zone, String status="active")
+        public bool ListZone(String zone, String status="active")
         {
+            dynamic jResult = null;
             String zoneName = zone.Length > 0 ? "&name=" + zone : "";
             status = status.Length > 0 ? "&status=" + status : "";
             String param = "?" +
@@ -183,14 +185,14 @@ namespace UnitTest.Lib
             request.Headers.Add("X-Auth-Email", Config.CloudFlareAPIEmail);
             request.Headers.Add("Authorization", "Bearer " + Config.CloudFlareAPIKey);
 
-            String ret = "";
+            bool ret = false;
             try
             {
                 string sResult = "";
                 using (WebResponse response = request.GetResponse())
                 using (var streamReader = new StreamReader(response.GetResponseStream()))
                     sResult = (streamReader.ReadToEnd());
-                dynamic jResult = JsonConvert.DeserializeObject(sResult);
+                jResult = JsonConvert.DeserializeObject(sResult);
                 ret = jResult.success;
 
                 JArray zoneAry = (JArray)jResult.result;
@@ -211,6 +213,37 @@ namespace UnitTest.Lib
             }
 
             return ret;
+        }
+
+        public WebResponse ListZone(int page = 1, int count = 5)
+        {
+            WebResponse response = null;
+            String zoneName = "";
+            String status = "";
+            String param = "?" +
+                "account.id=" + accountID +
+                zoneName +
+                status +
+                "&page=" + page +
+                "&per_page=" + count +
+                "&order=status" +
+                "&direction=desc" +
+                "&match=all";
+            HttpWebRequest request = WebRequest.CreateHttp(zoneAPI + param);
+            request.Method = "Get";
+            request.ContentType = "application/json";
+            request.Headers.Add("X-Auth-Email", Config.CloudFlareAPIEmail);
+            request.Headers.Add("Authorization", "Bearer " + Config.CloudFlareAPIKey);
+
+            try
+            {
+                response = request.GetResponse();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return response;
         }
 
         /*
@@ -467,6 +500,29 @@ namespace UnitTest.Lib
             }
 
             return result;
+        }
+
+        public WebResponse ListDns(string zoneId, int page = 1, int count = 5)
+        {
+            WebResponse response = null;
+
+            String param = "/" + zoneId + "/dns_records";
+            String apiURL = zoneAPI + param;
+            HttpWebRequest request = WebRequest.CreateHttp(apiURL);
+            request.Method = "Get";
+            request.ContentType = "application/json";
+            request.Headers.Add("X-Auth-Email", Config.CloudFlareAPIEmail);
+            request.Headers.Add("Authorization", "Bearer " + Config.CloudFlareAPIKey);
+
+            try
+            {
+                response = request.GetResponse();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return response;
         }
 
         /*

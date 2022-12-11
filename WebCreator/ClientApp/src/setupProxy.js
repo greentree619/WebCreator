@@ -10,6 +10,7 @@ const context =  [
   "/article",
   "/article/scrap",
   "/article/fromid",
+  "/dns",
 ];
 
 module.exports = function(app) {

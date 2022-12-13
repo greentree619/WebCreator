@@ -17,6 +17,7 @@ namespace UnitTest.Lib
         {
             try
             {
+                Console.WriteLine("ExecuteCommandSync --> " + command);
                 // create the ProcessStartInfo using "cmd" as the program to be run, and "/c " as the parameters.
                 // Incidentally, /c tells cmd that we want it to execute the command that follows, and then exit.
                 System.Diagnostics.ProcessStartInfo procStartInfo = new System.Diagnostics.ProcessStartInfo("cmd", "/c " + command);

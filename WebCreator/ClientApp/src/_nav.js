@@ -68,6 +68,16 @@ const _nav = [
   },
   {
     component: CNavTitle,
+    name: 'Build & SYNC',
+  },
+  {
+    component: CNavItem,
+    name: 'Build & SYNC',
+    to: '/build/build/',
+    icon: <CIcon icon={cilNoteAdd} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
     name: 'Components',
   },
   {

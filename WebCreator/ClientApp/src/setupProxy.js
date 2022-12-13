@@ -11,6 +11,8 @@ const context =  [
   "/article/scrap",
   "/article/fromid",
   "/dns",
+  "/buildsync",
+  "/buildsync/sync",
 ];
 
 module.exports = function(app) {

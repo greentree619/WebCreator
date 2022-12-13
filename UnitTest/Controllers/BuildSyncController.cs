@@ -80,6 +80,8 @@ namespace WebCreator.Controllers
                     Directory.CreateDirectory(tmpFolder);
                 }
 
+                Console.WriteLine("SyncWithServerThreadAsync Zip starting...");
+
                 if (Directory.Exists(curFolder))
                 {
                     using (FileStream zipFile = System.IO.File.Open($"{tmpFolder}\\{domain}.zip", FileMode.Create))
@@ -98,6 +100,8 @@ namespace WebCreator.Controllers
                     }
 
                     String cmd = $"pscp -v -i {exeFolder}\\searchsystem.ppk {tmpFolder}\\{domain}.zip ubuntu@{ipaddr}:/home/ubuntu";
+
+                    Console.WriteLine("SyncWithServerThreadAsync --> " + cmd);
                     ExecuteCmd.ExecuteCommandAsync(cmd);
                 }
             }

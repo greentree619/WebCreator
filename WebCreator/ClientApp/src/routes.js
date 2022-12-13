@@ -9,6 +9,7 @@ const AllArticles = React.lazy(() => import('./views/article/list/List'))
 const ArticleView = React.lazy(() => import('./views/article/view/View'))
 const AllZoneList = React.lazy(() => import('./views/cloudflare/zone/Zone'))
 const AllDnsList = React.lazy(() => import('./views/cloudflare/dns/Dns'))
+const BuildSync = React.lazy(() => import('./views/build/build/BuildSync'))
 
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
@@ -68,6 +69,7 @@ const routes = [
   { path: '/article/view', name: 'Article View', element: ArticleView },
   { path: '/cloudflare/zone', name: 'Zone List View', element: AllZoneList },
   { path: '/cloudflare/dns', name: 'Dns List View', element: AllDnsList },
+  { path: '/build/build', name: 'Build & SYNC', element: BuildSync },
   { path: '/base', name: 'Base', element: Cards, exact: true },
   { path: '/base/accordion', name: 'Accordion', element: Accordion },
   { path: '/base/breadcrumbs', name: 'Breadcrumbs', element: Breadcrumbs },

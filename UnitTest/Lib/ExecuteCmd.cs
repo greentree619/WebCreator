@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,16 +29,23 @@ namespace UnitTest.Lib
                 procStartInfo.UseShellExecute = false;
                 // Do not create the black window.
                 procStartInfo.CreateNoWindow = true;
+                //procStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 // Now we create a process, assign its ProcessStartInfo and start it
                 System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                Console.WriteLine("ExecuteCommandSync --> starting....");
                 proc.StartInfo = procStartInfo;
                 proc.Start();
-
+                //Thread.Sleep(100);
+                Console.WriteLine("ExecuteCommandSync --> show main window!");
+                //ShowWindow(proc.MainWindowHandle, 5);
+                Console.WriteLine("ExecuteCommandSync --> 3");
                 // Get the output into a string
                 string result = proc.StandardOutput.ReadToEnd();
+                Console.WriteLine("ExecuteCommandSync --> 2");
 
                 // Display the command output.
                 Console.WriteLine(result);
+                Console.WriteLine("ExecuteCommandSync --> 1");
             }
             catch (Exception objException)
             {
@@ -44,6 +53,9 @@ namespace UnitTest.Lib
                 Console.WriteLine("ExecuteCommandSync failed" + objException.Message);
             }
         }
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
 
         /// <summary>
         /// Execute the command Asynchronously.

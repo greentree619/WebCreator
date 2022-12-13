@@ -99,7 +99,7 @@ namespace WebCreator.Controllers
                         }
                     }
 
-                    String cmd = $"pscp -v -i {exeFolder}\\searchsystem.ppk {tmpFolder}\\{domain}.zip ubuntu@{ipaddr}:/home/ubuntu";
+                    String cmd = $"pscp -i {exeFolder}\\searchsystem.ppk {tmpFolder}\\{domain}.zip ubuntu@{ipaddr}:/home/ubuntu";
 
                     Console.WriteLine("SyncWithServerThreadAsync --> " + cmd);
                     ExecuteCmd.ExecuteCommandAsync(cmd);

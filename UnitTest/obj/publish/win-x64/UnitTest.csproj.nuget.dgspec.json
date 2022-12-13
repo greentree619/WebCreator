@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Workstation\\TonniProjects\\WebCreator\\UnitTest\\UnitTest.csproj": {}
+    "D:\\Workstation\\TonniProjects\\WebCreatorGit\\UnitTest\\UnitTest.csproj": {}
   },
   "projects": {
-    "D:\\Workstation\\TonniProjects\\WebCreator\\UnitTest\\UnitTest.csproj": {
+    "D:\\Workstation\\TonniProjects\\WebCreatorGit\\UnitTest\\UnitTest.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Workstation\\TonniProjects\\WebCreator\\UnitTest\\UnitTest.csproj",
+        "projectUniqueName": "D:\\Workstation\\TonniProjects\\WebCreatorGit\\UnitTest\\UnitTest.csproj",
         "projectName": "UnitTest",
-        "projectPath": "D:\\Workstation\\TonniProjects\\WebCreator\\UnitTest\\UnitTest.csproj",
+        "projectPath": "D:\\Workstation\\TonniProjects\\WebCreatorGit\\UnitTest\\UnitTest.csproj",
         "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "D:\\Workstation\\TonniProjects\\WebCreator\\UnitTest\\obj\\publish\\win-x64\\",
+        "outputPath": "D:\\Workstation\\TonniProjects\\WebCreatorGit\\UnitTest\\obj\\publish\\win-x64\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -43,6 +43,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "Aspose.Zip": {
+              "target": "Package",
+              "version": "[22.11.0, )"
+            },
             "FireSharp": {
               "target": "Package",
               "version": "[2.0.4, )"
@@ -54,6 +58,10 @@
             "Google.Cloud.Firestore": {
               "target": "Package",
               "version": "[3.0.0, )"
+            },
+            "Microsoft.AspNetCore.Mvc.Core": {
+              "target": "Package",
+              "version": "[2.2.5, )"
             },
             "Migamake.API.CloudFlare": {
               "target": "Package",

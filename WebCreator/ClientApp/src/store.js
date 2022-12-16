@@ -2,6 +2,9 @@ import { createStore } from 'redux'
 
 const initialState = {
   sidebarShow: true,
+  activeDomainId: '',
+  activeDomainName: '',
+  activeProject: {},
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {

@@ -1,12 +1,28 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import routes from '../routes'
 
 import { CBreadcrumb, CBreadcrumbItem } from '@coreui/react'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  CContainer,
+  CHeader,
+  CHeaderBrand,
+  CHeaderDivider,
+  CHeaderNav,
+  CHeaderToggler,
+  CNavLink,
+  CNavItem,
+} from '@coreui/react'
+import { NavLink } from 'react-router-dom'
+import { Outlet, Link } from 'react-router-dom'
 
 const AppBreadcrumb = () => {
   const currentLocation = useLocation().pathname
+  const activeDomainName = useSelector((state) => state.activeDomainName)
+  const activeDomainId = useSelector((state) => state.activeDomainId)
+  //const activeProject = useSelector((state) => state.activeProject)
 
   const getRouteName = (pathname, routes) => {
     const currentRoute = routes.find((route) => route.path === pathname)
@@ -33,7 +49,7 @@ const AppBreadcrumb = () => {
 
   return (
     <CBreadcrumb className="m-0 ms-2">
-      <CBreadcrumbItem href="/">Home</CBreadcrumbItem>
+      {/* <CBreadcrumbItem href="/">Home</CBreadcrumbItem>
       {breadcrumbs.map((breadcrumb, index) => {
         return (
           <CBreadcrumbItem
@@ -43,7 +59,29 @@ const AppBreadcrumb = () => {
             {breadcrumb.name}
           </CBreadcrumbItem>
         )
-      })}
+      })} */}
+
+      <CHeaderNav className="d-md-flex me-auto">
+        <CNavItem>
+          <CNavLink href="#/project/add?mode=view">{'DOMAIN : ' + activeDomainName}</CNavLink>
+        </CNavItem>
+        {activeDomainName.length > 0 && (
+          <>
+            <CNavItem>
+              <CNavLink href="#">Article Scrap Schedule</CNavLink>
+            </CNavItem>
+            <CNavItem>
+              <CNavLink href={'#/article/list/?domainId=' + activeDomainId}>Article Pages</CNavLink>
+            </CNavItem>
+            <CNavItem>
+              <CNavLink href="#">Article Theme</CNavLink>
+            </CNavItem>
+            <CNavItem>
+              <CNavLink href="#">Sync</CNavLink>
+            </CNavItem>
+          </>
+        )}
+      </CHeaderNav>
     </CBreadcrumb>
   )
 }

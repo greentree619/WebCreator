@@ -228,7 +228,12 @@ ListBase.propTypes = {
 
 const List = (props) => {
   const location = useLocation()
+  if (location.state == null && location.search.length > 0) {
+    location.state = { projectid: new URLSearchParams(location.search).get('domainId') }
+  }
   //console.log(location.state)
+  //console.log(location.search)
+  //console.log(new URLSearchParams(location.search).get('domainId'))
   return <ListBase location={location} {...props} />
 }
 export default List

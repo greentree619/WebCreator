@@ -21,38 +21,10 @@ import {
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { Outlet, Link } from 'react-router-dom'
 
 const Add = (props) => {
-  const location = useLocation()
-  const [validated, setValidated] = useState(false)
-  const [projectName, setProjectName] = useState(
-    location.state != null ? location.state.project.name : '',
-  )
-  const [ipAddress, setIpAddress] = useState(
-    location.state != null ? location.state.project.ip : '127.0.0.1',
-  )
-  const [searchKeyword, setSearchKeyword] = useState(
-    location.state != null ? location.state.project.keyword : '',
-  )
-  const [questionsCount, setQuestionsCount] = useState(
-    location.state != null ? location.state.project.quesionsCount : 50,
-  )
-  const [alarmVisible, setAlarmVisible] = useState(false)
-  const [alertColor, setAlertColor] = useState('success')
-  const [alertMsg, setAlertMsg] = useState('')
-  const [mode, setMode] = useState('ADD')
-  const [language, setLanguage] = useState(
-    location.state ? location.state.project.languageString : 'Engllish',
-  )
-  const [languageValue, setLanguageValue] = useState('en')
-  const navigate = useNavigate()
-
-  let ipAddressMap = [
-    { ip: '3.14.14.86', value: '3.14.14.86' },
-    { ip: '3.131.110.136', value: '3.131.110.136' },
-    { ip: '3.142.69.221', value: '3.142.69.221' },
-  ]
-
   let languageMap = [
     { lang: 'Abkhazian', value: 'ab' },
     { lang: 'Afrikaans', value: 'af' },
@@ -153,13 +125,71 @@ const Add = (props) => {
     { lang: 'Thai', value: 'th' },
   ]
 
+  const location = useLocation()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const [simpleMode, setSimpleMode] = useState(
+    location.state != null && location.state.simple_mode != null
+      ? location.state.simple_mode
+      : false,
+  )
+
+  if (location.search.length == 0) {
+    //normal link
+    if (location.state != null && !simpleMode) {
+      dispatch({ type: 'set', activeDomainName: location.state.project.name })
+      dispatch({ type: 'set', activeDomainId: location.state.project.id })
+      dispatch({ type: 'set', activeProject: location.state.project })
+    } else {
+      dispatch({ type: 'set', activeDomainName: '', activeProject: {}, activeDomainId: '' })
+    }
+  }
+
+  const activeProject = useSelector((state) => state.activeProject)
+  if (location.search.length > 0) {
+    //console.log()
+    const linkMode = new URLSearchParams(location.search).get('mode')
+    if (linkMode == 'view') {
+      location.state = { project: activeProject, mode: 'VIEW' }
+    }
+  }
+
+  const [validated, setValidated] = useState(false)
+  const [projectName, setProjectName] = useState(
+    location.state != null && !simpleMode ? location.state.project.name : '',
+  )
+  const [ipAddress, setIpAddress] = useState(
+    location.state != null && !simpleMode ? location.state.project.ip : '127.0.0.1',
+  )
+  const [searchKeyword, setSearchKeyword] = useState(
+    location.state != null && !simpleMode ? location.state.project.keyword : '',
+  )
+  const [questionsCount, setQuestionsCount] = useState(
+    location.state != null && !simpleMode ? location.state.project.quesionsCount : 50,
+  )
+  const [alarmVisible, setAlarmVisible] = useState(false)
+  const [alertColor, setAlertColor] = useState('success')
+  const [alertMsg, setAlertMsg] = useState('')
+  const [mode, setMode] = useState('ADD')
+  const [language, setLanguage] = useState(
+    location.state && !simpleMode ? location.state.project.languageString : 'Engllish',
+  )
+  const [languageValue, setLanguageValue] = useState('en')
+
+  let ipAddressMap = [
+    { ip: '3.14.14.86', value: '3.14.14.86' },
+    { ip: '3.131.110.136', value: '3.131.110.136' },
+    { ip: '3.142.69.221', value: '3.142.69.221' },
+  ]
+
   const handleSubmit = (event) => {
     const form = event.currentTarget
     event.preventDefault()
 
-    if (location.state != null && location.state.mode == 'EDIT') {
+    if (location.state != null && !simpleMode && location.state.mode == 'EDIT') {
       postAddProject()
-    } else if (location.state != null && location.state.mode == 'VIEW') {
+    } else if (location.state != null && !simpleMode && location.state.mode == 'VIEW') {
       navigate(-1)
     } else {
       if (form.checkValidity() === false) {
@@ -177,10 +207,10 @@ const Add = (props) => {
 
   async function postAddProject() {
     const requestOptions = {
-      method: location.state ? 'PUT' : 'POST',
+      method: location.state && !simpleMode ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id: location.state ? location.state.project.id : '-1',
+        id: location.state && !simpleMode ? location.state.project.id : '-1',
         name: projectName,
         ip: ipAddress,
         keyword: searchKeyword,
@@ -197,6 +227,8 @@ const Add = (props) => {
     if (response.status === 200 && ret) {
       setAlertMsg('Created new domain successfully.')
       setAlertColor('success')
+
+      if (simpleMode) navigate('/dashboard')
     }
     setAlarmVisible(true)
   }
@@ -228,10 +260,10 @@ const Add = (props) => {
     )
   }
 
-  let ActionMode = 'Add'
-  if (location.state != null && location.state.mode == 'EDIT') {
-    ActionMode = 'Edit'
-  } else if (location.state != null && location.state.mode == 'VIEW') {
+  let ActionMode = 'Create'
+  if (location.state != null && !simpleMode && location.state.mode == 'EDIT') {
+    ActionMode = 'Update'
+  } else if (location.state != null && !simpleMode && location.state.mode == 'VIEW') {
     ActionMode = 'Back'
   }
 
@@ -260,7 +292,7 @@ const Add = (props) => {
   return (
     <>
       <CCard className="mb-4">
-        <CCardHeader>Create Website</CCardHeader>
+        <CCardHeader>New/Update Domain</CCardHeader>
         <CCardBody>
           <CAlert
             color={alertColor}
@@ -285,24 +317,24 @@ const Add = (props) => {
                 aria-label="Domain"
                 required
                 onChange={(e) => inputChangeHandler(setProjectName, e)}
-                disabled={location.state != null && location.state.mode == 'VIEW'}
+                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
                 value={projectName}
               />
             </div>
-            <div className="mb-3">
+            <div className={simpleMode ? 'd-none' : 'mb-3'}>
               <CFormLabel htmlFor="exampleFormControlInput1">IP Address</CFormLabel>
               &nbsp;
               <CDropdown
                 id="axes-dd"
                 className="float-right mr-0"
                 size="sm"
-                disabled={location.state != null && location.state.mode == 'VIEW'}
+                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
               >
                 <CDropdownToggle
                   id="axes-ddt"
                   color="secondary"
                   size="sm"
-                  disabled={location.state != null && location.state.mode == 'VIEW'}
+                  disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
                 >
                   {ipAddress}
                 </CDropdownToggle>
@@ -313,7 +345,7 @@ const Add = (props) => {
                 </CDropdownMenu>
               </CDropdown>
             </div>
-            <div className="mb-3">
+            <div className={simpleMode ? 'd-none' : 'mb-3'}>
               <CFormLabel htmlFor="exampleFormControlInput1">
                 Search Keyword(can use multiple keywords using &apos;;&apos;)
               </CFormLabel>
@@ -323,36 +355,36 @@ const Add = (props) => {
                 placeholder="Search Keyword"
                 aria-label="Search Keyword"
                 onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
-                disabled={location.state != null && location.state.mode == 'VIEW'}
+                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
                 value={searchKeyword}
               />
             </div>
-            <div className="mb-3">
+            <div className={simpleMode ? 'd-none' : 'mb-3'}>
               <CFormLabel htmlFor="exampleFormControlInput1">Questions Count</CFormLabel>
               <CFormInput
                 type="text"
                 id="questionsCountFormControlInput"
                 placeholder="50"
                 onChange={(e) => inputChangeHandler(setQuestionsCount, e)}
-                required
-                disabled={location.state != null && location.state.mode == 'VIEW'}
+                required={simpleMode ? false : true}
+                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
                 value={questionsCount}
               />
             </div>
-            <div className="mb-3">
+            <div className={simpleMode ? 'd-none' : 'mb-3'}>
               <CFormLabel htmlFor="exampleFormControlInput1">Language</CFormLabel>
               &nbsp;
               <CDropdown
                 id="axes-dd"
                 className="float-right mr-0"
                 size="sm"
-                disabled={location.state != null && location.state.mode == 'VIEW'}
+                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
               >
                 <CDropdownToggle
                   id="axes-ddt"
                   color="secondary"
                   size="sm"
-                  disabled={location.state != null && location.state.mode == 'VIEW'}
+                  disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
                 >
                   {language}
                 </CDropdownToggle>
@@ -364,25 +396,34 @@ const Add = (props) => {
               </CDropdown>
             </div>
             <div className="mb-3">
-              {location.state != null && location.state.mode == 'VIEW' && (
-                <CButton
-                  type="button"
-                  onClick={() =>
-                    scrapQuery(
-                      location.state.project.id,
-                      location.state.project.keyword,
-                      location.state.project.quesionsCount,
-                    )
-                  }
-                >
-                  Scrap
+              {location.state != null && !simpleMode && (
+                <CButton type="button" onClick={() => navigate('/project/add')}>
+                  New Domain
                 </CButton>
               )}
               &nbsp;
-              {location.state != null && (
-                <CButton type="button" onClick={() => navigate('/project/add')}>
-                  Add
-                </CButton>
+              {location.state != null && !simpleMode && location.state.mode == 'VIEW' && (
+                <>
+                  <CButton
+                    type="button"
+                    onClick={() =>
+                      scrapQuery(
+                        location.state.project.id,
+                        location.state.project.keyword,
+                        location.state.project.quesionsCount,
+                      )
+                    }
+                  >
+                    Scrap
+                  </CButton>
+                  &nbsp;
+                  <Link
+                    to={`/project/add`}
+                    state={{ mode: 'EDIT', project: location.state.project }}
+                  >
+                    <CButton type="button">Edit</CButton>
+                  </Link>
+                </>
               )}
               &nbsp;
               <CButton type="submit">{ActionMode}</CButton>

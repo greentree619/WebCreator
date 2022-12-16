@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState, createRef } from 'react'
 
 import {
   CAvatar,
@@ -42,9 +42,12 @@ import {
   cilSettings,
   cilCloudDownload,
   cilPeople,
+  cilWindow,
   cilUser,
   cilUserFemale,
+  cibCanva,
 } from '@coreui/icons'
+import { Outlet, Link } from 'react-router-dom'
 
 import avatar1 from 'src/assets/images/avatars/1.jpg'
 import avatar2 from 'src/assets/images/avatars/2.jpg'
@@ -58,6 +61,7 @@ import WidgetsDropdown from '../widgets/WidgetsDropdown'
 
 const Dashboard = () => {
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+  const [projects, setProjects] = useState([])
 
   const progressExample = [
     { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
@@ -89,26 +93,42 @@ const Dashboard = () => {
     { title: 'LinkedIn', icon: cibLinkedin, percent: 8, value: '27,319' },
   ]
 
+  useEffect(() => {
+    getAllProject()
+  }, [])
+
+  async function getAllProject() {
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/1/100`)
+    const data = await response.json()
+    setProjects(data.data)
+  }
+
   return (
     <CRow>
-      <CCol xs={12} sm={6} lg={3}>
-        <CWidgetStatsF
-          className="mb-3"
-          icon={<CIcon width={24} icon={cilSettings} size="xl" />}
-          title="Create Website"
-          value=""
-          color="primary"
-        />
+      <CCol xs={15} sm={6} lg={3}>
+        <Link to={`/project/add`} state={{ simple_mode: true }}>
+          <CWidgetStatsF
+            className="lb-3"
+            icon={<CIcon width={24} icon={cilWindow} size="xl" />}
+            title="Create Website"
+            value=""
+            color="primary"
+          />
+        </Link>
       </CCol>
-      {/*<CCol xs={12} sm={6} lg={3}>*/}
-      {/*  <CWidgetStatsF*/}
-      {/*    className="mb-3"*/}
-      {/*    icon={<CIcon width={24} icon={cilSettings} size="xl" />}*/}
-      {/*    title="income"*/}
-      {/*    value=""*/}
-      {/*    color="primary"*/}
-      {/*  />*/}
-      {/*</CCol>*/}
+      {projects.map((project) => (
+        <CCol key={project.id} xs={15} sm={6} lg={3}>
+          <Link to={`/project/add`} state={{ mode: 'VIEW', project: project }}>
+            <CWidgetStatsF
+              className="lb-3"
+              icon={<CIcon width={24} icon={cilWindow} size="xl" />}
+              title={project.name}
+              value=""
+              color="primary"
+            />
+          </Link>
+        </CCol>
+      ))}
     </CRow>
   )
 }

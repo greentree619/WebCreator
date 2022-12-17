@@ -62,22 +62,35 @@ const AppBreadcrumb = () => {
       })} */}
 
       <CHeaderNav className="d-md-flex me-auto">
-        <CNavItem>
-          <CNavLink href="#/project/add?mode=view">{'DOMAIN : ' + activeDomainName}</CNavLink>
+        <CNavItem className="px-1">
+          <CNavLink href="#/project/add?mode=view" className="btn btn-light">
+            {'DOMAIN : ' + activeDomainName}
+          </CNavLink>
         </CNavItem>
         {activeDomainName.length > 0 && (
           <>
-            <CNavItem>
-              <CNavLink href="#">Article Scrap Schedule</CNavLink>
+            <CNavItem className="px-1">
+              <CNavLink href="#" className="btn btn-light">
+                Article Scrap Schedule
+              </CNavLink>
             </CNavItem>
-            <CNavItem>
-              <CNavLink href={'#/article/list/?domainId=' + activeDomainId}>Article Pages</CNavLink>
+            <CNavItem className="px-1">
+              <CNavLink
+                className="btn btn-light"
+                href={'#/article/list/?domainId=' + activeDomainId}
+              >
+                Article Pages
+              </CNavLink>
             </CNavItem>
-            <CNavItem>
-              <CNavLink href="#">Article Theme</CNavLink>
+            <CNavItem className="px-1">
+              <CNavLink className="btn btn-light" href="#">
+                Article Theme
+              </CNavLink>
             </CNavItem>
-            <CNavItem>
-              <CNavLink href="#">Sync</CNavLink>
+            <CNavItem className="px-1">
+              <CNavLink className="btn btn-light" href="#">
+                Sync
+              </CNavLink>
             </CNavItem>
           </>
         )}

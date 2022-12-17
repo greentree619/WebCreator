@@ -17,6 +17,8 @@ import {
   CDropdownItem,
   CDropdownToggle,
   CDropdownMenu,
+  CContainer,
+  CSpinner,
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -135,7 +137,9 @@ const Add = (props) => {
       : false,
   )
 
-  if (location.search.length == 0) {
+  console.log("location.search.length = " + location.search.length)
+  if (location.search.length == 0 
+      && (location.state != null && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT'))) {
     //normal link
     if (location.state != null && !simpleMode) {
       dispatch({ type: 'set', activeDomainName: location.state.project.name })
@@ -289,148 +293,210 @@ const Add = (props) => {
     return 'English'
   }
 
+  async function loadScrappingStatus()  {
+     try {
+      if(location.state != null && location.state.project != null && false){
+        const requestOptions = {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: location.state.project.id,
+            name: projectName,
+          }),
+        }
+    
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/status`, requestOptions)
+        let ret = await response.json()
+        if (response.status === 200 && ret) {
+        }
+      }
+        // const res = await fetch('https://api.apijson.com/...');
+        // const blocks = await res.json();
+        // const dataPanelone = blocks.panelone;
+        // const dataPaneltwo = blocks.paneltwo;
+
+        // this.setState({
+        //    panelone: dataPanelone,
+        //    paneltwo: dataPaneltwo,
+        // })
+    } catch (e) {
+        console.log(e);
+    }
+  }
+  setInterval(loadScrappingStatus, 1000);
+
   return (
     <>
-      <CCard className="mb-4">
-        <CCardHeader>New/Update Domain</CCardHeader>
-        <CCardBody>
-          <CAlert
-            color={alertColor}
-            dismissible
-            visible={alarmVisible}
-            onClose={() => setAlarmVisible(false)}
-          >
-            {alertMsg}
-          </CAlert>
-          <CForm
-            className="row g-3 needs-validation"
-            noValidate
-            validated={validated}
-            onSubmit={handleSubmit}
-          >
-            <div className="mb-3">
-              <CFormLabel htmlFor="exampleFormControlInput1">Domain</CFormLabel>
-              <CFormInput
-                type="text"
-                id="projectNameFormControlInput"
-                placeholder="www.domain.com"
-                aria-label="Domain"
-                required
-                onChange={(e) => inputChangeHandler(setProjectName, e)}
-                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                value={projectName}
-              />
-            </div>
-            <div className={simpleMode ? 'd-none' : 'mb-3'}>
-              <CFormLabel htmlFor="exampleFormControlInput1">IP Address</CFormLabel>
-              &nbsp;
-              <CDropdown
-                id="axes-dd"
-                className="float-right mr-0"
-                size="sm"
-                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-              >
-                <CDropdownToggle
-                  id="axes-ddt"
-                  color="secondary"
-                  size="sm"
-                  disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+      <CContainer className="px-4">
+        <CRow xs={{ gutterX: 5 }}>
+          <CCol>
+            <CCard className="mb-4">
+              <CCardHeader>New/Update Domain</CCardHeader>
+              <CCardBody>
+                <CAlert
+                  color={alertColor}
+                  dismissible
+                  visible={alarmVisible}
+                  onClose={() => setAlarmVisible(false)}
                 >
-                  {ipAddress}
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  {ipAddressMap.map((ipAddr, index) => {
-                    return renderIpAddrItem(ipAddr.ip)
-                  })}
-                </CDropdownMenu>
-              </CDropdown>
-            </div>
-            <div className={simpleMode ? 'd-none' : 'mb-3'}>
-              <CFormLabel htmlFor="exampleFormControlInput1">
-                Search Keyword(can use multiple keywords using &apos;;&apos;)
-              </CFormLabel>
-              <CFormInput
-                type="text"
-                id="searchKeywordFormControlInput"
-                placeholder="Search Keyword"
-                aria-label="Search Keyword"
-                onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
-                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                value={searchKeyword}
-              />
-            </div>
-            <div className={simpleMode ? 'd-none' : 'mb-3'}>
-              <CFormLabel htmlFor="exampleFormControlInput1">Questions Count</CFormLabel>
-              <CFormInput
-                type="text"
-                id="questionsCountFormControlInput"
-                placeholder="50"
-                onChange={(e) => inputChangeHandler(setQuestionsCount, e)}
-                required={simpleMode ? false : true}
-                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                value={questionsCount}
-              />
-            </div>
-            <div className={simpleMode ? 'd-none' : 'mb-3'}>
-              <CFormLabel htmlFor="exampleFormControlInput1">Language</CFormLabel>
-              &nbsp;
-              <CDropdown
-                id="axes-dd"
-                className="float-right mr-0"
-                size="sm"
-                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-              >
-                <CDropdownToggle
-                  id="axes-ddt"
-                  color="secondary"
-                  size="sm"
-                  disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                  {alertMsg}
+                </CAlert>
+                <CForm
+                  className="row g-3 needs-validation"
+                  noValidate
+                  validated={validated}
+                  onSubmit={handleSubmit}
                 >
-                  {language}
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  {languageMap.map((langInfo, index) => {
-                    return renderItem(langInfo.lang, langInfo.value)
-                  })}
-                </CDropdownMenu>
-              </CDropdown>
-            </div>
-            <div className="mb-3">
-              {location.state != null && !simpleMode && (
-                <CButton type="button" onClick={() => navigate('/project/add')}>
-                  New Domain
-                </CButton>
-              )}
-              &nbsp;
-              {location.state != null && !simpleMode && location.state.mode == 'VIEW' && (
-                <>
-                  <CButton
-                    type="button"
-                    onClick={() =>
-                      scrapQuery(
-                        location.state.project.id,
-                        location.state.project.keyword,
-                        location.state.project.quesionsCount,
-                      )
-                    }
-                  >
-                    Scrap
+                  <div className="mb-3">
+                    <CFormLabel htmlFor="exampleFormControlInput1">Domain</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="projectNameFormControlInput"
+                      placeholder="www.domain.com"
+                      aria-label="Domain"
+                      required
+                      onChange={(e) => inputChangeHandler(setProjectName, e)}
+                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                      value={projectName}
+                    />
+                  </div>
+                  <div className={simpleMode ? 'd-none' : 'mb-3'}>
+                    <CFormLabel htmlFor="exampleFormControlInput1">IP Address</CFormLabel>
+                    &nbsp;
+                    <CDropdown
+                      id="axes-dd"
+                      className="float-right mr-0"
+                      size="sm"
+                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                    >
+                      <CDropdownToggle
+                        id="axes-ddt"
+                        color="secondary"
+                        size="sm"
+                        disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                      >
+                        {ipAddress}
+                      </CDropdownToggle>
+                      <CDropdownMenu>
+                        {ipAddressMap.map((ipAddr, index) => {
+                          return renderIpAddrItem(ipAddr.ip)
+                        })}
+                      </CDropdownMenu>
+                    </CDropdown>
+                  </div>
+                  <div className={simpleMode ? 'd-none' : 'mb-3'}>
+                    <CFormLabel htmlFor="exampleFormControlInput1">
+                      Search Keyword(can use multiple keywords using &apos;;&apos;)
+                    </CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="searchKeywordFormControlInput"
+                      placeholder="Search Keyword"
+                      aria-label="Search Keyword"
+                      onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
+                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                      value={searchKeyword}
+                    />
+                  </div>
+                  <div className={simpleMode ? 'd-none' : 'mb-3'}>
+                    <CFormLabel htmlFor="exampleFormControlInput1">Questions Count</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="questionsCountFormControlInput"
+                      placeholder="50"
+                      onChange={(e) => inputChangeHandler(setQuestionsCount, e)}
+                      required={simpleMode ? false : true}
+                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                      value={questionsCount}
+                    />
+                  </div>
+                  <div className={simpleMode ? 'd-none' : 'mb-3'}>
+                    <CFormLabel htmlFor="exampleFormControlInput1">Language</CFormLabel>
+                    &nbsp;
+                    <CDropdown
+                      id="axes-dd"
+                      className="float-right mr-0"
+                      size="sm"
+                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                    >
+                      <CDropdownToggle
+                        id="axes-ddt"
+                        color="secondary"
+                        size="sm"
+                        disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                      >
+                        {language}
+                      </CDropdownToggle>
+                      <CDropdownMenu>
+                        {languageMap.map((langInfo, index) => {
+                          return renderItem(langInfo.lang, langInfo.value)
+                        })}
+                      </CDropdownMenu>
+                    </CDropdown>
+                  </div>
+                  <div className="mb-3">
+                    {location.state != null && !simpleMode && (
+                      <CButton type="button" onClick={() => navigate('/project/add')}>
+                        New Domain
+                      </CButton>
+                    )}
+                    &nbsp;
+                    {location.state != null && !simpleMode && location.state.mode == 'VIEW' && (
+                      <>
+                        <CButton
+                          type="button"
+                          onClick={() =>
+                            scrapQuery(
+                              location.state.project.id,
+                              location.state.project.keyword,
+                              location.state.project.quesionsCount,
+                            )
+                          }
+                        >
+                          Scrap
+                        </CButton>
+                        &nbsp;
+                        <Link
+                          to={`/project/add`}
+                          state={{ mode: 'EDIT', project: location.state.project }}
+                        >
+                          <CButton type="button">Edit</CButton>
+                        </Link>
+                      </>
+                    )}
+                    &nbsp;
+                    <CButton type="submit">{ActionMode}</CButton>
+                  </div>
+                </CForm>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol>
+            <CContainer>
+              <CRow xs={{ cols: 2 }}>
+                <CCol className="border border-secondary text-center">
+                  SerpAPI Scrapping
+                </CCol>
+                <CCol className="border border-secondary text-center">
+                  Article Forge Scrapping
+                </CCol>
+                <CCol className="border border-secondary text-center">
+                  <CButton disabled>
+                    <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
+                    Scrapping...
                   </CButton>
-                  &nbsp;
-                  <Link
-                    to={`/project/add`}
-                    state={{ mode: 'EDIT', project: location.state.project }}
-                  >
-                    <CButton type="button">Edit</CButton>
-                  </Link>
-                </>
-              )}
-              &nbsp;
-              <CButton type="submit">{ActionMode}</CButton>
-            </div>
-          </CForm>
-        </CCardBody>
-      </CCard>
+                </CCol>
+                <CCol className="border border-secondary text-center">
+                  <CButton disabled>
+                    <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
+                    Scrapping...
+                  </CButton>
+                </CCol>
+              </CRow>
+            </CContainer>
+          </CCol>
+        </CRow>
+      </CContainer>
     </>
   )
 }

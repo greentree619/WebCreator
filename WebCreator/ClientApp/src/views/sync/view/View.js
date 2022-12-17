@@ -13,9 +13,11 @@ import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Outlet, Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 
 class ListBase extends Component {
   static displayName = ListBase.name
+
   constructor(props) {
     super(props)
     this.state = {
@@ -42,50 +44,9 @@ class ListBase extends Component {
     this.populateArticleData(this.state.curPage + 1)
   }
 
-  async scrapArticle(_id, title) {
-    title = title.replaceAll('?', ';')
-    const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}article/scrap/` + _id + '/' + title,
-    )
-    this.setState({
-      alarmVisible: false,
-      alertMsg: 'Unfortunately, scrapping faild.',
-      alertColor: 'danger',
-    })
-    if (response.status === 200) {
-      //console.log('add success')
-      this.setState({
-        alertMsg: 'Started to scrapping article from Article Forge successfully.',
-        alertColor: 'success',
-      })
-    }
-    this.setState({ alarmVisible: true })
-  }
-
-  async deleteArticle(_id) {
-    const requestOptions = {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        _id: _id,
-      }),
-    }
-    fetch(`${process.env.REACT_APP_SERVER_URL}article/${_id}`, requestOptions)
-      .then((res) => {
-        if (res.status === 200) {
-          let tmpData = [...this.state.articles]
-          let idx = tmpData.findIndex((art) => art.id === _id)
-          tmpData.splice(idx, 1)
-          this.setState({
-            articles: tmpData,
-            loading: false,
-            alarmVisible: false,
-            curPage: this.state.curPage,
-            totalPage: this.state.total,
-          })
-        }
-      })
-      .catch((err) => console.log(err))
+  getLink(title){
+    title = title.replace("?", "");
+    return `http://${this.state.projectInfo.projectDomain}/${title}.html`;
   }
 
   renderArticlesTable = (articles) => {
@@ -140,6 +101,15 @@ class ListBase extends Component {
       )
     }
 
+    const openNewPage = (article) => {
+      let newLink = this.getLink(article)
+      //console.log('newLink', newLink)
+      window.open(
+        newLink,
+        '_blank' // <- This is what makes it open in a new window.
+      );
+    }
+
     return (
       <>
         <CAlert
@@ -155,7 +125,7 @@ class ListBase extends Component {
             <tr>
               <th>Id</th>
               <th>Title</th>
-              <th>Action</th>
+              <th>Link</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -163,22 +133,14 @@ class ListBase extends Component {
             {articles.map((article) => (
               <tr key={article.id}>
                 <td>{article.id}</td>
-                <td>{article.title}</td>
                 <td>
-                  <CButton
-                    type="button"
-                    onClick={() => this.scrapArticle(article.id, article.title)}
-                  >
-                    Scrap
-                  </CButton>
-                  &nbsp;
-                  <Link to={`/article/view`} state={{ mode: 'VIEW', article: article }}>
-                    <CButton type="button">View</CButton>
-                  </Link>
-                  &nbsp;
-                  <CButton type="button" onClick={() => this.deleteArticle(article.id)}>
-                    Delete
-                  </CButton>
+                    {article.title}
+                  {/* <Link to={{pathname: `/openlink`, search: '?url='+this.getLink(article.title)}}>
+                    {article.title}
+                  </Link> */}
+                </td>
+                <td>
+                  <button onClick={() => openNewPage(article.title)}>Open Link</button>
                 </td>
                 <td>
                   <CSpinner size="sm"/>
@@ -234,11 +196,9 @@ ListBase.propTypes = {
 const List = (props) => {
   const location = useLocation()
   if (location.state == null && location.search.length > 0) {
-    location.state = { projectid: new URLSearchParams(location.search).get('domainId') }
+    location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
+    projectDomain: new URLSearchParams(location.search).get('domain') }
   }
-  //console.log(location.state)
-  //console.log(location.search)
-  //console.log(new URLSearchParams(location.search).get('domainId'))
   return <ListBase location={location} {...props} />
 }
 export default List

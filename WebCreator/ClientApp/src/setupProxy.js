@@ -7,6 +7,7 @@ const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_H
 const context =  [
   "/project",
   "/project/serpapi",
+  "/project/status",
   "/article",
   "/article/scrap",
   "/article/fromid",

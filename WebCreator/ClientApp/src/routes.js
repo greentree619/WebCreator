@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLocation } from 'react-router-dom'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
@@ -10,6 +11,18 @@ const ArticleView = React.lazy(() => import('./views/article/view/View'))
 const AllZoneList = React.lazy(() => import('./views/cloudflare/zone/Zone'))
 const AllDnsList = React.lazy(() => import('./views/cloudflare/dns/Dns'))
 const BuildSync = React.lazy(() => import('./views/build/build/BuildSync'))
+const AFSchedule = React.lazy(() => import('./views/schedule/view/View'))
+const Sync = React.lazy(() => import('./views/sync/view/View'))
+const SyncWithDomain = () => {
+      const location = useLocation()
+      //console.log(new URLSearchParams(location.search).get('url'));
+      const link = new URLSearchParams(location.search).get('url');
+      window.open(
+        link,
+        '_blank' // <- This is what makes it open in a new window.
+      );
+      console.log('openlink');
+  }
 
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
@@ -70,6 +83,8 @@ const routes = [
   { path: '/cloudflare/zone', name: 'Zone List View', element: AllZoneList },
   { path: '/cloudflare/dns', name: 'Dns List View', element: AllDnsList },
   { path: '/build/build', name: 'Build & SYNC', element: BuildSync },
+  { path: '/schedule/view', name: 'Article Forge Schedule', element: AFSchedule},
+  { path: '/sync/view', name: 'Sync with domain', element: Sync},
   { path: '/base', name: 'Base', element: Cards, exact: true },
   { path: '/base/accordion', name: 'Accordion', element: Accordion },
   { path: '/base/breadcrumbs', name: 'Breadcrumbs', element: Breadcrumbs },
@@ -109,6 +124,7 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   { path: '/widgets', name: 'Widgets', element: Widgets },
+  { path: '/openlink', element: SyncWithDomain},
 ]
 
 export default routes

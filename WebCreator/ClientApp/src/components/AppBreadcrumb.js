@@ -70,7 +70,7 @@ const AppBreadcrumb = () => {
         {activeDomainName.length > 0 && (
           <>
             <CNavItem className="px-1">
-              <CNavLink href="#" className="btn btn-light">
+              <CNavLink href={'#/schedule/view/?domainId=' + activeDomainId} className="btn btn-light">
                 Article Scrap Schedule
               </CNavLink>
             </CNavItem>
@@ -83,12 +83,12 @@ const AppBreadcrumb = () => {
               </CNavLink>
             </CNavItem>
             <CNavItem className="px-1">
-              <CNavLink className="btn btn-light" href="#">
+              <CNavLink className="btn btn-light" href="#" disabled>
                 Article Theme
               </CNavLink>
             </CNavItem>
             <CNavItem className="px-1">
-              <CNavLink className="btn btn-light" href="#">
+              <CNavLink className="btn btn-light" href={'#/sync/view?domainId=' + activeDomainId + '&domain='+activeDomainName}>
                 Sync
               </CNavLink>
             </CNavItem>

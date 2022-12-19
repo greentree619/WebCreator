@@ -70,6 +70,39 @@ namespace WebCreator.Controllers
             return new OkObjectResult(new Item { curPage = page, total = total, data = list });
         }
 
+        [HttpGet("schedule/{domainid}")]
+        public async Task<IActionResult> GetScheduleAsync(String domainid)
+        {
+            Schedule schedule = null;
+            try
+            {
+                CollectionReference col = Config.FirebaseDB.Collection("Schedules");
+                Query query = col.WhereEqualTo("ProjectId", domainid).Limit(1);
+                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                if (projectsSnapshot.Documents.Count > 0)
+                {
+                    schedule = projectsSnapshot.Documents[0].ConvertTo<Schedule>();
+                    schedule.Id = projectsSnapshot.Documents[0].Id;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return Ok(new { id = domainid, data = schedule });
+        }
+
+        [HttpGet("isscrapping/{domainId}")]
+        public async Task<IActionResult> GetIsScrapping(String domainId)
+        {
+            JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(domainId);
+            bool isScrapping = (bool)scrapStatus["serpapi"];
+            bool isAFScrapping = (bool)scrapStatus["afapi"];
+
+            //return list;
+            return Ok(new { serpapi=isScrapping, afapi= isAFScrapping });
+        }
+
         [HttpPost]
         public async Task<ActionResult> AddProjectAsync([FromBody] Project projectInput)
         {
@@ -82,6 +115,7 @@ namespace WebCreator.Controllers
                 Language = projectInput.Language,
                 Ip = projectInput.Ip,
                 OnScrapping = false,
+                OnAFScrapping = false,
                 LanguageString = projectInput.LanguageString,
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
@@ -90,11 +124,13 @@ namespace WebCreator.Controllers
             try
             {
                 CollectionReference projectsCol = Config.FirebaseDB.Collection("Projects");
-                
+
                 Query query = projectsCol.OrderByDescending("CreatedTime").WhereEqualTo("Name", project.Name).Limit(1);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
                 if (projectsSnapshot.Documents.Count == 0) {
-                    await projectsCol.AddAsync(project);
+                    DocumentReference docRef = await projectsCol.AddAsync(project);
+
+                    await addDefaultSchedule(docRef.Id);
                     addOK = true;
                 }
 
@@ -106,6 +142,21 @@ namespace WebCreator.Controllers
             }
 
             return Ok(addOK);
+        }
+
+        private async Task addDefaultSchedule(String projectId) {
+            CollectionReference scheduleCol = Config.FirebaseDB.Collection("Schedules");
+            var afSchedule = new Schedule
+            {
+                ProjectId = projectId,
+                JustNowCount = 1,
+                EachCount = 1,
+                SpanTime = 1,
+                SpanUnit = 10,
+                CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+            };
+            await scheduleCol.AddAsync(afSchedule);
         }
 
         [HttpPut]
@@ -157,6 +208,36 @@ namespace WebCreator.Controllers
             return Ok(addOK);
         }
 
+        [HttpPut("updateSchedule")]
+        public async Task<ActionResult> UpdateScheduleAsync([FromBody] Schedule schedule)
+        {
+            Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+            {
+                { "ProjectId", schedule.ProjectId },
+                { "JustNowCount", schedule.JustNowCount },
+                { "EachCount", schedule.EachCount },
+                { "SpanTime", schedule.SpanTime },
+                { "SpanUnit", schedule.SpanUnit },
+                { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
+            };
+
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Schedules");
+                DocumentReference docRef = articlesCol.Document(schedule.Id);                
+                await docRef.UpdateAsync(userUpdate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                userUpdate["CreatedTime"] = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+                CollectionReference scheduleCol = Config.FirebaseDB.Collection("Schedules");
+                await scheduleCol.AddAsync(userUpdate);
+            }
+
+            return Ok(true);
+        }
+
         [HttpDelete("{projectid}")]
         public async Task<IActionResult> DeleteProjectAsync(String projectid)
         {
@@ -178,7 +259,18 @@ namespace WebCreator.Controllers
                 {
                     writeBatch.Delete(document.Reference);
                 }
-                await writeBatch.CommitAsync();                
+                await writeBatch.CommitAsync();
+
+                colRef = Config.FirebaseDB.Collection("Schedules");
+                query = colRef.WhereEqualTo("ProjectId", projectid);
+                snapshot = await query.GetSnapshotAsync();
+
+                writeBatch = Config.FirebaseDB.StartBatch();
+                foreach (DocumentSnapshot document in snapshot.Documents)
+                {
+                    writeBatch.Delete(document.Reference);
+                }
+                await writeBatch.CommitAsync();
             }
             catch (Exception ex)
             {
@@ -197,6 +289,18 @@ namespace WebCreator.Controllers
         public ActionResult serpapi(String _id, String keyword, Int32 count)
         {
             Task.Run(() => new SerpapiScrap().ScrappingThreadAsync(_id, keyword, count));
+            return Ok(true);
+        }
+
+        //{{
+        [HttpGet("startaf/{_id}/{sid}")]
+        //==
+        //[Route("serpapi")]
+        //[HttpPost]
+        //}}
+        public ActionResult StartAFapi(String _id, String sid)
+        {
+            Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(_id, sid));
             return Ok(true);
         }
     }

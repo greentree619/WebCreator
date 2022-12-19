@@ -1,4 +1,6 @@
 ﻿using Google.Cloud.Firestore;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebCreator;
 using WebCreator.Models;
+using Newtonsoft.Json;
 
 namespace UnitTest.Lib
 {
@@ -30,9 +33,29 @@ namespace UnitTest.Lib
             }
         }
 
-        public static async Task<bool> IsDomainScrappingAsync(String domainId)
+        public static async Task SetDomainAFScrappingAsync(String domainId, bool isScrapping)
+        {
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Projects");
+                DocumentReference docRef = articlesCol.Document(domainId);
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                {
+                    { "OnAFScrapping",  isScrapping},
+                };
+                await docRef.UpdateAsync(userUpdate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public static async Task<JObject> IsDomainScrappingAsync(String domainId)
         {
             bool isScrapping = false;
+            bool isAFScrapping = false;
             try
             {
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Projects");
@@ -42,6 +65,7 @@ namespace UnitTest.Lib
                 {
                     var prj = snapshot.ConvertTo<Project>();
                     isScrapping = (prj.OnScrapping != null ? prj.OnScrapping : false);
+                    isAFScrapping = (prj.OnAFScrapping != null ? prj.OnAFScrapping : false);
                 }
 
             }
@@ -50,7 +74,11 @@ namespace UnitTest.Lib
                 Console.WriteLine(ex.Message);
             }
 
-            return isScrapping;
+            JObject res = new JObject();
+            res["serpapi"] = isScrapping;
+            res["afapi"] = isAFScrapping;
+
+            return res;
         }
     }
 }

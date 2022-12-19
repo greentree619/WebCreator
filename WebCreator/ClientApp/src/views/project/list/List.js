@@ -31,6 +31,11 @@ export default class List extends Component {
     this.populateProjectData(1)
   }
 
+  componentWillUnmount() 
+  {//Unmount
+
+  }
+
   async scrapQuery(_id, keyword, count) {
     keyword = keyword.replaceAll(';', '&')
     keyword = keyword.replaceAll('?', ';')

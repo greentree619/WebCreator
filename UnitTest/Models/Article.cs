@@ -15,6 +15,8 @@ namespace WebCreator.Models
         [FirestoreProperty]
         public Int32 Progress { get; set; }
         [FirestoreProperty]
+        public Boolean IsScrapping { get; set; }
+        [FirestoreProperty]
         public String? Title { get; set; }
         [FirestoreProperty]
 

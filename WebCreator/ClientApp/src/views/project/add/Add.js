@@ -180,6 +180,8 @@ const Add = (props) => {
     location.state && !simpleMode ? location.state.project.languageString : 'Engllish',
   )
   const [languageValue, setLanguageValue] = useState('en')
+  const [isOnScrapping, setIsOnScrapping] = useState(false)
+  const [isOnAFScrapping, setIsOnAFScrapping] = useState(false)
 
   let ipAddressMap = [
     { ip: '3.14.14.86', value: '3.14.14.86' },
@@ -292,38 +294,37 @@ const Add = (props) => {
     //if(location.state != null )
     return 'English'
   }
+  
+  useEffect(() => {
+    async function loadScrappingStatus()  {
+      try {
+       if(location.state != null && location.state.project != null 
+         && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT')){
+         const requestOptions = {
+           method: 'GET',
+           headers: { 'Content-Type': 'application/json' },
+         }
+     
+         const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${location.state.project.id}`, requestOptions)
+         let ret = await response.json()
+         if (response.status === 200 && ret) {
+           console.log(ret);
+           setIsOnScrapping(ret.serpapi);
+           setIsOnAFScrapping(ret.afapi);
+         }
+       }
+     } catch (e) {
+         console.log(e);
+     }
+   }
 
-  async function loadScrappingStatus()  {
-     try {
-      if(location.state != null && location.state.project != null && false){
-        const requestOptions = {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: location.state.project.id,
-            name: projectName,
-          }),
-        }
-    
-        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/status`, requestOptions)
-        let ret = await response.json()
-        if (response.status === 200 && ret) {
-        }
-      }
-        // const res = await fetch('https://api.apijson.com/...');
-        // const blocks = await res.json();
-        // const dataPanelone = blocks.panelone;
-        // const dataPaneltwo = blocks.paneltwo;
-
-        // this.setState({
-        //    panelone: dataPanelone,
-        //    paneltwo: dataPaneltwo,
-        // })
-    } catch (e) {
-        console.log(e);
-    }
-  }
-  setInterval(loadScrappingStatus, 1000);
+    var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
+    return ()=>{
+      //unmount
+      clearInterval(refreshIntervalId);
+      console.log('project scrapping status interval cleared!!!');
+    }    
+  }, [])
 
   return (
     <>
@@ -481,16 +482,23 @@ const Add = (props) => {
                   Article Forge Scrapping
                 </CCol>
                 <CCol className="border border-secondary text-center">
-                  <CButton disabled>
-                    <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
-                    Scrapping...
-                  </CButton>
+                  {isOnScrapping ? (
+                    <>
+                      <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
+                      Scrapping...
+                    </>
+                  ) : 'Stopped'
+                }
+                  
                 </CCol>
                 <CCol className="border border-secondary text-center">
-                  <CButton disabled>
-                    <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
-                    Scrapping...
-                  </CButton>
+                  {isOnAFScrapping ? (
+                    <>
+                      <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
+                      Scrapping...
+                    </>
+                  ) : 'Stopped'
+                  }
                 </CCol>
               </CRow>
             </CContainer>

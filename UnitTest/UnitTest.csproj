@@ -16,6 +16,8 @@
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Migamake.API.CloudFlare" Version="3.0.104" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="NOW.FeatureFlagExtensions.FeatureManagement" Version="1.1.0-preview" />
     <PackageReference Include="RestSharp" Version="109.0.0-preview.1" />
   </ItemGroup>
 

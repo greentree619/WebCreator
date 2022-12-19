@@ -19,7 +19,8 @@ namespace UnitTest.Lib
 
         public async Task ScrappingThreadAsync(String _id, String keyword, Int32 count)
         {
-            bool isScrapping = await CommonModule.IsDomainScrappingAsync(_id);
+            JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(_id);
+            bool isScrapping = (bool)scrapStatus["serpapi"];
             if (!isScrapping)
             {
                 CommonModule.SetDomainScrappingAsync(_id, true);
@@ -46,9 +47,60 @@ namespace UnitTest.Lib
 
                 CommonModule.SetDomainScrappingAsync(_id, false);
             }
-
-            
         }
+        
+        public async Task ScrappingAFThreadAsync(String _id, String scheduleId)
+        {
+            JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(_id);
+            bool isScrapping = (bool)scrapStatus["afapi"];
+            if (!isScrapping)
+            {
+                CommonModule.SetDomainAFScrappingAsync(_id, true);
+                Thread.Sleep(1000 * 10);
+                try
+                {
+                    Schedule schedule;
+                    CollectionReference articlesCol = Config.FirebaseDB.Collection("Schedules");
+                    DocumentReference docRef = articlesCol.Document(scheduleId);
+                    DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
+
+
+                    CollectionReference col = Config.FirebaseDB.Collection("Articles");
+                    Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false);
+                    QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
+
+                    int articltCount = totalSnapshot.Count;
+                    if (articleSnapshot.Exists && totalSnapshot.Count > 0)
+                    {
+                        schedule = articleSnapshot.ConvertTo<Schedule>();
+
+                        //for (int i = 0; i < schedule.JustNowCount; i++)
+                        //{
+                        //    Thread.Sleep(1000);
+                        //}
+
+                        //while (true)
+                        //{
+                        //    Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+
+                        //    for (int i = 0; i < schedule.EachCount; i++)
+                        //    {
+                        //        Thread.Sleep(1000);
+                        //    }
+                        //}
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                
+                Console.WriteLine("AF scrapping All done.");
+
+                CommonModule.SetDomainAFScrappingAsync(_id, false);
+            }
+        }
+
         static void LogResult(Task<string> task)
         {
             Console.WriteLine($"Is Valid: {task.Result}");
@@ -82,6 +134,8 @@ namespace UnitTest.Lib
                         {
                             ProjectId = _id,
                             Title = (String)question["question"],
+                            IsScrapping = false,
+                            Progress = 0,
                             CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                         };
                         var articleData = article;
@@ -129,6 +183,8 @@ namespace UnitTest.Lib
                             {
                                 ProjectId = _id,
                                 Title = (String)question["question"],
+                                IsScrapping = false,
+                                Progress = 0,
                                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                             };
                             var articleData = article;

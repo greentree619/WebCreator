@@ -121,6 +121,7 @@ namespace WebCreator.Controllers
                         Dictionary<string, object> update = new Dictionary<string, object>()
                         {
                             { "ArticleId", ref_key },
+                            { "IsScrapping", true },
                             { "Progress", 0 },
                         };
                         docRef.UpdateAsync(update);
@@ -134,6 +135,7 @@ namespace WebCreator.Controllers
                         Dictionary<string, object> update = new Dictionary<string, object>()
                         {
                             { "Content", article.Content },
+                            { "IsScrapping", false },
                             { "Progress", 100 },
                         };
                         docRef.UpdateAsync(update);
@@ -164,6 +166,7 @@ namespace WebCreator.Controllers
                 {
                     { "ArticleId", ref_key },
                     { "Progress", 0 },
+                    { "IsScrapping", true },
                 };
                 await docRef.UpdateAsync(userUpdate);
             }

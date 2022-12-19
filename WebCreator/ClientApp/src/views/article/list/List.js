@@ -181,7 +181,7 @@ class ListBase extends Component {
                   </CButton>
                 </td>
                 <td>
-                  <CSpinner size="sm"/>
+                  {article.progress == 100 ? (<>100%</>) : article.isScrapping ? <CSpinner size="sm"/>:<>0 %</>}
                 </td>
               </tr>
             ))}

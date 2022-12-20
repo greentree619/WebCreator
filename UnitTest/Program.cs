@@ -59,6 +59,8 @@ catch (Exception ex)
 //api.UpdateDns("testzone.com", "testzone.com", "example6.com");
 //}}CloudFlare test
 
+//Refresh Article Forge Scrapping status.
+Task.Run(() => new CommonModule().UpdateArticleScrappingProgress());
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);

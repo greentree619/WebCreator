@@ -16,10 +16,12 @@ import { Outlet, Link } from 'react-router-dom'
 
 class ListBase extends Component {
   static displayName = ListBase.name
+  static refreshIntervalId
   constructor(props) {
     super(props)
     this.state = {
       articles: [],
+      sync:{},
       loading: true,
       curPage: 1,
       totalPage: 1,
@@ -32,6 +34,29 @@ class ListBase extends Component {
 
   componentDidMount() {
     this.populateArticleData(1)
+  }
+
+  componentWillUnmount(){
+    clearInterval(this.refreshIntervalId)
+    console.log("loadScrappingStatus cleared")
+  }
+
+  static async loadScrappingStatus(ids) {
+    //console.log("loadScrappingStatus")
+    try {
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrap_status/${ids}`, requestOptions)
+      let ret = await response.json()
+      if (response.status === 200 && ret) {
+        console.log(ret);
+      }
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   gotoPrevPage() {
@@ -181,7 +206,11 @@ class ListBase extends Component {
                   </CButton>
                 </td>
                 <td>
-                  {article.progress == 100 ? (<>100%</>) : article.isScrapping ? <CSpinner size="sm"/>:<>0 %</>}
+                  {this.state.sync[article.id]== null ? 
+                    (<CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />)
+                    : (this.state.sync[article.id] == 0 ? <>0 %</> 
+                         : (this.state.sync[article.id] == 100 ? <>100 %</> 
+                             : <><CSpinner size="sm"/> {this.state.sync[article.id]} %</>))}
                 </td>
               </tr>
             ))}
@@ -224,6 +253,34 @@ class ListBase extends Component {
       curPage: data.curPage,
       totalPage: data.total,
     })
+
+    let ids = "";
+    await data.data.map((item, index) => {
+      if(ids.length > 0) ids += ",";
+      ids += item.id;
+      //console.log(ids, "<--", this.state.articleIds);
+    });
+
+    this.refreshIntervalId = setInterval(async () => {
+      try {
+        const requestOptions = {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
+  
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrap_status/${ids}`, requestOptions)
+        let ret = await response.json()
+        if (response.status === 200 && ret) {
+          this.setState({
+            sync: ret,
+          })
+          console.log(this.state.sync);
+          //console.log(this.state.articles);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }, 10000);
   }
 }
 

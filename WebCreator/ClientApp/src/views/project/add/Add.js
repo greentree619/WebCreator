@@ -315,6 +315,8 @@ const Add = (props) => {
        }
      } catch (e) {
          console.log(e);
+         setIsOnScrapping(false);
+         setIsOnAFScrapping(false);
      }
    }
 

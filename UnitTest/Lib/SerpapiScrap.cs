@@ -19,9 +19,9 @@ namespace UnitTest.Lib
 
         public async Task ScrappingThreadAsync(String _id, String keyword, Int32 count)
         {
-            JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(_id);
-            bool isScrapping = (bool)scrapStatus["serpapi"];
-            if (!isScrapping)
+            //Omitted JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(_id);
+            //Omitted bool isScrapping = (bool)scrapStatus["serpapi"];
+            //Omitted if (!isScrapping)
             {
                 CommonModule.SetDomainScrappingAsync(_id, true);
 
@@ -46,48 +46,57 @@ namespace UnitTest.Lib
                 Console.WriteLine("All done.");
 
                 CommonModule.SetDomainScrappingAsync(_id, false);
+                CommonModule.threadList[_id] = false;
             }
         }
         
         public async Task ScrappingAFThreadAsync(String _id, String scheduleId)
         {
-            JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(_id);
-            bool isScrapping = (bool)scrapStatus["afapi"];
-            if (!isScrapping)
+            //Omitted JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(_id);
+            //Omitted             bool isScrapping = (bool)scrapStatus["afapi"];
+            //Omitted if (!isScrapping)
             {
                 CommonModule.SetDomainAFScrappingAsync(_id, true);
-                Thread.Sleep(1000 * 10);
                 try
                 {
                     Schedule schedule;
-                    CollectionReference articlesCol = Config.FirebaseDB.Collection("Schedules");
-                    DocumentReference docRef = articlesCol.Document(scheduleId);
-                    DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
-
+                    CollectionReference scheduleCol = Config.FirebaseDB.Collection("Schedules");
+                    DocumentReference docRef = scheduleCol.Document(scheduleId);
+                    DocumentSnapshot scheduleSnapshot = await docRef.GetSnapshotAsync();
 
                     CollectionReference col = Config.FirebaseDB.Collection("Articles");
                     Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false);
                     QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
 
-                    int articltCount = totalSnapshot.Count;
-                    if (articleSnapshot.Exists && totalSnapshot.Count > 0)
+                    Stack<Article> scrapArticles = new Stack<Article>();
+                    foreach (DocumentSnapshot document in totalSnapshot.Documents)
                     {
-                        schedule = articleSnapshot.ConvertTo<Schedule>();
+                        var article = document.ConvertTo<Article>();
+                        article.Id = document.Id;
+                        scrapArticles.Push(article);
+                    }
 
-                        //for (int i = 0; i < schedule.JustNowCount; i++)
-                        //{
-                        //    Thread.Sleep(1000);
-                        //}
+                    ArticleForge af = new ArticleForge();
+                    if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
+                    {
+                        schedule = scheduleSnapshot.ConvertTo<Schedule>();
 
-                        //while (true)
-                        //{
-                        //    Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+                        for (int i = 0; i < schedule.JustNowCount; i++)
+                        {
+                            Article scrapAF = scrapArticles.Pop();
+                            await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                        }
 
-                        //    for (int i = 0; i < schedule.EachCount; i++)
-                        //    {
-                        //        Thread.Sleep(1000);
-                        //    }
-                        //}
+                        while (true)
+                        {
+                            Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+
+                            for (int i = 0; i < schedule.EachCount; i++)
+                            {
+                                Article scrapAF = scrapArticles.Pop();
+                                await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -98,6 +107,7 @@ namespace UnitTest.Lib
                 Console.WriteLine("AF scrapping All done.");
 
                 CommonModule.SetDomainAFScrappingAsync(_id, false);
+                CommonModule.afThreadList[_id] = false;
             }
         }
 

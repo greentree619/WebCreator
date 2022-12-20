@@ -22,6 +22,7 @@ class ListBase extends Component {
     super(props)
     this.state = {
       articles: [],
+      sync:{},
       loading: true,
       curPage: 1,
       totalPage: 1,
@@ -44,9 +45,29 @@ class ListBase extends Component {
     this.populateArticleData(this.state.curPage + 1)
   }
 
-  getLink(title){
+  getLink(title) {
     title = title.replace("?", "");
     return `http://${this.state.projectInfo.projectDomain}/${title}.html`;
+  }
+
+  async loadSyncStatus(ids) {
+    try {
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/sync_status/${this.state.projectInfo.projectDomain}/${ids}`, requestOptions)
+      let ret = await response.json()
+      if (response.status === 200 && ret) {
+        console.log(ret);
+        this.setState({
+          sync: ret,
+        })
+      }
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   renderArticlesTable = (articles) => {
@@ -143,7 +164,7 @@ class ListBase extends Component {
                   <button onClick={() => openNewPage(article.title)}>Open Link</button>
                 </td>
                 <td>
-                  <CSpinner size="sm"/>
+                  {this.state.sync[article.id] == null ?  <CSpinner size="sm"/> : (this.state.sync[article.id] ? "OK" : "Failed")}
                 </td>
               </tr>
             ))}
@@ -186,6 +207,15 @@ class ListBase extends Component {
       curPage: data.curPage,
       totalPage: data.total,
     })
+
+    let ids = "";
+    await data.data.map((item, index) => {
+      if(ids.length > 0) ids += ",";
+      ids += item.id;
+      //console.log(ids, "<--", this.state.articleIds);
+    });
+
+    this.loadSyncStatus(ids);
   }
 }
 

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections;
 using UnitTest.Lib;
 using WebCreator.Models;
 
@@ -96,6 +97,58 @@ namespace WebCreator.Controllers
             return new OkObjectResult(new Item { curPage = page, total = total, data = list });
         }
 
+        [HttpGet("scrap_status/{articleids}")]
+        public async Task<IActionResult> GetScrapStatusAsync(String articleids)
+        {
+            string[] articleList = articleids.Split(',');
+            Dictionary<string, int> scrapStatus = new Dictionary<string, int>();
+            int total = 0;
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                Query query = articlesCol.WhereIn(FieldPath.DocumentId, articleList);
+                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                foreach (DocumentSnapshot document in projectsSnapshot.Documents)
+                {
+                    var article = document.ConvertTo<Article>();
+                    article.Id = document.Id;
+                    scrapStatus[document.Id] = article.Progress;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return new OkObjectResult(scrapStatus);
+        }
+
+        [HttpGet("sync_status/{domain}/{articleids}")]
+        public async Task<IActionResult> GetArticleSyncAsync(string domain, String articleids)
+        {
+            string[] articleList = articleids.Split(',');
+            Dictionary<string, bool> syncStatus = new Dictionary<string, bool>();
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                Query query = articlesCol.WhereIn(FieldPath.DocumentId, articleList);
+                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                foreach (DocumentSnapshot document in projectsSnapshot.Documents)
+                {
+                    var article = document.ConvertTo<Article>();
+                    String url = CommonModule.articleURL(domain, article.Title);
+                    syncStatus[document.Id] = CommonModule.RemoteFileExists(url);
+                    Console.WriteLine($"url:{url} -> {syncStatus[document.Id].ToString()}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return new OkObjectResult(syncStatus);
+        }
+
         [HttpGet("fromid/{articleid}")]
         public async Task<IActionResult> GetArticleAsync(String articleid)
         {
@@ -109,6 +162,7 @@ namespace WebCreator.Controllers
                     article = articleSnapshot.ConvertTo<Article>();
                 }
 
+                /* Omitted
                 if (article.Progress == 0 
                     || article.ArticleId == null 
                     || article.ArticleId.Length == 0)
@@ -141,7 +195,7 @@ namespace WebCreator.Controllers
                         docRef.UpdateAsync(update);
                     }
                     else article.Content = "Article Forge process : "+prog+"%";
-                }
+                }*/
             }
             catch (Exception ex)
             {
@@ -155,25 +209,26 @@ namespace WebCreator.Controllers
         public async Task<IActionResult> ScrapAsync(String articleid, String question)
         {
             question = question.Replace(";", "?");
-            String ref_key = af.initiateArticle(JObject.Parse("{\"keyword\":\""+ question + "\"}"));
 
-            try
-            {
-                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-                DocumentReference docRef = articlesCol.Document(articleid);
+            await CommonModule.ScrapArticleAsync(af, question, articleid);
+            //try
+            //{
+            //    String ref_key = af.initiateArticle(JObject.Parse("{\"keyword\":\"" + question + "\"}"));
+            //    CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+            //    DocumentReference docRef = articlesCol.Document(articleid);
 
-                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
-                {
-                    { "ArticleId", ref_key },
-                    { "Progress", 0 },
-                    { "IsScrapping", true },
-                };
-                await docRef.UpdateAsync(userUpdate);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            //    Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+            //    {
+            //        { "ArticleId", ref_key },
+            //        { "Progress", 0 },
+            //        { "IsScrapping", true },
+            //    };
+            //    await docRef.UpdateAsync(userUpdate);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine(ex.Message);
+            //}
 
             return Ok(true);
         }

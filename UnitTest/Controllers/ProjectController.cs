@@ -95,9 +95,9 @@ namespace WebCreator.Controllers
         [HttpGet("isscrapping/{domainId}")]
         public async Task<IActionResult> GetIsScrapping(String domainId)
         {
-            JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(domainId);
-            bool isScrapping = (bool)scrapStatus["serpapi"];
-            bool isAFScrapping = (bool)scrapStatus["afapi"];
+            //Omitted JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(domainId);
+            bool isScrapping = (CommonModule.threadList[domainId] != null ? (bool)CommonModule.threadList[domainId] : false);
+            bool isAFScrapping = (CommonModule.afThreadList[domainId] != null ? (bool)CommonModule.afThreadList[domainId] : false);
 
             //return list;
             return Ok(new { serpapi=isScrapping, afapi= isAFScrapping });
@@ -288,7 +288,11 @@ namespace WebCreator.Controllers
         //}}
         public ActionResult serpapi(String _id, String keyword, Int32 count)
         {
-            Task.Run(() => new SerpapiScrap().ScrappingThreadAsync(_id, keyword, count));
+            if (CommonModule.threadList[_id] == null || (bool)CommonModule.threadList[_id] == false)
+            {
+                CommonModule.threadList[_id] = true;
+                Task.Run(() => new SerpapiScrap().ScrappingThreadAsync(_id, keyword, count));
+            }
             return Ok(true);
         }
 
@@ -300,7 +304,11 @@ namespace WebCreator.Controllers
         //}}
         public ActionResult StartAFapi(String _id, String sid)
         {
-            Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(_id, sid));
+            if (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false)
+            {
+                CommonModule.afThreadList[_id] = true;
+                Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(_id, sid));
+            }
             return Ok(true);
         }
     }

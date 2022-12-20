@@ -15,6 +15,8 @@ const context =  [
   "/article",
   "/article/scrap",
   "/article/fromid",
+  "article/sync_status",
+  "article/scrap_status",
   "/dns",
   "/buildsync",
   "/buildsync/sync",

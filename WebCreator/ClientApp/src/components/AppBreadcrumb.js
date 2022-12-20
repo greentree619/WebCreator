@@ -83,13 +83,13 @@ const AppBreadcrumb = () => {
               </CNavLink>
             </CNavItem>
             <CNavItem className="px-1">
-              <CNavLink className="btn btn-light" href="#" disabled>
-                Article Theme
+              <CNavLink className="btn btn-light" href={'#/sync/view?domainId=' + activeDomainId + '&domain='+activeDomainName}>
+                Sync
               </CNavLink>
             </CNavItem>
             <CNavItem className="px-1">
-              <CNavLink className="btn btn-light" href={'#/sync/view?domainId=' + activeDomainId + '&domain='+activeDomainName}>
-                Sync
+              <CNavLink className="btn btn-light" href="#" disabled>
+                Article Theme
               </CNavLink>
             </CNavItem>
           </>

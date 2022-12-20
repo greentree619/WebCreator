@@ -9,11 +9,16 @@ using System.Threading.Tasks;
 using WebCreator;
 using WebCreator.Models;
 using Newtonsoft.Json;
+using System.Collections;
+using System.Net;
 
 namespace UnitTest.Lib
 {
     internal class CommonModule
     {
+        public static Hashtable threadList = new Hashtable();
+        public static Hashtable afThreadList = new Hashtable();
+
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
             try
@@ -79,6 +84,96 @@ namespace UnitTest.Lib
             res["afapi"] = isAFScrapping;
 
             return res;
+        }
+
+        public static async Task ScrapArticleAsync(ArticleForge af, String question, String articleid) {
+            try
+            {
+                String ref_key = af.initiateArticle(JObject.Parse("{\"keyword\":\"" + question + "\"}"));
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                DocumentReference docRef = articlesCol.Document(articleid);
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                {
+                    { "ArticleId", ref_key },
+                    { "Progress", 0 },
+                    { "IsScrapping", true },
+                };
+                await docRef.UpdateAsync(userUpdate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public static String articleURL(String domain, String question) {
+            String filename = question.Replace("?", "");
+            return $"http://{domain}/{filename}.html";
+        }
+
+        public static bool RemoteFileExists(string url)
+        {
+            try
+            {
+                //Creating the HttpWebRequest
+                HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                //Setting the Request method HEAD, you can also use GET too.
+                request.Method = "HEAD";
+                //Getting the Web Response.
+                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                //Returns TRUE if the Status code == 200
+                response.Close();
+                return (response.StatusCode == HttpStatusCode.OK);
+            }
+            catch
+            {
+                //Any exception will returns false.
+                return false;
+            }
+        }
+
+        public async Task UpdateArticleScrappingProgress() {
+            try
+            {
+                ArticleForge af = new ArticleForge();
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                while ( true )
+                {   
+                    Query query = articlesCol.WhereEqualTo("IsScrapping", true).OrderByDescending("CreatedTime");
+                    QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+
+                    foreach (DocumentSnapshot document in projectsSnapshot.Documents)
+                    {
+                        var article = document.ConvertTo<Article>();
+                        int prog = 0;
+                        if(article.ArticleId != null) prog = af.getApiProgress(article.ArticleId);
+                        Dictionary<string, object> update = new Dictionary<string, object>();
+                        if (prog == 100)
+                        {
+                            article.Content = af.getApiArticleResult(article.ArticleId);
+                            update["Content"] = article.Content;
+                            update["IsScrapping"] = false;
+                            update["Progress"] = 100;
+                        }
+                        else if (article.ArticleId == null)
+                        {
+                            update["IsScrapping"] = false;
+                            update["Progress"] = 0;
+                        }
+                        else {
+                            update["Progress"] = prog;
+                        }
+                        DocumentReference docRef = articlesCol.Document(document.Id);
+                        await docRef.UpdateAsync(update);
+                    }
+
+                    Thread.Sleep(500);
+                }
+            }
+            catch (Exception e) {
+                Console.WriteLine(e);
+            }
         }
     }
 }

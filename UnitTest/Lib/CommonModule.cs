@@ -93,6 +93,8 @@ namespace UnitTest.Lib
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 DocumentReference docRef = articlesCol.Document(articleid);
 
+                Console.WriteLine($"ScrapArticleAsync ref_key={ref_key}");
+
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                 {
                     { "ArticleId", ref_key },
@@ -138,16 +140,25 @@ namespace UnitTest.Lib
             {
                 ArticleForge af = new ArticleForge();
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                
                 while ( true )
-                {   
+                {
                     Query query = articlesCol.WhereEqualTo("IsScrapping", true).OrderByDescending("CreatedTime");
                     QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
 
                     foreach (DocumentSnapshot document in projectsSnapshot.Documents)
                     {
                         var article = document.ConvertTo<Article>();
+                        if (!article.IsScrapping && article.Progress == 100) continue;
+
                         int prog = 0;
-                        if(article.ArticleId != null) prog = af.getApiProgress(article.ArticleId);
+                        if (article.ArticleId != null)
+                        {
+                            prog = af.getApiProgress(article.ArticleId);
+                            if (prog == article.Progress) continue;
+                        }
+                        //if (prog == 0) continue;
+
                         Dictionary<string, object> update = new Dictionary<string, object>();
                         if (prog == 100)
                         {
@@ -161,14 +172,15 @@ namespace UnitTest.Lib
                             update["IsScrapping"] = false;
                             update["Progress"] = 0;
                         }
-                        else {
+                        else
+                        {
                             update["Progress"] = prog;
                         }
                         DocumentReference docRef = articlesCol.Document(document.Id);
                         await docRef.UpdateAsync(update);
                     }
 
-                    Thread.Sleep(500);
+                    Thread.Sleep(5 * 1000);
                 }
             }
             catch (Exception e) {

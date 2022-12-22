@@ -4,6 +4,8 @@ const initialState = {
   sidebarShow: true,
   activeDomainId: '',
   activeDomainName: '',
+  activeZoneId: '',
+  activeZoneName: '',
   activeProject: {},
 }
 

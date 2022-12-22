@@ -105,6 +105,7 @@ namespace WebCreator.Controllers
             int total = 0;
             try
             {
+#if false
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 Query query = articlesCol.WhereIn(FieldPath.DocumentId, articleList);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
@@ -112,8 +113,14 @@ namespace WebCreator.Controllers
                 {
                     var article = document.ConvertTo<Article>();
                     article.Id = document.Id;
-                    scrapStatus[document.Id] = article.Progress;
+                    scrapStatus[article.ArticleId.ToString()] = article.Progress;
                 }
+#else
+                foreach (String articleId in articleList) {
+                    int prog = af.getApiProgress(articleId);
+                    scrapStatus[articleId] = prog;
+                }
+#endif
             }
             catch (Exception ex)
             {
@@ -161,8 +168,7 @@ namespace WebCreator.Controllers
                 if (articleSnapshot.Exists) {
                     article = articleSnapshot.ConvertTo<Article>();
                 }
-
-                /* Omitted
+#if false
                 if (article.Progress == 0 
                     || article.ArticleId == null 
                     || article.ArticleId.Length == 0)
@@ -195,7 +201,26 @@ namespace WebCreator.Controllers
                         docRef.UpdateAsync(update);
                     }
                     else article.Content = "Article Forge process : "+prog+"%";
-                }*/
+                }
+#else
+                if (article.IsScrapping && article.Progress == 0 && article.ArticleId != null)
+                {
+                    int prog = af.getApiProgress(article.ArticleId);
+                    article.Progress = prog;
+                    if (prog == 100)
+                    {
+                        article.Content = af.getApiArticleResult(article.ArticleId);
+                        Dictionary<string, object> update = new Dictionary<string, object>()
+                        {
+                            { "Content", article.Content },
+                            { "IsScrapping", false },
+                            { "Progress", 100 },
+                        };
+                        docRef.UpdateAsync(update);
+                    }
+                    else article.Content = "Article Forge process : " + prog + "%";
+                }
+#endif
             }
             catch (Exception ex)
             {
@@ -211,25 +236,6 @@ namespace WebCreator.Controllers
             question = question.Replace(";", "?");
 
             await CommonModule.ScrapArticleAsync(af, question, articleid);
-            //try
-            //{
-            //    String ref_key = af.initiateArticle(JObject.Parse("{\"keyword\":\"" + question + "\"}"));
-            //    CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-            //    DocumentReference docRef = articlesCol.Document(articleid);
-
-            //    Dictionary<string, object> userUpdate = new Dictionary<string, object>()
-            //    {
-            //        { "ArticleId", ref_key },
-            //        { "Progress", 0 },
-            //        { "IsScrapping", true },
-            //    };
-            //    await docRef.UpdateAsync(userUpdate);
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex.Message);
-            //}
-
             return Ok(true);
         }
 

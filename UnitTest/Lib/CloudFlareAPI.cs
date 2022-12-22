@@ -246,6 +246,33 @@ namespace UnitTest.Lib
             return response;
         }
 
+        public WebResponse ListZoneByName(String zoneNameParam)
+        {
+            WebResponse response = null;
+            String zoneName = "&name="+ zoneNameParam;
+            String status = "";
+            String param = "?" +
+                "account.id=" + accountID +
+                zoneName +
+                status +
+                "&match=all";
+            HttpWebRequest request = WebRequest.CreateHttp(zoneAPI + param);
+            request.Method = "Get";
+            request.ContentType = "application/json";
+            request.Headers.Add("X-Auth-Email", Config.CloudFlareAPIEmail);
+            request.Headers.Add("Authorization", "Bearer " + Config.CloudFlareAPIKey);
+
+            try
+            {
+                response = request.GetResponse();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return response;
+        }
+
         /*
          * curl -X POST "https://api.cloudflare.com/client/v4/zones" \
              -H "X-Auth-Email: user@example.com" \

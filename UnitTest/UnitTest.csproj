@@ -28,6 +28,9 @@
     <None Update="searchsystem.ppk">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="webcreator-dc8f8-35607d000566.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="websitecreator-94452-firebase-adminsdk-l9yoo-962812244e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

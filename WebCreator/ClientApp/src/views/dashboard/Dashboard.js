@@ -105,7 +105,7 @@ const Dashboard = () => {
 
   return (
     <CRow>
-      <CCol xs={15} sm={6} lg={3}>
+      <CCol xs={15} sm={6} lg={3} className="my-2">
         <Link to={`/project/add`} state={{ simple_mode: true }}>
           <CWidgetStatsF
             className="lb-3"
@@ -117,7 +117,7 @@ const Dashboard = () => {
         </Link>
       </CCol>
       {projects.map((project) => (
-        <CCol key={project.id} xs={15} sm={6} lg={3}>
+        <CCol key={project.id} xs={15} sm={6} lg={3} my={2} className="my-2">
           <Link to={`/project/add`} state={{ mode: 'VIEW', project: project }}>
             <CWidgetStatsF
               className="lb-3"

@@ -8,10 +8,10 @@ using System.Collections;
 using UnitTest.Lib;
 using WebCreator;
 
-WebCreator.Config.FirebaseCredentialJson = File.ReadAllText("websitecreator-94452-firebase-adminsdk-l9yoo-962812244e.json");
+WebCreator.Config.FirebaseCredentialJson = File.ReadAllText("webcreator-dc8f8-35607d000566.json");
 try
 {
-    Config.FirebaseDB = FirestoreDb.Create("websitecreator-94452"
+    Config.FirebaseDB = FirestoreDb.Create("webcreator-dc8f8"
         , (new FirestoreClientBuilder { JsonCredentials = Config.FirebaseCredentialJson }).Build());
 }
 catch (Exception ex)

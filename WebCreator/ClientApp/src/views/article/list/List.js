@@ -17,6 +17,7 @@ import { Outlet, Link } from 'react-router-dom'
 class ListBase extends Component {
   static displayName = ListBase.name
   static refreshIntervalId
+  static articleListPage
   constructor(props) {
     super(props)
     this.state = {
@@ -34,10 +35,12 @@ class ListBase extends Component {
 
   componentDidMount() {
     this.populateArticleData(1)
+    this.articleListPage = true
   }
 
   componentWillUnmount(){
-    clearInterval(this.refreshIntervalId)
+    this.articleListPage = false
+    clearTimeout( this.refreshIntervalId );
     console.log("loadScrappingStatus cleared")
   }
 
@@ -206,11 +209,8 @@ class ListBase extends Component {
                   </CButton>
                 </td>
                 <td>
-                  {this.state.sync[article.id]== null ? 
-                    (<CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />)
-                    : (this.state.sync[article.id] == 0 ? <>0 %</> 
-                         : (this.state.sync[article.id] == 100 ? <>100 %</> 
-                             : <><CSpinner size="sm"/> {this.state.sync[article.id]} %</>))}
+                  {article.articleId != null && article.articleId.length > 0 && this.state.sync[article.articleId] != null ? 
+                    (<>{this.state.sync[article.articleId]} %</>) : (<></>)}
                 </td>
               </tr>
             ))}
@@ -256,31 +256,42 @@ class ListBase extends Component {
 
     let ids = "";
     await data.data.map((item, index) => {
-      if(ids.length > 0) ids += ",";
-      ids += item.id;
-      //console.log(ids, "<--", this.state.articleIds);
+      if( /*item.isScrapping &&*/ item.articleId != null && item.articleId.length > 0)
+      {
+        if(ids.length > 0) ids += ",";
+        ids += item.articleId;
+      }
+      console.log(ids, "<--", this.state.articleIds);
     });
 
-    this.refreshIntervalId = setInterval(async () => {
-      try {
-        const requestOptions = {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+    const refreshFunc = async () => {
+      if(ids.length > 0){
+        try {
+          const requestOptions = {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          }
+    
+          const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrap_status/${ids}`, requestOptions)
+          let ret = await response.json()
+          if (response.status === 200 && ret) {
+            var ret2 =  { ...this.state.sync, ...ret };
+            //console.log("progress status : ", ret2);
+            this.setState({
+              sync: ret2,
+            })
+            console.log(this.state.sync);
+          }
+        } catch (e) {
+          console.log(e);
         }
-  
-        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrap_status/${ids}`, requestOptions)
-        let ret = await response.json()
-        if (response.status === 200 && ret) {
-          this.setState({
-            sync: ret,
-          })
-          console.log(this.state.sync);
-          //console.log(this.state.articles);
-        }
-      } catch (e) {
-        console.log(e);
       }
-    }, 10000);
+      
+      //console.log(">>>Hello World-->", this.articleListPage);
+      if(this.articleListPage != null && this.articleListPage)
+        this.refreshIntervalId = setTimeout(refreshFunc, 100);
+  }
+    this.refreshIntervalId = setTimeout(refreshFunc, 100);
   }
 }
 

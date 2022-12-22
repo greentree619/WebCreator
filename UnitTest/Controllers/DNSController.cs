@@ -42,6 +42,22 @@ namespace WebCreator.Controllers
             return Content(sResult, "application/json");
         }
 
+        [HttpGet("byname/{domainName}")]
+        public async Task<IActionResult> GetByNameAsync(String domainName)
+        {
+            String sResult = "{\"success\": false}";
+            String[] domainInfo = domainName.Split(".");
+            if (domainInfo.Length >= 2)
+            {
+                String zoneName = domainInfo[domainInfo.Length - 2] + "." + domainInfo[domainInfo.Length - 1];
+                WebResponse response = cloudFlareAPI.ListZoneByName(zoneName);
+                using (var streamReader = new StreamReader(response.GetResponseStream()))
+                    sResult = (streamReader.ReadToEnd());
+            }
+
+            return Content(sResult, "application/json");
+        }
+
         [HttpGet("{zoneid}/{page}/{count}")]
         public async Task<IActionResult> GetAsync(string zoneId, int page = 1, int count = 5)
         {

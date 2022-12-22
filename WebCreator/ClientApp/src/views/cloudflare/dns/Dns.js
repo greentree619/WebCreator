@@ -177,6 +177,13 @@ DnsBase.propTypes = {
 const Dns = (props) => {
   const location = useLocation()
   //console.log(location.state)
+  if (location.state == null && location.search.length > 0) {
+    location.state = { 
+      zoneId: new URLSearchParams(location.search).get('domainId'),
+      zoneName: new URLSearchParams(location.search).get('domainName'),
+   }
+  }
+
   return <DnsBase location={location} {...props} />
 }
 export default Dns

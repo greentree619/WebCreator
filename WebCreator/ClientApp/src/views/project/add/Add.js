@@ -294,6 +294,26 @@ const Add = (props) => {
     //if(location.state != null )
     return 'English'
   }
+
+  async function getZoneInformation()  {
+    try {
+     if(location.state != null && location.state.project != null 
+       && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT')){
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}dns/byname/${location.state.project.name}`)
+      const data = await response.json()
+      //console.log(data.result);
+      if(data.result.length > 0){
+        //console.log(data.result[0].name);
+        //console.log(data.result[0].id);
+        dispatch({ type: 'set', activeZoneName: data.result[0].name })
+        dispatch({ type: 'set', activeZoneId: data.result[0].id })
+        dispatch({ type: 'set', activeZoneStatus: data.result[0].status })
+      }
+     }
+   } catch (e) {
+       console.log(e);
+   }
+ }
   
   useEffect(() => {
     async function loadScrappingStatus()  {
@@ -308,18 +328,19 @@ const Add = (props) => {
          const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${location.state.project.id}`, requestOptions)
          let ret = await response.json()
          if (response.status === 200 && ret) {
-           console.log(ret);
+           //console.log(ret);
            setIsOnScrapping(ret.serpapi);
            setIsOnAFScrapping(ret.afapi);
          }
        }
      } catch (e) {
-         console.log(e);
+         //console.log(e);
          setIsOnScrapping(false);
          setIsOnAFScrapping(false);
      }
    }
 
+   getZoneInformation();
     var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
     return ()=>{
       //unmount
@@ -333,6 +354,36 @@ const Add = (props) => {
       <CContainer className="px-4">
         <CRow xs={{ gutterX: 5 }}>
           <CCol>
+          <CContainer>
+              <CRow xs={{ cols: 2 }}>
+                <CCol className="border border-secondary text-center">
+                  SerpAPI Scrapping
+                </CCol>
+                <CCol className="border border-secondary text-center">
+                  Article Forge Scrapping
+                </CCol>
+                <CCol className="border border-secondary text-center">
+                  {isOnScrapping ? (
+                    <>
+                      <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
+                      Scrapping...
+                    </>
+                  ) : 'Stopped'
+                }
+                  
+                </CCol>
+                <CCol className="border border-secondary text-center">
+                  {isOnAFScrapping ? (
+                    <>
+                      <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
+                      Scrapping...
+                    </>
+                  ) : 'Stopped'
+                  }
+                </CCol>
+              </CRow>
+            </CContainer>
+            <br/>
             <CCard className="mb-4">
               <CCardHeader>New/Update Domain</CCardHeader>
               <CCardBody>
@@ -473,37 +524,6 @@ const Add = (props) => {
                 </CForm>
               </CCardBody>
             </CCard>
-          </CCol>
-          <CCol>
-            <CContainer>
-              <CRow xs={{ cols: 2 }}>
-                <CCol className="border border-secondary text-center">
-                  SerpAPI Scrapping
-                </CCol>
-                <CCol className="border border-secondary text-center">
-                  Article Forge Scrapping
-                </CCol>
-                <CCol className="border border-secondary text-center">
-                  {isOnScrapping ? (
-                    <>
-                      <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
-                      Scrapping...
-                    </>
-                  ) : 'Stopped'
-                }
-                  
-                </CCol>
-                <CCol className="border border-secondary text-center">
-                  {isOnAFScrapping ? (
-                    <>
-                      <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
-                      Scrapping...
-                    </>
-                  ) : 'Stopped'
-                  }
-                </CCol>
-              </CRow>
-            </CContainer>
           </CCol>
         </CRow>
       </CContainer>

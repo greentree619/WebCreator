@@ -8,6 +8,9 @@ import {
   CPaginationItem,
   CAlert,
   CSpinner,
+  CContainer,
+  CRow,
+  CCol,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
@@ -164,7 +167,7 @@ class ListBase extends Component {
                       </Link> */}
                     </td>
                     <td>
-                      <button onClick={() => openNewPage(article.title)}>Open Link</button>
+                      <button disabled={article.content == null || article.content.length == 0} onClick={() => openNewPage(article.title)}>Open Link</button>
                     </td>
                     <td>
                       {this.state.sync[article.id] == null ?  <CSpinner size="sm"/> : (this.state.sync[article.id] ? "OK" : "Failed")}
@@ -202,7 +205,7 @@ class ListBase extends Component {
       `${process.env.REACT_APP_SERVER_URL}article/valid/` +
         (projectId != '' ? projectId + '/' : '') +
         pageNo +
-        '/7',
+        '/25',
     )
     const data = await response.json()
     this.setState({

@@ -87,27 +87,34 @@ namespace UnitTest.Lib
             return res;
         }
 
-        public static async Task ScrapArticleAsync(ArticleForge af, String question, String articleid) {
+        public static async Task<bool> ScrapArticleAsync(ArticleForge af, String question, String articleid) {
+            bool status = false;
             try
             {
                 String ref_key = af.initiateArticle(JObject.Parse("{\"keyword\":\"" + question + "\"}"));
-                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-                DocumentReference docRef = articlesCol.Document(articleid);
-
-                Console.WriteLine($"ScrapArticleAsync ref_key={ref_key}");
-
-                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                if (ref_key != null)
                 {
-                    { "ArticleId", ref_key },
-                    { "Progress", 0 },
-                    { "IsScrapping", true },
-                };
-                await docRef.UpdateAsync(userUpdate);
+                    CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                    DocumentReference docRef = articlesCol.Document(articleid);
+
+                    Console.WriteLine($"ScrapArticleAsync ref_key={ref_key}");
+
+                    Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                    {
+                        { "ArticleId", ref_key },
+                        { "Progress", 0 },
+                        { "IsScrapping", true },
+                    };
+                    await docRef.UpdateAsync(userUpdate);
+                    status = true;
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+
+            return status;
         }
 
         public static String articleURL(String domain, String question) {
@@ -188,6 +195,21 @@ namespace UnitTest.Lib
             }
             catch (Exception e) {
                 Console.WriteLine(e);
+            }
+        }
+
+        static public void DeleteAllContentInFolder(String folder)
+        {
+            System.IO.DirectoryInfo di = new DirectoryInfo(folder);
+
+            foreach (FileInfo file in di.GetFiles())
+            {
+                file.Delete();
+            }
+
+            foreach (DirectoryInfo dir in di.GetDirectories())
+            {
+                dir.Delete(true);
             }
         }
     }

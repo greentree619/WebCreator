@@ -8,6 +8,9 @@ import {
   CPaginationItem,
   CAlert,
   CSpinner,
+  CContainer,
+  CRow,
+  CCol,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
@@ -80,7 +83,9 @@ class ListBase extends Component {
       alertMsg: 'Unfortunately, scrapping faild.',
       alertColor: 'danger',
     })
-    if (response.status === 200) {
+    let ret = await response.json()
+    console.log("scrapArticle", ret);
+    if (response.status === 200 && ret) {
       //console.log('add success')
       this.setState({
         alertMsg: 'Started to scrapping article from Article Forge successfully.',
@@ -116,7 +121,8 @@ class ListBase extends Component {
       .catch((err) => console.log(err))
   }
 
-  async onBuild(_id, domain, ip) {
+  async onBuild(_id, domain, ip, articleId) {
+    console.log(articleId);
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -124,7 +130,8 @@ class ListBase extends Component {
     }
 
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}`,
+      (articleId.length > 0 ? `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}/${articleId}` 
+                            : `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}`),
       requestOptions,
     )
     this.setState({
@@ -138,9 +145,9 @@ class ListBase extends Component {
         alertMsg: 'Zip file was created successfully.',
       })
     }
-    this.setState({
-      alarmVisible: true,
-    })
+    // this.setState({
+    //   alarmVisible: true,
+    // })
   }
 
   async onSync(_id, domain, ip) {
@@ -170,9 +177,9 @@ class ListBase extends Component {
     })
   }
 
-  async syncArticle(_id, domain, ip) {
-    //await onBuild(_id, domain, ip);
-    //await onSync(_id, domain, ip);
+  async syncArticle(_id, domain, ip, articleId) {
+    await this.onBuild(_id, domain, ip, articleId);
+    await this.onSync(_id, domain, ip);
   }
 
   renderArticlesTable = (articles) => {
@@ -263,7 +270,11 @@ class ListBase extends Component {
                     &nbsp;
                     <CButton
                       type="button"
-                      //onClick={() => this.syncArticle(article.id, article.title)}
+                      onClick={() => this.syncArticle(this.state.projectInfo.projectid,
+                                                  this.state.projectInfo.domainName,
+                                                  this.state.projectInfo.domainIp,
+                                                  article.id
+                                                  )}
                     >
                       Sync
                     </CButton>
@@ -300,7 +311,25 @@ class ListBase extends Component {
     )
     return (
       <CCard className="mb-4">
-        <CCardHeader>All Articles</CCardHeader>
+        <CCardHeader>
+          <CContainer>
+            <CRow>
+              <CCol className="align-self-start">All Articles</CCol>
+              <CCol className="align-self-end" xs="auto">
+                <CButton
+                  type="button"
+                  onClick={() => this.syncArticle(this.state.projectInfo.projectid,
+                                                  this.state.projectInfo.domainName,
+                                                  this.state.projectInfo.domainIp,
+                                                  ""
+                                                  )}
+                >
+                  All Sync
+                </CButton>
+              </CCol>
+            </CRow>
+          </CContainer>
+        </CCardHeader>
         <CCardBody>{contents}</CCardBody>
       </CCard>
     )
@@ -312,7 +341,7 @@ class ListBase extends Component {
       `${process.env.REACT_APP_SERVER_URL}article/` +
         (projectId != '' ? projectId + '/' : '') +
         pageNo +
-        '/7',
+        '/25',
     )
     const data = await response.json()
     this.setState({

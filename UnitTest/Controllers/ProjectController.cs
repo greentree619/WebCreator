@@ -50,7 +50,7 @@ namespace WebCreator.Controllers
             {
                 CollectionReference projectsCol = Config.FirebaseDB.Collection("Projects");
                 QuerySnapshot totalSnapshot = await projectsCol.GetSnapshotAsync();
-                total = (int)Math.Round( (double)totalSnapshot.Count/count );
+                total = (int)Math.Ceiling( (double)totalSnapshot.Count/count );
                 Query query = projectsCol.OrderByDescending("CreatedTime").Offset((page-1)*count).Limit(count);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
                 

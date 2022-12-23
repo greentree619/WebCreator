@@ -45,7 +45,7 @@ namespace WebCreator.Controllers
             {
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 QuerySnapshot totalSnapshot = await articlesCol.GetSnapshotAsync();
-                total = (int)Math.Round((double)totalSnapshot.Count / count);
+                total = (int)Math.Ceiling((double)totalSnapshot.Count / count);
 
                 Query query = articlesCol.OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
@@ -77,7 +77,7 @@ namespace WebCreator.Controllers
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 Query query = articlesCol.WhereEqualTo("ProjectId", domainid);
                 QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
-                total = (int)Math.Round((double)totalSnapshot.Count / count);
+                total = (int)Math.Ceiling((double)totalSnapshot.Count / count);
 
                 query = articlesCol.WhereEqualTo("ProjectId", domainid).OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
@@ -109,7 +109,7 @@ namespace WebCreator.Controllers
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 Query query = articlesCol.WhereEqualTo("ProjectId", domainid);
                 QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
-                total = (int)Math.Round((double)totalSnapshot.Count / count);
+                total = (int)Math.Ceiling((double)totalSnapshot.Count / count);
 
                 query = articlesCol.WhereEqualTo("ProjectId", domainid).OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
@@ -267,8 +267,8 @@ namespace WebCreator.Controllers
         {
             question = question.Replace(";", "?");
 
-            await CommonModule.ScrapArticleAsync(af, question, articleid);
-            return Ok(true);
+            bool ret = await CommonModule.ScrapArticleAsync(af, question, articleid);
+            return Ok(ret);
         }
 
         [HttpPut("{articleid}/{userid}")]

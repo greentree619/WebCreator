@@ -77,6 +77,7 @@ namespace UnitTest.Lib
                     }
 
                     ArticleForge af = new ArticleForge();
+                    bool afRet = false;
                     if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
                     {
                         schedule = scheduleSnapshot.ConvertTo<Schedule>();
@@ -84,7 +85,11 @@ namespace UnitTest.Lib
                         for (int i = 0; i < schedule.JustNowCount; i++)
                         {
                             Article scrapAF = scrapArticles.Pop();
-                            await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                            do {
+                                Thread.Sleep(10000);
+                                afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                            }
+                            while (!afRet);
                         }
 
                         while (true)
@@ -94,7 +99,12 @@ namespace UnitTest.Lib
                             for (int i = 0; i < schedule.EachCount; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
-                                await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                                do {
+                                    Thread.Sleep(10000);
+                                    afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                                }
+                                while ( !afRet );
+                                
                             }
                         }
                     }
@@ -118,14 +128,18 @@ namespace UnitTest.Lib
 
         public async Task<string> GoogleSearchAsync(String _id, String keyword, int count)
         {
+            Console.WriteLine($"GoogleSearchAsync keyword={keyword} count={count}");
             // secret api key from https://serpapi.com/dashboard
             String apiKey = Config.SerpApiKey;
             int curCount = 0;
             String next_page_token = "";
 
             // Localized search for Coffee shop in Austin Texas
+            keyword += "?";
             Hashtable ht = new Hashtable();
-            ht.Add("location", "Austin, Texas, United States");
+            //Omitted ht.Add("location", "Austin, Texas, United States");
+            ht.Add("engine", "google");
+            ht.Add("gl", "us");
             ht.Add("q", keyword);
 
             try
@@ -228,7 +242,7 @@ namespace UnitTest.Lib
                 Console.WriteLine(ex.ToString());
             }
 
-            return $"Complted scrapping: DomainID={_id} Keyword={keyword}";
+            return $"Complted scrapping: DomainID={_id} Keyword={keyword} total_count={curCount}";
         }
     }
 }

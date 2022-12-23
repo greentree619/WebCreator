@@ -340,7 +340,7 @@ namespace UnitTest.Lib
                         progress = 100;
                         break;
                     default:
-                        progress = (result["progress"] != null ? (int)Math.Round(Double.Parse(result["progress"].ToString()) * 100) : 0);
+                        progress = (result["progress"] != null ? (int)Math.Ceiling(Double.Parse(result["progress"].ToString()) * 100) : 0);
                         break;
                 }
 

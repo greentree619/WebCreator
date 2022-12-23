@@ -218,7 +218,7 @@ export default class List extends Component {
   }
 
   async populateProjectData(pageNo) {
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/` + pageNo + '/7')
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/` + pageNo + '/25')
     const data = await response.json()
     this.setState({
       projects: data.data,

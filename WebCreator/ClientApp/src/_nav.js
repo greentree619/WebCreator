@@ -18,7 +18,8 @@ import {
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
 let coreUINav = []
-if( !process.env.DEPLOY_VERSION ){
+//console.log(process.env.REACT_APP_HIDE_COREMENU)
+if( process.env.REACT_APP_HIDE_COREMENU == "false" ){
   coreUINav = [{
     component: CNavTitle,
     name: 'Components',

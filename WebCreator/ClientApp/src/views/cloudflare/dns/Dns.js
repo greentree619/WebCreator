@@ -156,7 +156,7 @@ class DnsBase extends Component {
   async populateData(pageNo) {
     if (this.state.zoneInfo != null) {
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}dns/${this.state.zoneInfo.zoneId}/` + pageNo + '/7',
+        `${process.env.REACT_APP_SERVER_URL}dns/${this.state.zoneInfo.zoneId}/` + pageNo + '/25',
       )
       const data = await response.json()
       this.setState({

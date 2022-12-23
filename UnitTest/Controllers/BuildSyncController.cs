@@ -37,6 +37,13 @@ namespace WebCreator.Controllers
             return Ok(true);
         }
 
+        [HttpPost("{domainid}/{domain}/{articleId}")]
+        public async Task<IActionResult> BuildArticlePage(string domainid, string domain, string articleId)
+        {
+            Task.Run(() => this.BuildArticlePageThreadAsync(domainid, domain, articleId));
+            return Ok(true);
+        }
+
         [HttpGet("{domainid}/{domain}")]
         public async Task<IActionResult> GetBuildPages(string domainid, string domain)
         {
@@ -90,6 +97,15 @@ namespace WebCreator.Controllers
                         {
                             DirectoryInfo info = new DirectoryInfo(curFolder);
                             FileInfo[] files = info.GetFiles("*.htm*").ToArray();
+                            int prevCount = files.Length;
+                            while ( true ) 
+                            {
+                                Thread.Sleep(100);
+                                files = info.GetFiles("*.htm*").ToArray();
+                                if (prevCount!= 0 && prevCount == files.Length) break;
+                                prevCount = files.Length;
+                            }
+
                             foreach (FileInfo file in files)
                             {
                                 archive.CreateEntry(file.Name, file);
@@ -117,9 +133,15 @@ namespace WebCreator.Controllers
             {
                 String curFolder = Directory.GetCurrentDirectory();
                 curFolder += $"\\Build\\{domain}";
-                if (!Directory.Exists(curFolder)) { 
+                if (!Directory.Exists(curFolder))
+                {
                     Directory.CreateDirectory(curFolder);
                 }
+                else
+                {
+                    CommonModule.DeleteAllContentInFolder(curFolder);
+                }
+
 
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 Query query = articlesCol.WhereEqualTo("ProjectId", domainid);
@@ -129,6 +151,44 @@ namespace WebCreator.Controllers
                 {
                     var article = document.ConvertTo<Article>();
                     if (article.Content != null && article.Content.Length > 0) {
+                        String title = article.Title.Replace("?", "").Trim();
+                        using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
+                        {
+                            writer.Write(article.Content);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public async Task BuildArticlePageThreadAsync(String domainid, String domain, String articleId)
+        {
+            try
+            {
+                String curFolder = Directory.GetCurrentDirectory();
+                curFolder += $"\\Build\\{domain}";
+                if (!Directory.Exists(curFolder))
+                {
+                    Directory.CreateDirectory(curFolder);
+                }
+                else
+                {
+                    CommonModule.DeleteAllContentInFolder(curFolder);
+                }
+
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                DocumentReference docRef = articlesCol.Document(articleId);
+
+                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+                if (snapshot.Exists)
+                {
+                    var article = snapshot.ConvertTo<Article>();
+                    if (article.Content != null && article.Content.Length > 0)
+                    {
                         String title = article.Title.Replace("?", "").Trim();
                         using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
                         {

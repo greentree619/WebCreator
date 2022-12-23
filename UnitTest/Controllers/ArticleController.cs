@@ -97,6 +97,38 @@ namespace WebCreator.Controllers
             return new OkObjectResult(new Item { curPage = page, total = total, data = list });
         }
 
+        [HttpGet("valid/{domainid}/{page}/{count}")]
+        public async Task<IActionResult> GetValidArticleAsync(String domainid, int page = 1, int count = 5)
+        {
+            if (page < 0) page = 1;
+            if (count < 0) count = 5;
+            var list = new List<Article>();
+            int total = 0;
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                Query query = articlesCol.WhereEqualTo("ProjectId", domainid);
+                QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
+                total = (int)Math.Round((double)totalSnapshot.Count / count);
+
+                query = articlesCol.WhereEqualTo("ProjectId", domainid).OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
+                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot document in projectsSnapshot.Documents)
+                {
+                    var article = document.ConvertTo<Article>();
+                    article.Id = document.Id;
+                    list.Add(article);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return new OkObjectResult(new Item { curPage = page, total = total, data = list });
+        }
+
         [HttpGet("scrap_status/{articleids}")]
         public async Task<IActionResult> GetScrapStatusAsync(String articleids)
         {

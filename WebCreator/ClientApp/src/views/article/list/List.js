@@ -88,7 +88,7 @@ class ListBase extends Component {
       })
     }
     this.setState({ alarmVisible: true })
-  }
+  }  
 
   async deleteArticle(_id) {
     const requestOptions = {
@@ -114,6 +114,65 @@ class ListBase extends Component {
         }
       })
       .catch((err) => console.log(err))
+  }
+
+  async onBuild(_id, domain, ip) {
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    }
+
+    const response = await fetch(
+      `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}`,
+      requestOptions,
+    )
+    this.setState({
+      alertColor: 'danger',
+      alertMsg: 'Zip file can not be create, unfortunatley.',
+    })
+    let ret = await response.json()
+    if (response.status === 200 && ret) {
+      this.setState({
+        alertColor: 'success',
+        alertMsg: 'Zip file was created successfully.',
+      })
+    }
+    this.setState({
+      alarmVisible: true,
+    })
+  }
+
+  async onSync(_id, domain, ip) {
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    }
+
+    const response = await fetch(
+      `${process.env.REACT_APP_SERVER_URL}buildsync/sync/${_id}/${domain}/${ip}`,
+      requestOptions,
+    )
+    this.setState({
+      alertColor: 'danger',
+      alertMsg: 'Sync action failed, unfortunatley.',
+    })
+    let ret = await response.json()
+    if (response.status === 200 && ret) {
+      this.setState({
+        alertColor: 'success',
+        alertMsg: 'Sync action compeleted, successfully.',
+      })
+    }
+    this.setState({
+      alarmVisible: true,
+    })
+  }
+
+  async syncArticle(_id, domain, ip) {
+    //await onBuild(_id, domain, ip);
+    //await onSync(_id, domain, ip);
   }
 
   renderArticlesTable = (articles) => {
@@ -188,32 +247,42 @@ class ListBase extends Component {
             </tr>
           </thead>
           <tbody>
-            {articles.map((article) => (
-              <tr key={article.id}>
-                <td>{article.id}</td>
-                <td>{article.title}</td>
-                <td>
-                  <CButton
-                    type="button"
-                    onClick={() => this.scrapArticle(article.id, article.title)}
-                  >
-                    Scrap
-                  </CButton>
-                  &nbsp;
-                  <Link to={`/article/view`} state={{ mode: 'VIEW', article: article }}>
-                    <CButton type="button">View</CButton>
-                  </Link>
-                  &nbsp;
-                  <CButton type="button" onClick={() => this.deleteArticle(article.id)}>
-                    Delete
-                  </CButton>
-                </td>
-                <td>
-                  {article.articleId != null && article.articleId.length > 0 && this.state.sync[article.articleId] != null ? 
-                    (<>{this.state.sync[article.articleId]} %</>) : (<></>)}
-                </td>
-              </tr>
-            ))}
+            {articles.map((article) => {
+              //if (article.content != null && article.content.length > 0)
+              {
+                return (<tr key={article.id}>
+                  <td>{article.id}</td>
+                  <td>{article.title}</td>
+                  <td>
+                    <CButton
+                      type="button"
+                      onClick={() => this.scrapArticle(article.id, article.title)}
+                    >
+                      Scrap
+                    </CButton>
+                    &nbsp;
+                    <CButton
+                      type="button"
+                      //onClick={() => this.syncArticle(article.id, article.title)}
+                    >
+                      Sync
+                    </CButton>
+                    &nbsp;
+                    <Link to={`/article/view`} state={{ mode: 'VIEW', article: article }}>
+                      <CButton type="button">View</CButton>
+                    </Link>
+                    &nbsp;
+                    <CButton type="button" onClick={() => this.deleteArticle(article.id)}>
+                      Delete
+                    </CButton>
+                  </td>
+                  <td>
+                    {article.articleId != null && article.articleId.length > 0 && this.state.sync[article.articleId] != null ? 
+                      (<>{this.state.sync[article.articleId]} %</>) : (<></>)}
+                  </td>
+                </tr>)
+              }
+              })}
           </tbody>
         </table>
         {pagination}
@@ -302,7 +371,9 @@ ListBase.propTypes = {
 const List = (props) => {
   const location = useLocation()
   if (location.state == null && location.search.length > 0) {
-    location.state = { projectid: new URLSearchParams(location.search).get('domainId') }
+    location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
+    domainName: new URLSearchParams(location.search).get('domainName'), 
+    domainIp: new URLSearchParams(location.search).get('domainIp') }
   }
   //console.log(location.state)
   //console.log(location.search)

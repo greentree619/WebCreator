@@ -137,19 +137,6 @@ const Add = (props) => {
       : false,
   )
 
-  console.log("location.search.length = " + location.search.length)
-  if (location.search.length == 0 
-      && (location.state != null && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT'))) {
-    //normal link
-    if (location.state != null && !simpleMode) {
-      dispatch({ type: 'set', activeDomainName: location.state.project.name })
-      dispatch({ type: 'set', activeDomainId: location.state.project.id })
-      dispatch({ type: 'set', activeProject: location.state.project })
-    } else {
-      dispatch({ type: 'set', activeDomainName: '', activeProject: {}, activeDomainId: '' })
-    }
-  }
-
   const activeProject = useSelector((state) => state.activeProject)
   if (location.search.length > 0) {
     //console.log()
@@ -228,10 +215,10 @@ const Add = (props) => {
 
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project`, requestOptions)
     setAlertColor('danger')
-    setAlertMsg('Faild to create new domain unfortunatley.')
+    setAlertMsg('Faild to create/update new domain unfortunatley.')
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertMsg('Created new domain successfully.')
+      setAlertMsg('Created/Updated new domain successfully.')
       setAlertColor('success')
 
       if (simpleMode) navigate('/dashboard')
@@ -313,40 +300,53 @@ const Add = (props) => {
    } catch (e) {
        console.log(e);
    }
- }
-  
-  useEffect(() => {
-  //   async function loadScrappingStatus()  {
-  //     try {
-  //      if(location.state != null && location.state.project != null 
-  //        && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT')){
-  //        const requestOptions = {
-  //          method: 'GET',
-  //          headers: { 'Content-Type': 'application/json' },
-  //        }
-     
-  //        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${location.state.project.id}`, requestOptions)
-  //        let ret = await response.json()
-  //        if (response.status === 200 && ret) {
-  //          //console.log(ret);
-  //          setIsOnScrapping(ret.serpapi);
-  //          setIsOnAFScrapping(ret.afapi);
-  //        }
-  //      }
-  //    } catch (e) {
-  //        //console.log(e);
-  //        setIsOnScrapping(false);
-  //        setIsOnAFScrapping(false);
-  //    }
-  //  }
-  //  var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
+  }
 
-   getZoneInformation();
-    return ()=>{
+  useEffect(() => {
+    //   async function loadScrappingStatus()  {
+    //     try {
+    //      if(location.state != null && location.state.project != null 
+    //        && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT')){
+    //        const requestOptions = {
+    //          method: 'GET',
+    //          headers: { 'Content-Type': 'application/json' },
+    //        }
+
+    //        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${location.state.project.id}`, requestOptions)
+    //        let ret = await response.json()
+    //        if (response.status === 200 && ret) {
+    //          //console.log(ret);
+    //          setIsOnScrapping(ret.serpapi);
+    //          setIsOnAFScrapping(ret.afapi);
+    //        }
+    //      }
+    //    } catch (e) {
+    //        //console.log(e);
+    //        setIsOnScrapping(false);
+    //        setIsOnAFScrapping(false);
+    //    }
+    //  }
+    //  var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
+    console.log("location.search.length = " + location.search.length)
+    if (location.search.length == 0
+      && (location.state != null && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT'))) {
+      //normal link
+      if (location.state != null && !simpleMode) {
+        dispatch({ type: 'set', activeDomainName: location.state.project.name })
+        dispatch({ type: 'set', activeDomainId: location.state.project.id })
+        dispatch({ type: 'set', activeProject: location.state.project })
+        dispatch({ type: 'set', activeDomainIp: location.state.project.ip })
+      } else {
+        dispatch({ type: 'set', activeDomainName: '', activeProject: {}, activeDomainId: '' })
+      }
+    }
+
+    getZoneInformation();
+    return () => {
       //unmount
       // clearInterval(refreshIntervalId);
       console.log('project scrapping status interval cleared!!!');
-    }    
+    }
   }, [])
 
   return (

@@ -151,23 +151,28 @@ class ListBase extends Component {
             </tr>
           </thead>
           <tbody>
-            {articles.map((article) => (
-              <tr key={article.id}>
-                <td>{article.id}</td>
-                <td>
-                    {article.title}
-                  {/* <Link to={{pathname: `/openlink`, search: '?url='+this.getLink(article.title)}}>
-                    {article.title}
-                  </Link> */}
-                </td>
-                <td>
-                  <button onClick={() => openNewPage(article.title)}>Open Link</button>
-                </td>
-                <td>
-                  {this.state.sync[article.id] == null ?  <CSpinner size="sm"/> : (this.state.sync[article.id] ? "OK" : "Failed")}
-                </td>
-              </tr>
-            ))}
+            {articles.map((article) => {
+              //Omitted if (article.content != null && article.content.length > 0)
+              {
+                return (
+                  <tr key={article.id}>
+                    <td>{article.id}</td>
+                    <td>
+                        {article.title}
+                      {/* <Link to={{pathname: `/openlink`, search: '?url='+this.getLink(article.title)}}>
+                        {article.title}
+                      </Link> */}
+                    </td>
+                    <td>
+                      <button onClick={() => openNewPage(article.title)}>Open Link</button>
+                    </td>
+                    <td>
+                      {this.state.sync[article.id] == null ?  <CSpinner size="sm"/> : (this.state.sync[article.id] ? "OK" : "Failed")}
+                    </td>
+                  </tr>
+                )
+              }
+            })}
           </tbody>
         </table>
         {pagination}
@@ -194,7 +199,7 @@ class ListBase extends Component {
   async populateArticleData(pageNo) {
     const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}article/` +
+      `${process.env.REACT_APP_SERVER_URL}article/valid/` +
         (projectId != '' ? projectId + '/' : '') +
         pageNo +
         '/7',

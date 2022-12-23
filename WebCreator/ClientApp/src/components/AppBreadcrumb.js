@@ -25,6 +25,7 @@ const AppBreadcrumb = () => {
   let refreshIntervalId = 0
   const currentLocation = useLocation().pathname
   const activeDomainName = useSelector((state) => state.activeDomainName)
+  const activeDomainIp = useSelector((state) => state.activeDomainIp)
   const activeDomainId = useSelector((state) => state.activeDomainId)
   const activeZoneId = useSelector((state) => state.activeZoneId)
   const activeZoneName = useSelector((state) => state.activeZoneName)
@@ -114,32 +115,32 @@ const AppBreadcrumb = () => {
 
               <CHeaderNav className="d-md-flex me-auto">
                 <CNavItem className="px-1">
-                  <CNavLink href="#/project/add?mode=view" className="btn btn-light">
+                  <CNavLink href="#/project/add?mode=view" className="btn btn-primary text-white">
                     {'DOMAIN : ' + activeDomainName}
                   </CNavLink>
                 </CNavItem>
                 {activeDomainName.length > 0 && (
                   <>
                     <CNavItem className="px-1">
-                      <CNavLink href={'#/cloudflare/dns/?domainId=' + activeZoneId + '&domainName=' + activeZoneName} className="btn btn-light">
+                      <CNavLink href={'#/cloudflare/dns/?domainId=' + activeZoneId + '&domainName=' + activeZoneName} className="btn btn-primary text-white">
                         DNS Status
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink href={'#/schedule/view/?domainId=' + activeDomainId} className="btn btn-light">
+                      <CNavLink href={'#/schedule/view/?domainId=' + activeDomainId} className="btn btn-primary text-white">
                         Article Scrap Schedule
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
                       <CNavLink
-                        className="btn btn-light"
-                        href={'#/article/list/?domainId=' + activeDomainId}
+                        className="btn btn-primary text-white"
+                        href={'#/article/list/?domainId=' + activeDomainId + '&domainName=' + activeDomainName + '&domainIp=' + activeDomainIp}
                       >
                         Article Pages
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink className="btn btn-light" href={'#/sync/view?domainId=' + activeDomainId + '&domain=' + activeDomainName}>
+                      <CNavLink className="btn btn-primary text-white" href={'#/sync/view?domainId=' + activeDomainId + '&domain=' + activeDomainName}>
                         Sync
                       </CNavLink>
                     </CNavItem>
@@ -156,9 +157,9 @@ const AppBreadcrumb = () => {
           <CCol xs="auto">
             <CBadge color={activeZoneStatus == 'active' ? "success" : "dark"} shape="rounded-pill">{activeDomainName}</CBadge>
             &nbsp;
-            <CBadge color={isOnScrapping ? "success" : "dark"} shape="rounded-pill">Query Scrapping</CBadge>
+            <CBadge color={isOnScrapping ? "success" : "dark"} shape="rounded-pill">Query Scrap</CBadge>
             &nbsp;
-            <CBadge color={isOnAFScrapping ? "success" : "dark"} shape="rounded-pill">Article Forge Scheduleing</CBadge>
+            <CBadge color={isOnAFScrapping ? "success" : "dark"} shape="rounded-pill">AF Schedule</CBadge>
           </CCol>
         </CRow>
       </CContainer>

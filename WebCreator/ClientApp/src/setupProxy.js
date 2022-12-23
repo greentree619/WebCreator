@@ -17,6 +17,7 @@ const context =  [
   "/article/fromid",
   "/article/sync_status",
   "/article/scrap_status",
+  "/article/valid",
   "/dns",
   "/dns/byname",
   "/buildsync",

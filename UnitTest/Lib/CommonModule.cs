@@ -11,6 +11,7 @@ using WebCreator.Models;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Net;
+using System.Web;
 
 namespace UnitTest.Lib
 {
@@ -111,28 +112,30 @@ namespace UnitTest.Lib
 
         public static String articleURL(String domain, String question) {
             String filename = question.Replace("?", "");
-            return $"http://{domain}/{filename}.html";
+            filename = Uri.EscapeUriString(filename + ".html");
+            return $"http://{domain}/{filename}";
         }
 
         public static bool RemoteFileExists(string url)
         {
+            bool code = false;
             try
             {
-                //Creating the HttpWebRequest
                 HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
-                //Setting the Request method HEAD, you can also use GET too.
-                request.Method = "HEAD";
-                //Getting the Web Response.
-                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-                //Returns TRUE if the Status code == 200
-                response.Close();
-                return (response.StatusCode == HttpStatusCode.OK);
+                string text;
+                HttpStatusCode status;
+
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse) { 
+                     code = (response.StatusCode == HttpStatusCode.OK);
+                }
             }
             catch
             {
                 //Any exception will returns false.
                 return false;
             }
+
+            return code;
         }
 
         public async Task UpdateArticleScrappingProgress() {

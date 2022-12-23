@@ -4,8 +4,10 @@ const initialState = {
   sidebarShow: true,
   activeDomainId: '',
   activeDomainName: '',
+  activeDomainIp: '',
   activeZoneId: '',
   activeZoneName: '',
+  activeZoneStatus: '',
   activeProject: {},
 }
 

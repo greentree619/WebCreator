@@ -316,35 +316,35 @@ const Add = (props) => {
  }
   
   useEffect(() => {
-    async function loadScrappingStatus()  {
-      try {
-       if(location.state != null && location.state.project != null 
-         && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT')){
-         const requestOptions = {
-           method: 'GET',
-           headers: { 'Content-Type': 'application/json' },
-         }
+  //   async function loadScrappingStatus()  {
+  //     try {
+  //      if(location.state != null && location.state.project != null 
+  //        && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT')){
+  //        const requestOptions = {
+  //          method: 'GET',
+  //          headers: { 'Content-Type': 'application/json' },
+  //        }
      
-         const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${location.state.project.id}`, requestOptions)
-         let ret = await response.json()
-         if (response.status === 200 && ret) {
-           //console.log(ret);
-           setIsOnScrapping(ret.serpapi);
-           setIsOnAFScrapping(ret.afapi);
-         }
-       }
-     } catch (e) {
-         //console.log(e);
-         setIsOnScrapping(false);
-         setIsOnAFScrapping(false);
-     }
-   }
+  //        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${location.state.project.id}`, requestOptions)
+  //        let ret = await response.json()
+  //        if (response.status === 200 && ret) {
+  //          //console.log(ret);
+  //          setIsOnScrapping(ret.serpapi);
+  //          setIsOnAFScrapping(ret.afapi);
+  //        }
+  //      }
+  //    } catch (e) {
+  //        //console.log(e);
+  //        setIsOnScrapping(false);
+  //        setIsOnAFScrapping(false);
+  //    }
+  //  }
+  //  var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
 
    getZoneInformation();
-    var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
     return ()=>{
       //unmount
-      clearInterval(refreshIntervalId);
+      // clearInterval(refreshIntervalId);
       console.log('project scrapping status interval cleared!!!');
     }    
   }, [])
@@ -354,7 +354,7 @@ const Add = (props) => {
       <CContainer className="px-4">
         <CRow xs={{ gutterX: 5 }}>
           <CCol>
-          <CContainer>
+          {/* <CContainer>
               <CRow xs={{ cols: 2 }}>
                 <CCol className="border border-secondary text-center">
                   SerpAPI Scrapping
@@ -383,7 +383,7 @@ const Add = (props) => {
                 </CCol>
               </CRow>
             </CContainer>
-            <br/>
+            <br/> */}
             <CCard className="mb-4">
               <CCardHeader>New/Update Domain</CCardHeader>
               <CCardBody>

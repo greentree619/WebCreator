@@ -22,6 +22,7 @@ import { NavLink } from 'react-router-dom'
 import { Outlet, Link } from 'react-router-dom'
 
 const AppBreadcrumb = () => {
+  let refreshIntervalId = 0
   const currentLocation = useLocation().pathname
   const activeDomainName = useSelector((state) => state.activeDomainName)
   const activeDomainId = useSelector((state) => state.activeDomainId)
@@ -55,42 +56,43 @@ const AppBreadcrumb = () => {
   const [isOnScrapping, setIsOnScrapping] = useState(false)
   const [isOnAFScrapping, setIsOnAFScrapping] = useState(false)
 
-  useEffect(() => {
-    async function loadScrappingStatus()  {
-      try {
-       if( activeDomainId.length > 0 ){
-         const requestOptions = {
-           method: 'GET',
-           headers: { 'Content-Type': 'application/json' },
-         }
-     
-         const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${activeDomainId}`, requestOptions)
-         let ret = await response.json()
-         if (response.status === 200 && ret) {
-           //console.log(ret);
-           setIsOnScrapping(ret.serpapi);
-           setIsOnAFScrapping(ret.afapi);
-         }
-       }
-       else
-       {
-          setIsOnScrapping(false);
-          setIsOnAFScrapping(false);
-       }
-     } catch (e) {
-         //console.log(e);
-         setIsOnScrapping(false);
-         setIsOnAFScrapping(false);
-     }
-   }
+  async function loadScrappingStatus() {
+    //console.log("loadScrappingStatus->" + activeDomainId, activeDomainName);
+    try {
+      if (activeDomainId.length > 0) {
+        const requestOptions = {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
 
-    var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
-    return ()=>{
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${activeDomainId}`, requestOptions)
+        let ret = await response.json()
+        if (response.status === 200 && ret) {
+          //console.log(ret);
+          setIsOnScrapping(ret.serpapi);
+          setIsOnAFScrapping(ret.afapi);
+        }
+      }
+      else {
+        setIsOnScrapping(false);
+        setIsOnAFScrapping(false);
+      }
+    } catch (e) {
+      console.log(e);
+      //setIsOnScrapping(false);
+      //setIsOnAFScrapping(false);
+    }
+  }
+
+  useEffect(() => {
+    clearInterval( refreshIntervalId );
+    refreshIntervalId = setInterval(loadScrappingStatus, 1000);
+    return () => {
       //unmount
       clearInterval(refreshIntervalId);
       console.log('Bread Crumb project scrapping status interval cleared!!!');
-    }    
-  }, [])
+    }
+  }, [activeDomainId])
 
   return (
     <>
@@ -137,7 +139,7 @@ const AppBreadcrumb = () => {
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink className="btn btn-light" href={'#/sync/view?domainId=' + activeDomainId + '&domain='+activeDomainName}>
+                      <CNavLink className="btn btn-light" href={'#/sync/view?domainId=' + activeDomainId + '&domain=' + activeDomainName}>
                         Sync
                       </CNavLink>
                     </CNavItem>

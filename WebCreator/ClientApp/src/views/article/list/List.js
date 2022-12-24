@@ -16,6 +16,8 @@ import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Outlet, Link } from 'react-router-dom'
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 class ListBase extends Component {
   static displayName = ListBase.name
@@ -93,7 +95,24 @@ class ListBase extends Component {
       })
     }
     this.setState({ alarmVisible: true })
-  }  
+  }
+
+  deleteArticleConfirm = (_id) => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to delete this.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => this.deleteArticle(_id)
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  };
 
   async deleteArticle(_id) {
     const requestOptions = {
@@ -283,7 +302,7 @@ class ListBase extends Component {
                       <CButton type="button">View</CButton>
                     </Link>
                     &nbsp;
-                    <CButton type="button" onClick={() => this.deleteArticle(article.id)}>
+                    <CButton type="button" onClick={() => this.deleteArticleConfirm(article.id)}>
                       Delete
                     </CButton>
                   </td>

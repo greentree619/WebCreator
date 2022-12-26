@@ -22,6 +22,7 @@ const context =  [
   "/dns/byname",
   "/buildsync",
   "/buildsync/sync",
+  "/setting/afsetting",
 ];
 
 module.exports = function(app) {

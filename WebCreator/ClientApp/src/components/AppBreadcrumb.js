@@ -127,11 +127,6 @@ const AppBreadcrumb = () => {
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink href={'#/article/setting/?domainId=' + activeDomainId} className="btn btn-primary text-white">
-                        AF Setting
-                      </CNavLink>
-                    </CNavItem>
-                    <CNavItem className="px-1">
                       <CNavLink href={'#/schedule/view/?domainId=' + activeDomainId} className="btn btn-primary text-white">
                         Article Scrap Schedule
                       </CNavLink>

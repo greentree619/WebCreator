@@ -21,6 +21,12 @@ import { logo } from 'src/assets/brand/logo'
 const AppHeader = () => {
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const activeDomainName = useSelector((state) => state.activeDomainName)
+  const activeDomainIp = useSelector((state) => state.activeDomainIp)
+  const activeDomainId = useSelector((state) => state.activeDomainId)
+  const activeZoneId = useSelector((state) => state.activeZoneId)
+  const activeZoneName = useSelector((state) => state.activeZoneName)
+  const activeZoneStatus = useSelector((state) => state.activeZoneStatus)
 
   return (
     <CHeader position="sticky" className="mb-4">
@@ -46,6 +52,11 @@ const AppHeader = () => {
           <CNavItem>
             <CNavLink href="#">Settings</CNavLink>
           </CNavItem>
+          <CNavItem>
+          <CNavLink href={'#/article/setting/?domainId=' + activeDomainId}>
+            AF Setting
+          </CNavLink>
+        </CNavItem>
         </CHeaderNav>
         <CHeaderNav>
           <CNavItem>

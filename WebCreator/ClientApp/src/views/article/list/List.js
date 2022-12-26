@@ -308,7 +308,9 @@ class ListBase extends Component {
                   </td>
                   <td>
                     {article.articleId != null && article.articleId.length > 0 && this.state.sync[article.articleId] != null ? 
-                      (<>{this.state.sync[article.articleId]} %</>) : (<></>)}
+                      (<>{this.state.sync[article.articleId]} %</>) 
+                      : 
+                      this.state.sync[article.id] != null ? (<>{this.state.sync[article.id]} %</>) : (<></>)}
                   </td>
                 </tr>)
               }
@@ -372,11 +374,17 @@ class ListBase extends Component {
     })
 
     let ids = "";
+    let articleDocumentIds = "";
     await data.data.map((item, index) => {
       if( /*item.isScrapping &&*/ item.articleId != null && item.articleId.length > 0)
       {
         if(ids.length > 0) ids += ",";
         ids += item.articleId;
+      }
+      else
+      {
+        if(articleDocumentIds.length > 0) articleDocumentIds += ",";
+        articleDocumentIds += item.id;
       }
       console.log(ids, "<--", this.state.articleIds);
     });
@@ -389,7 +397,7 @@ class ListBase extends Component {
             headers: { 'Content-Type': 'application/json' },
           }
     
-          const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrap_status/${ids}`, requestOptions)
+          const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrap_status/${ids};${articleDocumentIds}`, requestOptions)
           let ret = await response.json()
           if (response.status === 200 && ret) {
             var ret2 =  { ...this.state.sync, ...ret };

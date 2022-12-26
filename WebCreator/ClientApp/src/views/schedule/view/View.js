@@ -35,6 +35,7 @@ const View = (props) => {
   const [betweenNumber, setBetweenNumber] = useState(1)
   const [betweenUnit, setBetweenUnit] = useState(60)//1 min as default
   const [betweenUnitLabel, setBetweenUnitLabel] = useState('Minute(s)')
+  const [scrapCommand, setScrapCommand] = useState('Start Scrapping')
   const navigate = useNavigate()
 
   let unitMap = [
@@ -103,8 +104,19 @@ const View = (props) => {
     setAlertColor('danger')
     if (response.status === 200) {
       //console.log('add success')
-      setAlertMsg('Completed to scrapping questions from Article Forge successfully.')
-      setAlertColor('success')
+      let ret = await response.json()
+      if(ret)
+      {
+        setScrapCommand('Stop Scrapping')
+        setAlertMsg('Article Forge Scrapping Schedule started successfully.')
+        setAlertColor('success')
+      }
+      else
+      {
+        setScrapCommand('Start Scrapping')
+        setAlertMsg('Article Forge Scrapping Schedule stopped.')
+        setAlertColor('success')
+      }
     }
     setAlarmVisible(true)
 
@@ -233,7 +245,7 @@ const View = (props) => {
             <div className="mb-3">
               <CButton type="submit">Update</CButton>
               &nbsp;
-              <CButton type="button" onClick={() => startScrapping(projectId)}>Start Scrapping</CButton>
+              <CButton type="button" onClick={() => startScrapping(projectId)}>{scrapCommand}</CButton>
             </div>
           </CForm>
         </CCardBody>

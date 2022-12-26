@@ -19,6 +19,7 @@ namespace UnitTest.Lib
     {
         public static Hashtable threadList = new Hashtable();
         public static Hashtable afThreadList = new Hashtable();
+        public static Hashtable refKeyCash = new Hashtable();
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -91,9 +92,23 @@ namespace UnitTest.Lib
             bool status = false;
             try
             {
-                String ref_key = af.initiateArticle(JObject.Parse("{\"keyword\":\"" + question + "\"}"));
+                dynamic jsonObjectParam = new JObject();
+                jsonObjectParam.keyword = question;
+                //jsonObjectParam.sub_keywords = "subkeyword1,subkeyword2,subkeyword3";
+                jsonObjectParam.sentence_variation = 2;//a list of sub-keywords separated by comma (e.g. subkeyword1,subkeyword2,subkeyword3).
+                jsonObjectParam.paragraph_variation = 2;//number of paragraph variations. It can be either 1, 2, or 3. The default value is 1.
+                jsonObjectParam.shuffle_paragraphs = 1;//enable shuffle paragraphs or not.It can be either 0(disabled) or 1(enabled).The default value is 0.
+                jsonObjectParam.length = "medium";//the length of the article. It can be either ‘very_short’(approximately 50 words), ‘short’(approximately 200 words), ‘medium’(approximately 500 words), or ‘long’(approximately 750 words). The default value is ‘short’.
+                jsonObjectParam.title = 1;//It can be either 0 or 1. If it is set to be 0, the article generated is without titles and headings. The default value is 0.
+                jsonObjectParam.image = 1.0;//the probability of adding an image into the article. It should be a float number from 0.00 to 1.00. The default value is 0.00.
+                jsonObjectParam.video = 1.0;//the probability of adding a video into the article. It should be a float number from 0.00 to 1.00. The default value is 0.00.
+                jsonObjectParam.quality = 3;
+
+
+                String ref_key = af.initiateArticle(jsonObjectParam);
                 if (ref_key != null)
                 {
+                    CommonModule.refKeyCash[articleid] = ref_key;
                     CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                     DocumentReference docRef = articlesCol.Document(articleid);
 

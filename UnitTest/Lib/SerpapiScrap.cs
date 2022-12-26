@@ -65,7 +65,7 @@ namespace UnitTest.Lib
                     DocumentSnapshot scheduleSnapshot = await docRef.GetSnapshotAsync();
 
                     CollectionReference col = Config.FirebaseDB.Collection("Articles");
-                    Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false);
+                    Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false).OrderBy("CreatedTime");
                     QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
 
                     Stack<Article> scrapArticles = new Stack<Article>();
@@ -82,28 +82,28 @@ namespace UnitTest.Lib
                     {
                         schedule = scheduleSnapshot.ConvertTo<Schedule>();
 
-                        for (int i = 0; i < schedule.JustNowCount; i++)
+                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.afThreadList[_id]; i++)
                         {
                             Article scrapAF = scrapArticles.Pop();
                             do {
                                 Thread.Sleep(10000);
                                 afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
                             }
-                            while (!afRet);
+                            while (!afRet && (bool)CommonModule.afThreadList[_id]);
                         }
 
-                        while (true)
+                        while ( (bool)CommonModule.afThreadList[_id] )
                         {
                             Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
-                            for (int i = 0; i < schedule.EachCount; i++)
+                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.afThreadList[_id]; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
                                 do {
                                     Thread.Sleep(10000);
                                     afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
                                 }
-                                while ( !afRet );
+                                while ( !afRet && (bool)CommonModule.afThreadList[_id]);
                                 
                             }
                         }

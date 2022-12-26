@@ -132,7 +132,9 @@ namespace WebCreator.Controllers
         [HttpGet("scrap_status/{articleids}")]
         public async Task<IActionResult> GetScrapStatusAsync(String articleids)
         {
-            string[] articleList = articleids.Split(',');
+            string[] idsList = articleids.Split(';');
+            string[] articleRefKeyList = idsList[0].Split(',');
+            string[] articleDocumentIdsList = idsList[1].Split(',');
             Dictionary<string, int> scrapStatus = new Dictionary<string, int>();
             int total = 0;
             try
@@ -148,10 +150,23 @@ namespace WebCreator.Controllers
                     scrapStatus[article.ArticleId.ToString()] = article.Progress;
                 }
 #else
-                foreach (String articleId in articleList) {
+                foreach (String articleId in articleRefKeyList) {
                     int prog = af.getApiProgress(articleId);
                     scrapStatus[articleId] = prog;
                 }
+
+                foreach (String articleDocId in articleDocumentIdsList)
+                {
+                    if( CommonModule.refKeyCash[articleDocId] != null 
+                        && CommonModule.refKeyCash[articleDocId].ToString().Length > 0 )
+                    {
+                        String articleId = CommonModule.refKeyCash[articleDocId].ToString();
+                        int prog = af.getApiProgress(articleId);
+                        scrapStatus[articleDocId] = prog;
+                    }
+                }
+
+                
 #endif
             }
             catch (Exception ex)

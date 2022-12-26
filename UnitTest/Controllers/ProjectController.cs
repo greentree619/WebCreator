@@ -152,7 +152,7 @@ namespace WebCreator.Controllers
                 JustNowCount = 1,
                 EachCount = 1,
                 SpanTime = 1,
-                SpanUnit = 10,
+                SpanUnit = 60,
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             };
@@ -304,12 +304,19 @@ namespace WebCreator.Controllers
         //}}
         public ActionResult StartAFapi(String _id, String sid)
         {
+            bool ret = false;
             if (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false)
             {
                 CommonModule.afThreadList[_id] = true;
                 Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(_id, sid));
+                ret = true;
             }
-            return Ok(true);
+            else
+            {
+                CommonModule.afThreadList[_id] = false;
+                ret = false;
+            }
+            return Ok(ret);
         }
     }
 }

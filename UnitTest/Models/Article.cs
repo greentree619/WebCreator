@@ -22,6 +22,8 @@ namespace WebCreator.Models
 
         public String? Content { get; set; }
         [FirestoreProperty]
+        public DateTime UpdateTime { get; set; }
+        [FirestoreProperty]
         public DateTime CreatedTime { get; set; }
     }
 }

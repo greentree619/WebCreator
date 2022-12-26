@@ -308,17 +308,24 @@ namespace WebCreator.Controllers
             return Ok(true);
         }
 
-        [HttpPut("content/{articleid}/{content}")]
-        public async Task<IActionResult> UpdateContentAsync(String articleid, String content)
+        [HttpPut("add")]
+        public async Task<IActionResult> AddArticleAsync([FromBody] Article article)
+        {
+            bool ret = await CommonModule.AddArticle(article.ProjectId, article.Title, article.Content, 100);
+            return Ok(ret);
+        }
+
+        [HttpPut("update_content")]
+        public async Task<IActionResult> UpdateContentAsync([FromBody] Article article)
         {
             try
             {
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-                DocumentReference docRef = articlesCol.Document(articleid);
+                DocumentReference docRef = articlesCol.Document(article.Id);
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                 {
-                    { "Content", content },
+                    { "Content", article.Content },
                 };
                 await docRef.UpdateAsync(userUpdate);
             }

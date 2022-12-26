@@ -7,6 +7,7 @@ const Typography = React.lazy(() => import('./views/theme/typography/Typography'
 const AddProject = React.lazy(() => import('./views/project/add/Add'))
 const ListProject = React.lazy(() => import('./views/project/list/List'))
 const AllArticles = React.lazy(() => import('./views/article/list/List'))
+const NewArticle = React.lazy(() => import('./views/article/add/Add'))
 const ArticleView = React.lazy(() => import('./views/article/view/View'))
 const AFSetting = React.lazy(() => import('./views/article/setting/Setting'))
 const AllZoneList = React.lazy(() => import('./views/cloudflare/zone/Zone'))
@@ -81,6 +82,7 @@ const routes = [
   { path: '/project/list', name: 'All Websites', element: ListProject },
   { path: '/article/list', name: 'All Articles', element: AllArticles },
   { path: '/article/view', name: 'Article View', element: ArticleView },
+  { path: '/article/add', name: 'Create New Article', element: NewArticle },
   { path: '/article/setting', name: 'Article Forge Setting', element: AFSetting },
   { path: '/cloudflare/zone', name: 'Zone List View', element: AllZoneList },
   { path: '/cloudflare/dns', name: 'Dns List View', element: AllDnsList },

@@ -27,26 +27,18 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 const API_URL = "https://77em4-8080.sse.codesandbox.io";
 const UPLOAD_ENDPOINT = "upload_files";
 
-const View = (props) => {
+const Add = (props) => {
   const location = useLocation()
   const [alarmVisible, setAlarmVisible] = useState(false)
   const [alertColor, setAlertColor] = useState('success')
   const [alertMsg, setAlertMsg] = useState('')
   const [title, setTitle] = useState('')
+  const [projectId, setProjectId] = useState(location.state.projectId)
   const [content, setContent] = useState('')
   const navigate = useNavigate()
 
+  //console.log(projectId)
   useEffect(() => {
-    const getFetch = async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}article/fromid/` + location.state.article.id,
-      )
-      const data = await response.json()
-      //console.log(data)
-      setTitle(data.data.title)
-      if (data.data.content != null) setContent(data.data.content)
-    }
-    getFetch()
   }, [])
 
   function uploadAdapter(loader) {
@@ -84,22 +76,23 @@ const View = (props) => {
     };
   }
 
-  const updateContent = async () => {
+  const addNewArticle = async () => {
     const requestOptions = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id: location.state.article.id,
+        projectId: projectId,
+        title: title,
         content: content,
       }),
     }
 
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/update_content`, requestOptions)
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/add`, requestOptions)
     setAlertColor('danger')
-    setAlertMsg('Faild to update content unfortunatley.')
+    setAlertMsg('Faild to add article unfortunatley.')
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertMsg('Article content is updated successfully.')
+      setAlertMsg('Article content is added successfully.')
       setAlertColor('success')
     }
     setAlarmVisible(true)
@@ -125,7 +118,6 @@ const View = (props) => {
                 type="text"
                 id="titleFormControlInput"
                 aria-label="title"
-                disabled
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -159,8 +151,8 @@ const View = (props) => {
                 Back
               </CButton>
               &nbsp;
-              <CButton type="button" onClick={() => updateContent()}>
-                Update
+              <CButton type="button" onClick={() => addNewArticle()}>
+                Add
               </CButton>
             </div>
           </CForm>
@@ -170,4 +162,4 @@ const View = (props) => {
   )
 }
 
-export default View
+export default Add

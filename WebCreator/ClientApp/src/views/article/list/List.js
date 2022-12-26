@@ -336,18 +336,26 @@ class ListBase extends Component {
           <CContainer>
             <CRow>
               <CCol className="align-self-start">All Articles</CCol>
-              <CCol className="align-self-end" xs="auto">
-                <CButton
-                  type="button"
-                  onClick={() => this.syncArticle(this.state.projectInfo.projectid,
-                                                  this.state.projectInfo.domainName,
-                                                  this.state.projectInfo.domainIp,
-                                                  ""
-                                                  )}
-                >
-                  All Sync
-                </CButton>
-              </CCol>
+              {this.state.projectInfo != null && this.state.projectInfo.projectid != null && (
+                <>
+                <CCol className="align-self-end" xs="auto">
+                  <Link to={`/article/add`} state={{ projectId: this.state.projectInfo.projectid }}>
+                    <CButton type="button">New Article</CButton>
+                  </Link>
+                  &nbsp;
+                  <CButton
+                    type="button"
+                    onClick={() => this.syncArticle(this.state.projectInfo.projectid,
+                                                    this.state.projectInfo.domainName,
+                                                    this.state.projectInfo.domainIp,
+                                                    ""
+                                                    )}
+                  >
+                    All Sync
+                  </CButton>
+                  </CCol>
+                  </>)
+              }
             </CRow>
           </CContainer>
         </CCardHeader>

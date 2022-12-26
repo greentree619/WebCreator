@@ -227,5 +227,41 @@ namespace UnitTest.Lib
                 dir.Delete(true);
             }
         }
+
+        static public async Task<bool> AddArticle(String domainId, String title, String content, Int32 progress)
+        {
+            bool ret = false;
+            var article = new Article
+            {
+                ProjectId = domainId,
+                Title = title,
+                Content = content,
+                IsScrapping = false,
+                Progress = progress,
+                UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+            };
+            var articleData = article;
+
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                Query query = articlesCol.OrderByDescending("CreatedTime")
+                    .WhereEqualTo("ProjectId", articleData.ProjectId)
+                    .WhereEqualTo("Title", articleData.Title).Limit(1);
+                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                if (projectsSnapshot.Documents.Count == 0)
+                {
+                    await articlesCol.AddAsync(articleData);
+                    ret = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return ret;
+        }
     }
 }

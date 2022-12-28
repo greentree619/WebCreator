@@ -32,6 +32,7 @@ namespace UnitTest.Lib
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                 {
                     { "OnScrapping",  isScrapping},
+                    { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                 };
                 await docRef.UpdateAsync(userUpdate);
             }
@@ -51,6 +52,7 @@ namespace UnitTest.Lib
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                 {
                     { "OnAFScrapping",  isScrapping},
+                    { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                 };
                 await docRef.UpdateAsync(userUpdate);
             }
@@ -119,6 +121,7 @@ namespace UnitTest.Lib
                         { "ArticleId", ref_key },
                         { "Progress", 0 },
                         { "IsScrapping", true },
+                        { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                     };
                     await docRef.UpdateAsync(userUpdate);
                     status = true;
@@ -201,6 +204,8 @@ namespace UnitTest.Lib
                         {
                             update["Progress"] = prog;
                         }
+
+                        update["UpdateTime"] = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                         DocumentReference docRef = articlesCol.Document(document.Id);
                         await docRef.UpdateAsync(update);
                     }

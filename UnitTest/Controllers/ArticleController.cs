@@ -230,6 +230,7 @@ namespace WebCreator.Controllers
                             { "ArticleId", ref_key },
                             { "IsScrapping", true },
                             { "Progress", 0 },
+                            { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                         };
                         docRef.UpdateAsync(update);
                     }
@@ -244,6 +245,7 @@ namespace WebCreator.Controllers
                             { "Content", article.Content },
                             { "IsScrapping", false },
                             { "Progress", 100 },
+                            { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                         };
                         docRef.UpdateAsync(update);
                     }
@@ -262,6 +264,7 @@ namespace WebCreator.Controllers
                             { "Content", article.Content },
                             { "IsScrapping", false },
                             { "Progress", 100 },
+                            { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                         };
                         docRef.UpdateAsync(update);
                     }

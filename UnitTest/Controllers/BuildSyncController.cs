@@ -99,7 +99,7 @@ namespace WebCreator.Controllers
 
                     using (MemoryStream zipMS = new MemoryStream())
                     {
-                        using (ZipArchive zipArchive = new ZipArchive(zipMS, ZipArchiveMode.Create, true))
+                        using (ZipArchive zipArchive = new ZipArchive(zipMS, ZipArchiveMode.Create, true, Encoding.UTF8))
                         {
                             //loop through files to add
                             foreach (string fileToZip in filesToZip)

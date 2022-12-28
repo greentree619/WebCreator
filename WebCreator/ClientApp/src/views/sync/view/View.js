@@ -63,9 +63,10 @@ class ListBase extends Component {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/sync_status/${this.state.projectInfo.projectDomain}/${ids}`, requestOptions)
       let ret = await response.json()
       if (response.status === 200 && ret) {
-        console.log(ret);
+        //console.log(ret);
+        var ret2 =  { ...this.state.sync, ...ret };
         this.setState({
-          sync: ret,
+          sync: ret2,
         })
       }
     } catch (e) {
@@ -220,10 +221,11 @@ class ListBase extends Component {
     await data.data.map((item, index) => {
       if(ids.length > 0) ids += ",";
       ids += item.id;
+      this.loadSyncStatus(item.id);
       //console.log(ids, "<--", this.state.articleIds);
     });
 
-    this.loadSyncStatus(ids);
+    //Omitted this.loadSyncStatus(ids);
   }
 }
 

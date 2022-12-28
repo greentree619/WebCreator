@@ -278,7 +278,9 @@ class ListBase extends Component {
               {
                 return (<tr key={article.id}>
                   <td>{article.id}</td>
-                  <td>{article.title}</td>
+                  <td>{article.title}{(article.articleId == null 
+                            || article.articleId != '1234567890')
+                            && (<>&nbsp;<span className="badge text-bg-info">AF</span></>)}</td>
                   <td>
                     <CButton
                       type="button"
@@ -314,7 +316,7 @@ class ListBase extends Component {
                   </td>
                 </tr>)
               }
-              })}
+            })}
           </tbody>
         </table>
         {pagination}
@@ -383,37 +385,53 @@ class ListBase extends Component {
 
     let ids = "";
     let articleDocumentIds = "";
+    this.setState({
+      sync: {},
+    })
     await data.data.map((item, index) => {
       if( /*item.isScrapping &&*/ item.articleId != null && item.articleId.length > 0)
       {
-        if(ids.length > 0) ids += ",";
-        ids += item.articleId;
+        if(item.progress != 100){
+          if(ids.length > 0) ids += ",";
+          ids += item.articleId;
+        }
+        else
+        {
+          var ret = this.state.sync
+          ret[item.articleId] = item.progress
+          this.setState({
+            sync: ret,
+          })
+          console.log("article-list", ret, this.state.sync)
+        }
       }
       else
       {
         if(articleDocumentIds.length > 0) articleDocumentIds += ",";
         articleDocumentIds += item.id;
       }
-      console.log(ids, "<--", this.state.articleIds);
+      console.log(ids, "<--", articleDocumentIds);
     });
 
     const refreshFunc = async () => {
-      if(ids.length > 0){
+      if(ids.length > 0 || articleDocumentIds.length > 0){
         try {
           const requestOptions = {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
           }
     
+          //console.log("progress status : ->");
           const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrap_status/${ids};${articleDocumentIds}`, requestOptions)
           let ret = await response.json()
           if (response.status === 200 && ret) {
             var ret2 =  { ...this.state.sync, ...ret };
-            //console.log("progress status : ", ret2);
+            //console.log(articleDocumentIds);
+            //console.log(ret);
             this.setState({
               sync: ret2,
             })
-            console.log(this.state.sync);
+            //console.log(this.state.sync);
           }
         } catch (e) {
           console.log(e);
@@ -423,7 +441,7 @@ class ListBase extends Component {
       //console.log(">>>Hello World-->", this.articleListPage);
       if(this.articleListPage != null && this.articleListPage)
         this.refreshIntervalId = setTimeout(refreshFunc, 100);
-  }
+    }
     this.refreshIntervalId = setTimeout(refreshFunc, 100);
   }
 }

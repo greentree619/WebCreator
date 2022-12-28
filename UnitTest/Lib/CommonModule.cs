@@ -228,13 +228,14 @@ namespace UnitTest.Lib
             }
         }
 
-        static public async Task<bool> AddArticle(String domainId, String title, String content, Int32 progress)
+        static public async Task<bool> AddArticle(String domainId, String title, String articleId, String content, Int32 progress)
         {
             bool ret = false;
             var article = new Article
             {
                 ProjectId = domainId,
                 Title = title,
+                ArticleId = articleId,
                 Content = content,
                 IsScrapping = false,
                 Progress = progress,

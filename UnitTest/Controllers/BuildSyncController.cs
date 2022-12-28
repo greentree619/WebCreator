@@ -17,6 +17,7 @@ using Google.Cloud.Firestore;
 using WebCreator.Models;
 using Aspose.Zip;
 using Aspose.Zip.Saving;
+using System.IO.Compression;
 
 namespace WebCreator.Controllers
 {
@@ -33,14 +34,15 @@ namespace WebCreator.Controllers
         [HttpPost("{domainid}/{domain}")]
         public async Task<IActionResult> BuildPages(string domainid, string domain)
         {
-            Task.Run(() => this.BuildPagesThreadAsync(domainid, domain));
+            //Task.Run(() => this.BuildPagesThreadAsync(domainid, domain));
+            await BuildPagesThreadAsync(domainid, domain);
             return Ok(true);
         }
 
         [HttpPost("{domainid}/{domain}/{articleId}")]
         public async Task<IActionResult> BuildArticlePage(string domainid, string domain, string articleId)
         {
-            Task.Run(() => this.BuildArticlePageThreadAsync(domainid, domain, articleId));
+            await BuildArticlePageThreadAsync(domainid, domain, articleId);//Task.Run(() => this.BuildArticlePageThreadAsync(domainid, domain, articleId));
             return Ok(true);
         }
 
@@ -68,7 +70,7 @@ namespace WebCreator.Controllers
         [HttpPost("sync/{domainid}/{domain}/{ipaddr}")]
         public async Task<IActionResult> SyncWithServer(string domainid, string domain, string ipaddr)
         {
-            Task.Run(() => this.SyncWithServerThreadAsync(domainid, domain, ipaddr));
+            await SyncWithServerThreadAsync(domainid, domain, ipaddr);//Task.Run(() => this.SyncWithServerThreadAsync(domainid, domain, ipaddr));
             return Ok(true);
         }
 
@@ -91,27 +93,35 @@ namespace WebCreator.Controllers
 
                 if (Directory.Exists(curFolder))
                 {
-                    using (FileStream zipFile = System.IO.File.Open($"{tmpFolder}\\{domain}.zip", FileMode.Create))
-                    {
-                        using (var archive = new Archive())
-                        {
-                            DirectoryInfo info = new DirectoryInfo(curFolder);
-                            FileInfo[] files = info.GetFiles("*.htm*").ToArray();
-                            int prevCount = files.Length;
-                            while ( true ) 
-                            {
-                                Thread.Sleep(100);
-                                files = info.GetFiles("*.htm*").ToArray();
-                                if (prevCount!= 0 && prevCount == files.Length) break;
-                                prevCount = files.Length;
-                            }
+                    string dirRoot = curFolder;
+                    string[] filesToZip = Directory.GetFiles(dirRoot, "*.*");
+                    string zipFileName = string.Format($"{domain}.zip", DateTime.Now);
 
-                            foreach (FileInfo file in files)
+                    using (MemoryStream zipMS = new MemoryStream())
+                    {
+                        using (ZipArchive zipArchive = new ZipArchive(zipMS, ZipArchiveMode.Create, true))
+                        {
+                            //loop through files to add
+                            foreach (string fileToZip in filesToZip)
                             {
-                                archive.CreateEntry(file.Name, file);
+                                //read the file bytes
+                                byte[] fileToZipBytes = System.IO.File.ReadAllBytes(fileToZip);
+                                String zipEntry = fileToZip.Replace(dirRoot + "\\", "");
+                                ZipArchiveEntry zipFileEntry = zipArchive.CreateEntry(zipEntry);
+
+                                //add the file contents
+                                using (Stream zipEntryStream = zipFileEntry.Open())
+                                using (BinaryWriter zipFileBinary = new BinaryWriter(zipEntryStream))
+                                {
+                                    zipFileBinary.Write(fileToZipBytes);
+                                }
                             }
-                            // Create ZIP archive
-                            archive.Save(zipFile, new ArchiveSaveOptions() { Encoding = Encoding.ASCII });
+                        }
+
+                        using (FileStream finalZipFileStream = new FileStream($"{tmpFolder}\\" + zipFileName, FileMode.Create))
+                        {
+                            zipMS.Seek(0, SeekOrigin.Begin);
+                            zipMS.CopyTo(finalZipFileStream);
                         }
                     }
 

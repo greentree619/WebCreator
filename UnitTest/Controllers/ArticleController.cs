@@ -311,7 +311,7 @@ namespace WebCreator.Controllers
         [HttpPut("add")]
         public async Task<IActionResult> AddArticleAsync([FromBody] Article article)
         {
-            bool ret = await CommonModule.AddArticle(article.ProjectId, article.Title, article.Content, 100);
+            bool ret = await CommonModule.AddArticle(article.ProjectId, article.Title, "1234567890",article.Content, 100);
             return Ok(ret);
         }
 

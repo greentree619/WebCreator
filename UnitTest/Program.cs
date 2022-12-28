@@ -1,3 +1,5 @@
+using Aspose.Zip;
+using Aspose.Zip.Saving;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
 using Microsoft.AspNetCore.Builder;
@@ -5,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using System.Collections;
+using System.IO.Compression;
+using System.Text;
 using UnitTest.Lib;
 using WebCreator;
 
@@ -58,6 +62,47 @@ catch (Exception ex)
 //api.DeleteDns("testzone.com", "example.com");
 //api.UpdateDns("testzone.com", "testzone.com", "example6.com");
 //}}CloudFlare test
+
+////{{ZIP TEST
+//String tmpFolder = "D:\\Workstation\\TonniProjects\\WebCreatorGit\\UnitTest\\bin\\Release\\net6.0\\Temp";
+//String curFolder = "D:\\Workstation\\TonniProjects\\WebCreatorGit\\UnitTest\\bin\\Release\\net6.0\\Build\\traepiller.net";
+////what folder to zip - include trailing slash
+//string dirRoot = curFolder;
+//string[] filesToZip = Directory.GetFiles(dirRoot, "*.*");
+//string zipFileName = string.Format("zipfile-{0:yyyy-MM-dd_hh-mm-ss-tt}.zip", DateTime.Now);
+
+//using (MemoryStream zipMS = new MemoryStream())
+//{
+//    using (ZipArchive zipArchive = new ZipArchive(zipMS, ZipArchiveMode.Create, true))
+//    {
+//        //loop through files to add
+//        foreach (string fileToZip in filesToZip)
+//        {
+//            if (new FileInfo(fileToZip).Extension == ".zip") continue;
+//            if (fileToZip.Contains("node_modules")) continue;
+
+//            //read the file bytes
+//            byte[] fileToZipBytes = System.IO.File.ReadAllBytes(fileToZip);
+//            String zipEntry = fileToZip.Replace(dirRoot + "\\", "");
+//            ZipArchiveEntry zipFileEntry = zipArchive.CreateEntry( zipEntry );
+
+//            //add the file contents
+//            using (Stream zipEntryStream = zipFileEntry.Open())
+//            using (BinaryWriter zipFileBinary = new BinaryWriter(zipEntryStream))
+//            {
+//                zipFileBinary.Write(fileToZipBytes);
+//            }
+//            //lstLog.Items.Add("zipped: " + fileToZip);
+//        }
+//    }
+
+//    using (FileStream finalZipFileStream = new FileStream($"{tmpFolder}\\" + zipFileName, FileMode.Create))
+//    {
+//        zipMS.Seek(0, SeekOrigin.Begin);
+//        zipMS.CopyTo(finalZipFileStream);
+//    }
+//}
+////}}ZIP TEST
 
 //Refresh Article Forge Scrapping status.
 Task.Run(() => new CommonModule().UpdateArticleScrappingProgress());

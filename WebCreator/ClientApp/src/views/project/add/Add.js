@@ -349,6 +349,20 @@ const Add = (props) => {
     }
   }, [])
 
+  const readKeyFile = async (e) => {
+    e.preventDefault()
+    const reader = new FileReader()
+    reader.onload = async (e) => { 
+      const text = (e.target.result)
+      //console.log(text)
+      //alert(text.replaceAll('\r\n', ';'))
+      var tmpKeyword = text.replaceAll('\r\n', ';')
+      if(tmpKeyword[tmpKeyword.length-1] == ';') tmpKeyword = tmpKeyword.substring(0, tmpKeyword.length-1)
+      setSearchKeyword(tmpKeyword);
+    };
+    reader.readAsText(e.target.files[0])
+  }
+
   return (
     <>
       <CContainer className="px-4">
@@ -442,15 +456,25 @@ const Add = (props) => {
                     <CFormLabel htmlFor="exampleFormControlInput1">
                       Search Keyword(can use multiple keywords using &apos;;&apos;)
                     </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="searchKeywordFormControlInput"
-                      placeholder="Search Keyword"
-                      aria-label="Search Keyword"
-                      onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
-                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                      value={searchKeyword}
-                    />
+                    <CRow>
+                      <CCol className='col-9'>
+                        <CFormInput
+                          type="text"
+                          id="searchKeywordFormControlInput"
+                          placeholder="Search Keyword"
+                          aria-label="Search Keyword"
+                          onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
+                          disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                          value={searchKeyword}
+                        />
+                      </CCol>
+                      <CCol>
+                        <CFormInput type="file" 
+                        id="formFile" 
+                        onChange={(e) => readKeyFile(e)}
+                        disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                      </CCol>
+                    </CRow>
                   </div>
                   <div className={simpleMode ? 'd-none' : 'mb-3'}>
                     <CFormLabel htmlFor="exampleFormControlInput1">Questions Count</CFormLabel>

@@ -233,15 +233,19 @@ namespace UnitTest.Lib
             }
         }
 
-        static public async Task<bool> AddArticle(String domainId, String title, String articleId, String content, Int32 progress)
+        static public async Task<bool> AddArticle(Article articleParam, String articleId, Int32 progress)
         {
             bool ret = false;
             var article = new Article
             {
-                ProjectId = domainId,
-                Title = title,
+                ProjectId = articleParam.ProjectId,
+                Title = articleParam.Title,
+                MetaDescription = articleParam.MetaDescription,
+                MetaKeywords = articleParam.MetaKeywords,
+                MetaAuthor = articleParam.MetaAuthor,
                 ArticleId = articleId,
-                Content = content,
+                Content = articleParam.Content,
+                Footer = articleParam.Footer,
                 IsScrapping = false,
                 Progress = progress,
                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),

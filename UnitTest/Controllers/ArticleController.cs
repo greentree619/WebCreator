@@ -314,7 +314,7 @@ namespace WebCreator.Controllers
         [HttpPut("add")]
         public async Task<IActionResult> AddArticleAsync([FromBody] Article article)
         {
-            bool ret = await CommonModule.AddArticle(article.ProjectId, article.Title, "1234567890",article.Content, 100);
+            bool ret = await CommonModule.AddArticle(article, "1234567890", 100);
             return Ok(ret);
         }
 
@@ -328,7 +328,11 @@ namespace WebCreator.Controllers
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                 {
+                    { "MetaAuthor", article.MetaAuthor },
+                    { "MetaDescription", article.MetaDescription },
+                    { "MetaKeywords", article.MetaKeywords },
                     { "Content", article.Content },
+                    { "Footer", article.Footer },
                 };
                 await docRef.UpdateAsync(userUpdate);
             }

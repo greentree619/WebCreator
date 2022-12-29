@@ -35,6 +35,10 @@ const Add = (props) => {
   const [title, setTitle] = useState('')
   const [projectId, setProjectId] = useState(location.state.projectId)
   const [content, setContent] = useState('')
+  const [footer, setFooter] = useState('')
+  const [metaDescription, setMetaDescription] = useState('')
+  const [metaKeywords, setMetaKeywords] = useState('')
+  const [metaAuthor, setMetaAuthor] = useState('')
   const navigate = useNavigate()
 
   //console.log(projectId)
@@ -83,7 +87,11 @@ const Add = (props) => {
       body: JSON.stringify({
         projectId: projectId,
         title: title,
+        metaDescription: metaDescription,
+        metaKeywords: metaKeywords,
+        metaAuthor: metaAuthor,
         content: content,
+        footer: footer,
       }),
     }
 
@@ -101,7 +109,7 @@ const Add = (props) => {
   return (
     <>
       <CCard className="mb-4">
-        <CCardHeader>Article View</CCardHeader>
+        <CCardHeader>New Article</CCardHeader>
         <CCardBody>
           <CAlert
             color={alertColor}
@@ -112,7 +120,7 @@ const Add = (props) => {
             {alertMsg}
           </CAlert>
           <CForm className="row g-3 needs-validation">
-            <div className="mb-3">
+          <div className="mb-3">
               <CFormLabel htmlFor="exampleFormControlInput1">Title</CFormLabel>
               <CFormInput
                 type="text"
@@ -123,7 +131,41 @@ const Add = (props) => {
               />
             </div>
             <div className="mb-3">
-              <CFormLabel htmlFor="exampleFormControlInput1">Content</CFormLabel>
+            <CRow>
+                <CCol>
+                  <CFormLabel htmlFor="metaDescription">Meta Description</CFormLabel>
+                  <CFormInput
+                    type="text"
+                    id="metaDescription"
+                    aria-label="metaDescription"
+                    value={metaDescription}
+                    onChange={(e) => setMetaDescription(e.target.value)}
+                  />
+                </CCol>
+                <CCol>
+                  <CFormLabel htmlFor="metaKeywords">Meta Keywords</CFormLabel>
+                  <CFormInput
+                    type="text"
+                    id="metaKeywords"
+                    aria-label="metaKeywords"
+                    value={metaKeywords}
+                    onChange={(e) => setMetaKeywords(e.target.value)}
+                  />
+                </CCol>
+                <CCol>
+                  <CFormLabel htmlFor="metaAuthor">Meta Author</CFormLabel>
+                  <CFormInput
+                    type="text"
+                    id="metaAuthor"
+                    aria-label="metaAuthor"
+                    value={metaAuthor}
+                    onChange={(e) => setMetaAuthor(e.target.value)}
+                  />
+                </CCol>
+              </CRow>
+            </div>
+            <div className="mb-3">
+              <CFormLabel htmlFor="exampleFormControlInput1">Body</CFormLabel>
               <CKEditor
                 config={{
                   extraPlugins: [uploadPlugin]
@@ -143,6 +185,30 @@ const Add = (props) => {
                 }}
                 onFocus={(event, editor) => {
                   console.log('Focus.', editor)
+                }}
+              />
+            </div>
+            <div className="mb-3">
+              <CFormLabel htmlFor="exampleFormControlInput2">Footer</CFormLabel>
+              <CKEditor
+                config={{
+                  extraPlugins: [uploadPlugin]
+                }}
+                editor={ClassicEditor}
+                data={footer}
+                onReady={(footerEditor) => {
+                  console.log('Editor is ready to use!', footerEditor)
+                }}
+                onChange={(event, footerEditor) => {
+                  const data = footerEditor.getData()
+                  setFooter(data)
+                  //console.log({ event, editor, data })
+                }}
+                onBlur={(event, footerEditor) => {
+                  console.log('Blur.', footerEditor)
+                }}
+                onFocus={(event, footerEditor) => {
+                  console.log('Focus.', footerEditor)
                 }}
               />
             </div>

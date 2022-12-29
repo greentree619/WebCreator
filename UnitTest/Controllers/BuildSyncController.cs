@@ -18,6 +18,7 @@ using WebCreator.Models;
 using Aspose.Zip;
 using Aspose.Zip.Saving;
 using System.IO.Compression;
+using System.Runtime.CompilerServices;
 
 namespace WebCreator.Controllers
 {
@@ -164,7 +165,37 @@ namespace WebCreator.Controllers
                         String title = article.Title.Replace("?", "").Trim();
                         using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
                         {
+                            writer.Write("<!DOCTYPE html>");
+                            writer.Write("<html>");
+                            writer.Write("<head>");
+                            writer.Write($"<title>{article.Title}</title>");
+                            if (article.MetaDescription != null && article.MetaDescription.Length > 0)
+                            {
+                                writer.Write($"<meta name=\"description\" content=\"{article.MetaDescription}\">");
+                            }
+
+                            if (article.MetaKeywords != null && article.MetaKeywords.Length > 0)
+                            {
+                                writer.Write($"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">");
+                            }
+
+                            if (article.MetaAuthor != null && article.MetaAuthor.Length > 0)
+                            {
+                                writer.Write($"<meta name=\"author\" content=\"{article.MetaAuthor}\">");
+                            }
+
+                            writer.Write($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+                            writer.Write("</head>");
+                            writer.Write("<body>");
                             writer.Write(article.Content);
+                            if (article.Footer != null && article.Footer.Length > 0)
+                            {
+                                writer.Write("<footer>");
+                                writer.Write(article.Footer);
+                                writer.Write("</footer>");
+                            }
+                            writer.Write("</body>");
+                            writer.Write("</html>");
                         }
                     }
                 }
@@ -202,7 +233,37 @@ namespace WebCreator.Controllers
                         String title = article.Title.Replace("?", "").Trim();
                         using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
                         {
+                            writer.Write("<!DOCTYPE html>");
+                            writer.Write("<html>");
+                            writer.Write("<head>");
+                            writer.Write($"<title>{article.Title}</title>");
+                            if (article.MetaDescription != null && article.MetaDescription.Length > 0)
+                            {
+                                writer.Write($"<meta name=\"description\" content=\"{article.MetaDescription}\">");
+                            }
+
+                            if (article.MetaKeywords != null && article.MetaKeywords.Length > 0)
+                            {
+                                writer.Write($"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">");
+                            }
+
+                            if (article.MetaAuthor != null && article.MetaAuthor.Length > 0)
+                            {
+                                writer.Write($"<meta name=\"author\" content=\"{article.MetaAuthor}\">");
+                            }
+
+                            writer.Write($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+                            writer.Write("</head>");
+                            writer.Write("<body>");
                             writer.Write(article.Content);
+                            if (article.Footer != null && article.Footer.Length > 0)
+                            {
+                                writer.Write("<footer>");
+                                writer.Write(article.Footer);
+                                writer.Write("</footer>");
+                            }
+                            writer.Write("</body>");
+                            writer.Write("</html>");
                         }
                     }
                 }

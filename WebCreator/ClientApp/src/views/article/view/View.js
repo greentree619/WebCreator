@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, { useEffect, useState, createRef } from 'react'
+import React, { useEffect, useState, createRef, useRef } from 'react'
 import classNames from 'classnames'
 import {
   CRow,
@@ -21,11 +21,12 @@ import {
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CKEditor } from '@ckeditor/ckeditor5-react'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
-
-const API_URL = "https://77em4-8080.sse.codesandbox.io";
-const UPLOAD_ENDPOINT = "upload_files";
+import SunEditor,{buttonList} from 'suneditor-react';
+import 'suneditor/dist/css/suneditor.min.css'; // Import Sun Editor's CSS File
+import plugins from 'suneditor/src/plugins'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
+import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
 
 const View = (props) => {
   const location = useLocation()
@@ -38,6 +39,7 @@ const View = (props) => {
   const [metaDescription, setMetaDescription] = useState('')
   const [metaKeywords, setMetaKeywords] = useState('')
   const [metaAuthor, setMetaAuthor] = useState('')
+  const [pixabayURL, setPixabayURL] = useState('https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=480&min_height=600&per_page=100&page=1')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -55,42 +57,14 @@ const View = (props) => {
       if (data.data.footer != null) setFooter(data.data.footer)
     }
     getFetch()
+
+    let q = title.replaceAll(' ', '+').replaceAll('?', '')
+    console.log(q, title)
+    setPixabayURL()
+    footEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
+    bodyEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
+    console.log(footEditor.current.core.options.imageGalleryLoadURL)
   }, [])
-
-  function uploadAdapter(loader) {
-    return {
-      upload: () => {
-        return new Promise((resolve, reject) => {
-          const body = new FormData();
-          loader.file.then((file) => {
-            body.append("files", file);
-            // let headers = new Headers();
-            // headers.append("Origin", "http://localhost:3000");
-            fetch(`${API_URL}/${UPLOAD_ENDPOINT}`, {
-              method: "post",
-              body: body
-              // mode: "no-cors"
-            })
-              .then((res) => res.json())
-              .then((res) => {
-                resolve({
-                  default: `${API_URL}/${res.filename}`
-                });
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          });
-        });
-      }
-    };
-  }
-
-  function uploadPlugin(editor) {
-    editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
-      return uploadAdapter(loader);
-    };
-  }
 
   const updateContent = async () => {
     const requestOptions = {
@@ -116,6 +90,17 @@ const View = (props) => {
     }
     setAlarmVisible(true)
   }
+
+  const footEditor = useRef(null)
+  const bodyEditor = useRef(null)
+
+  const getFooterSunEditorInstance = (sunEditor) => {
+    footEditor.current = sunEditor;
+  };
+
+  const getBodySunEditorInstance = (sunEditor) => {
+    bodyEditor.current = sunEditor;
+  };
 
   return (
     <>
@@ -178,51 +163,69 @@ const View = (props) => {
             </div>
             <div className="mb-3">
               <CFormLabel htmlFor="exampleFormControlInput1">Body</CFormLabel>
-              <CKEditor
-                config={{
-                  extraPlugins: [uploadPlugin]
-                }}
-                editor={ClassicEditor}
-                data={content}
-                onReady={(editor) => {
-                  console.log('Editor is ready to use!', editor)
-                }}
-                onChange={(event, editor) => {
-                  const data = editor.getData()
-                  setContent(data)
+              <SunEditor
+                getSunEditorInstance={getBodySunEditorInstance}
+                setContents={content} 
+                onChange={(contents, core) => {
+                  setContent(contents)
                   //console.log({ event, editor, data })
                 }}
-                onBlur={(event, editor) => {
-                  console.log('Blur.', editor)
-                }}
-                onFocus={(event, editor) => {
-                  console.log('Focus.', editor)
-                }}
-              />
+                setOptions={{
+                    height: 200,
+                    plugins: {...plugins, pixabayImageGallery},
+                    katex: katex,
+                    //imageGalleryUrl: "",
+                    buttonList: [
+                        ['undo', 'redo'],
+                        ['font', 'fontSize', 'formatBlock'],
+                        ['paragraphStyle', 'blockquote'],
+                        ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+                        ['fontColor', 'hiliteColor', 'textStyle'],
+                        ['removeFormat'],
+                        '/', // Line break
+                        ['outdent', 'indent'],
+                        ['align', 'horizontalRule', 'list', 'lineHeight'],
+                        ['table', 'link', 'image', 'video', 'audio' ,'math'], // You must add the 'katex' library at options to use the 'math' plugin.
+                        ['pixabayImageGallery'], // You must add the "imageGalleryUrl".
+                        ['fullScreen', 'showBlocks', 'codeView'],
+                        ['preview', 'print'],
+                        ['save', 'template'],
+                        /** ['dir', 'dir_ltr', 'dir_rtl'] */ // "dir": Toggle text direction, "dir_ltr": Right to Left, "dir_rtl": Left to Right
+                    ]
+              }}/>
             </div>
             <div className="mb-3">
               <CFormLabel htmlFor="exampleFormControlInput2">Footer</CFormLabel>
-              <CKEditor
-                config={{
-                  extraPlugins: [uploadPlugin]
-                }}
-                editor={ClassicEditor}
-                data={footer}
-                onReady={(footerEditor) => {
-                  console.log('Editor is ready to use!', footerEditor)
-                }}
-                onChange={(event, footerEditor) => {
-                  const data = footerEditor.getData()
-                  setFooter(data)
+              <SunEditor 
+                getSunEditorInstance={getFooterSunEditorInstance}
+                setContents={footer} 
+                onChange={(contents, core) => {
+                  setFooter(contents)
                   //console.log({ event, editor, data })
                 }}
-                onBlur={(event, footerEditor) => {
-                  console.log('Blur.', footerEditor)
-                }}
-                onFocus={(event, footerEditor) => {
-                  console.log('Focus.', footerEditor)
-                }}
-              />
+                setOptions={{
+                    height: 200,
+                    plugins: {...plugins, pixabayImageGallery},
+                    katex: katex,
+                    //imageGalleryUrl: "",
+                    buttonList: [
+                        ['undo', 'redo'],
+                        ['font', 'fontSize', 'formatBlock'],
+                        ['paragraphStyle', 'blockquote'],
+                        ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+                        ['fontColor', 'hiliteColor', 'textStyle'],
+                        ['removeFormat'],
+                        '/', // Line break
+                        ['outdent', 'indent'],
+                        ['align', 'horizontalRule', 'list', 'lineHeight'],
+                        ['table', 'link', 'image', 'video', 'audio' ,'math'], // You must add the 'katex' library at options to use the 'math' plugin.
+                        ['pixabayImageGallery'], // You must add the "imageGalleryUrl".
+                        ['fullScreen', 'showBlocks', 'codeView'],
+                        ['preview', 'print'],
+                        ['save', 'template'],
+                        /** ['dir', 'dir_ltr', 'dir_rtl'] */ // "dir": Toggle text direction, "dir_ltr": Right to Left, "dir_rtl": Left to Right
+                    ]
+              }}/>
             </div>
             <div className="mb-3">
               <CButton type="button" onClick={() => navigate(-1)}>

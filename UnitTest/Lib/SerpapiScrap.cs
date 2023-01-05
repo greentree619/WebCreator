@@ -160,6 +160,7 @@ namespace UnitTest.Lib
                             Title = (String)question["question"],
                             IsScrapping = false,
                             Progress = 0,
+                            State = 0,
                             UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                             CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                         };
@@ -210,6 +211,7 @@ namespace UnitTest.Lib
                                 Title = (String)question["question"],
                                 IsScrapping = false,
                                 Progress = 0,
+                                State = 0,
                                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                             };

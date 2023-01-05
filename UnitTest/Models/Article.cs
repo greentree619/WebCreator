@@ -30,6 +30,8 @@ namespace WebCreator.Models
         [FirestoreProperty]
         public String? Footer { get; set; }
         [FirestoreProperty]
+        public int State { get; set; }
+        [FirestoreProperty]
         public DateTime UpdateTime { get; set; }
         [FirestoreProperty]
         public DateTime CreatedTime { get; set; }

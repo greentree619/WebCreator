@@ -248,6 +248,7 @@ namespace UnitTest.Lib
                 Footer = articleParam.Footer,
                 IsScrapping = false,
                 Progress = progress,
+                State = 0,
                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             };

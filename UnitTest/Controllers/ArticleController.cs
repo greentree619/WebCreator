@@ -44,10 +44,10 @@ namespace WebCreator.Controllers
             try
             {
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-                QuerySnapshot totalSnapshot = await articlesCol.GetSnapshotAsync();
+                QuerySnapshot totalSnapshot = await articlesCol.WhereNotEqualTo("State", 4).GetSnapshotAsync();
                 total = (int)Math.Ceiling((double)totalSnapshot.Count / count);
 
-                Query query = articlesCol.OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
+                Query query = articlesCol.OrderBy("State").WhereNotEqualTo("State", 4).OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
 
                 foreach (DocumentSnapshot document in projectsSnapshot.Documents)
@@ -65,8 +65,29 @@ namespace WebCreator.Controllers
             return new OkObjectResult(new Item { curPage = page, total = total, data = list });
         }
 
-        [HttpGet("{domainid}/{page}/{count}")]
-        public async Task<IActionResult> GetAsync(String domainid, int page = 1, int count = 5)
+        private Query filterByState(Query query, int state)
+        {
+            if (state == 0)
+            {//missed content
+                query = query.OrderBy("State").WhereNotEqualTo("State", 4);
+            }
+            else if (state == 1)
+            {//missed content
+                query = query.OrderBy("State").WhereNotIn("State", new Int32[]{2, 3, 4});
+            }
+            else if (state == 2)
+            {// Ready for approval
+                query = query.WhereEqualTo("State", 2);
+            }
+            else if (state == 3)
+            {// Online on server
+                query = query.WhereEqualTo("State", 3);
+            }
+            return query;
+        }
+
+        [HttpGet("{domainid}/{state}/{page}/{count}")]
+        public async Task<IActionResult> GetAsync(String domainid, int state, int page = 1, int count = 5)
         {
             if (page < 0) page = 1;
             if (count < 0) count = 5;
@@ -76,10 +97,15 @@ namespace WebCreator.Controllers
             {
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 Query query = articlesCol.WhereEqualTo("ProjectId", domainid);
+                query = filterByState(query, state);
+                
                 QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
                 total = (int)Math.Ceiling((double)totalSnapshot.Count / count);
 
-                query = articlesCol.WhereEqualTo("ProjectId", domainid).OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
+                query = articlesCol.WhereEqualTo("ProjectId", domainid);
+                query = filterByState(query, state);
+
+                query = query.OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
 
                 foreach (DocumentSnapshot document in projectsSnapshot.Documents)
@@ -311,6 +337,71 @@ namespace WebCreator.Controllers
             return Ok(true);
         }
 
+        [HttpPut("UpdateState/{articleid}/{state}")]
+        public async Task<IActionResult> UpdateStateAsync(String articleid, Int32 state)
+        {
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                DocumentReference docRef = articlesCol.Document(articleid);
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                {
+                    { "State", state },
+                };
+                await docRef.UpdateAsync(userUpdate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return Ok(true);
+        }
+
+        [HttpPut("UpdateBatchState/{articleids}/{state}")]
+        public async Task<IActionResult> UpdateBatchStateAsync(String articleids, Int32 state)
+        {
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+
+                int elemSize = 10;
+                int pageNo = 0;
+                String[] ids = articleids.Split(",");
+                do
+                {
+                    var subIds = ids.Skip(elemSize * pageNo).Take(elemSize);
+                    pageNo++;
+
+                    if (subIds.Count() > 0)
+                    {
+                        Query query = articlesCol.WhereIn(FieldPath.DocumentId, subIds);
+                        QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                        WriteBatch updateBatch = Config.FirebaseDB.StartBatch();
+                        Dictionary<string, object> articleUpdate = new Dictionary<string, object>()
+                        {
+                            { "State", state },
+                        };
+
+                        foreach (DocumentSnapshot document in snapshot.Documents)
+                        {
+                            updateBatch.Update(document.Reference, articleUpdate);
+                        }
+                        await updateBatch.CommitAsync();
+                    }
+                    else break;
+                } while (true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return Ok(true);
+        }
+
         [HttpPut("add")]
         public async Task<IActionResult> AddArticleAsync([FromBody] Article article)
         {
@@ -349,9 +440,20 @@ namespace WebCreator.Controllers
         {
             try
             {
+                //{{
+                //CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                //DocumentReference docRef = articlesCol.Document(articleid);
+                //await docRef.DeleteAsync();
+                //==
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 DocumentReference docRef = articlesCol.Document(articleid);
-                await docRef.DeleteAsync();
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                {
+                    { "State", 4 },
+                };
+                await docRef.UpdateAsync(userUpdate);
+                //}}
             }
             catch (Exception ex)
             {

@@ -5,10 +5,12 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 const AddProject = React.lazy(() => import('./views/project/add/Add'))
+const Keyword = React.lazy(() => import('./views/project/keyword/Keyword'))
 const ListProject = React.lazy(() => import('./views/project/list/List'))
 const AllArticles = React.lazy(() => import('./views/article/list/List'))
 const NewArticle = React.lazy(() => import('./views/article/add/Add'))
 const ArticleView = React.lazy(() => import('./views/article/view/View'))
+const ApprovalArticle = React.lazy(() => import('./views/article/approval/Approval'))
 const AFSetting = React.lazy(() => import('./views/article/setting/Setting'))
 const AllZoneList = React.lazy(() => import('./views/cloudflare/zone/Zone'))
 const AllDnsList = React.lazy(() => import('./views/cloudflare/dns/Dns'))
@@ -80,9 +82,11 @@ const routes = [
   { path: '/theme/typography', name: 'Typography', element: Typography },
   { path: '/project/add', name: 'AddProject', element: AddProject },
   { path: '/project/list', name: 'All Websites', element: ListProject },
+  { path: '/project/keyword', name: 'Keyword', element: Keyword },
   { path: '/article/list', name: 'All Articles', element: AllArticles },
   { path: '/article/view', name: 'Article View', element: ArticleView },
   { path: '/article/add', name: 'Create New Article', element: NewArticle },
+  { path: '/article/approval', name: 'Approval Article', element: ApprovalArticle },
   { path: '/article/setting', name: 'Article Forge Setting', element: AFSetting },
   { path: '/cloudflare/zone', name: 'Zone List View', element: AllZoneList },
   { path: '/cloudflare/dns', name: 'Dns List View', element: AllDnsList },

@@ -122,6 +122,11 @@ const AppBreadcrumb = () => {
                 {activeDomainName.length > 0 && (
                   <>
                     <CNavItem className="px-1">
+                      <CNavLink href={'#/project/keyword/?domainId=' + activeZoneId + '&domainName=' + activeZoneName} className="btn btn-primary text-white">
+                        Keyword
+                      </CNavLink>
+                    </CNavItem>
+                    <CNavItem className="px-1">
                       <CNavLink href={'#/cloudflare/dns/?domainId=' + activeZoneId + '&domainName=' + activeZoneName} className="btn btn-primary text-white">
                         DNS Status
                       </CNavLink>
@@ -129,6 +134,14 @@ const AppBreadcrumb = () => {
                     <CNavItem className="px-1">
                       <CNavLink href={'#/schedule/view/?domainId=' + activeDomainId} className="btn btn-primary text-white">
                         Article Scrap Schedule
+                      </CNavLink>
+                    </CNavItem>
+                    <CNavItem className="px-1">
+                      <CNavLink
+                        className="btn btn-primary text-white"
+                        href={'#/article/approval/?domainId=' + activeDomainId + '&domainName=' + activeDomainName + '&domainIp=' + activeDomainIp}
+                      >
+                        Approval Article
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">

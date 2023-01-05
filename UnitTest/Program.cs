@@ -104,6 +104,24 @@ catch (Exception ex)
 //}
 ////}}ZIP TEST
 
+
+/////{{ Patch Firebase Article.State
+//CollectionReference colRef = Config.FirebaseDB.Collection("Articles");
+//QuerySnapshot snapshot = await colRef.GetSnapshotAsync();
+//WriteBatch updateBatch = Config.FirebaseDB.StartBatch();
+//Dictionary<string, object> articleUpdate = new Dictionary<string, object>()
+//{
+//    { "State", 0 },
+//};
+
+//foreach (DocumentSnapshot document in snapshot.Documents)
+//{
+//    updateBatch.Update( document.Reference, articleUpdate );
+//}
+//await updateBatch.CommitAsync();
+///// 
+/////}} Patch Firebase Article.State
+
 //Refresh Article Forge Scrapping status.
 Task.Run(() => new CommonModule().UpdateArticleScrappingProgress());
 

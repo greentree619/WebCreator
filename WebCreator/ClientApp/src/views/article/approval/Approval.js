@@ -1,0 +1,422 @@
+import React, { Component } from 'react'
+import {
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CButton,
+  CPagination,
+  CPaginationItem,
+  CAlert,
+  CSpinner,
+  CContainer,
+  CRow,
+  CCol,
+  CFormSelect,
+  CFormCheck,
+  CLink,
+} from '@coreui/react'
+import { DocsLink } from 'src/components'
+import { useLocation } from 'react-router-dom'
+import PropTypes from 'prop-types'
+import { Outlet, Link } from 'react-router-dom'
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+
+class ApprovalBase extends Component {
+  static displayName = ApprovalBase.name
+  constructor(props) {
+    super(props)
+    this.state = {
+      articles: [],
+      sync:{},
+      checkedItem:{},
+      loading: true,
+      curPage: 1,
+      totalPage: 1,
+      projectInfo: this.props.location.state,
+      alarmVisible: false,
+      alertMsg: '',
+      alertColor: 'success',
+      articleState: 0,
+    }
+  }
+
+  componentDidMount() {
+    this.populateArticleData(1, this.state.articleState)
+  }
+
+  componentWillUnmount(){
+  }
+
+  // shouldComponentUpdate(prevProps, prevState) {
+  //   if (prevState.loading !== this.state.loading
+  //     || prevState.checkedItem !== this.state.checkedItem) {
+  //     console.log("shouldComponentUpdate", this.state.loading)
+  //     return true;
+  //   }
+  //   else {
+  //     return false;
+
+  //   }
+  // }
+
+  gotoPrevPage() {
+    this.populateArticleData(this.state.curPage - 1, this.state.articleState)
+  }
+
+  gotoNextPage() {
+    this.populateArticleData(this.state.curPage + 1, this.state.articleState)
+  }
+
+  deleteArticleConfirm = (_id) => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to delete this.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => this.deleteArticle(_id)
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  };
+
+  deleteBatchArticleConfirm = () => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to delete selected articles.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => this.setArticleState(4)
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  };
+
+  async deleteArticle(_id) {
+    const requestOptions = {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        _id: _id,
+      }),
+    }
+    fetch(`${process.env.REACT_APP_SERVER_URL}article/${_id}`, requestOptions)
+      .then((res) => {
+        if (res.status === 200) {
+          let tmpData = [...this.state.articles]
+          let idx = tmpData.findIndex((art) => art.id === _id)
+          tmpData.splice(idx, 1)
+          this.setState({
+            articles: tmpData,
+            loading: false,
+            alarmVisible: false,
+            curPage: this.state.curPage,
+            totalPage: this.state.total,
+          })
+        }
+      })
+      .catch((err) => console.log(err))
+  }
+
+  async viewArticleByState(val)
+  {
+    //console.log("setArticleState", val)
+    this.setState({
+      articleState: val,
+    })
+    this.populateArticleData(1, val)
+  }
+
+  async setArticleState(articleState)
+  {
+    var checkedItem = this.state.checkedItem
+    //console.log(Object.keys(checkedItem).length)
+    var articleIds = ''
+    Object.keys( checkedItem ).map((item)=>{
+      if( checkedItem[item] )
+      {
+        if(articleIds.length > 0) articleIds += ","
+        articleIds += item
+      }
+    })
+    //console.log(articleIds)
+
+    const requestOptions = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+    }
+
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/UpdateBatchState/${articleIds}/${articleState}`, requestOptions)
+    this.setState({
+      alarmVisible: false,
+      alertMsg: 'Failed to change State.',
+      alertColor: 'danger',
+    })
+    let ret = await response.json()
+    //console.log("scrapArticle", ret);
+    if (response.status === 200 && ret) {
+      //console.log('add success')
+      this.setState({
+        alertMsg: 'Changed State Successfully.',
+        alertColor: 'success',
+      })
+    }
+    this.setState({ alarmVisible: true })
+  }
+
+  onDelete()
+  {
+    console.log("onDelete");
+  }
+
+  getArticleState( articleState )
+  {
+    //console.log(articleState)
+    switch(articleState)
+    {
+      case 0: return ("UnApproved");
+      case 1: return ("UnApproved");
+      case 2: return ("Approved");
+      case 3: return ("Online");
+    }
+    return (articleState)
+  }
+
+  renderArticlesTable = (articles) => {
+    let pageButtonCount = 3
+    let pagination = <p></p>
+
+    if (this.state.totalPage > 1) {
+      let prevButton = (
+        <CPaginationItem onClick={() => this.gotoPrevPage()}>Previous</CPaginationItem>
+      )
+      if (this.state.curPage <= 1) prevButton = <CPaginationItem disabled>Previous</CPaginationItem>
+
+      let nextButton = <CPaginationItem onClick={() => this.gotoNextPage()}>Next</CPaginationItem>
+      if (this.state.curPage >= this.state.totalPage)
+        nextButton = <CPaginationItem disabled>Next</CPaginationItem>
+
+      var pageNoAry = []
+      var startNo = this.state.curPage - pageButtonCount
+      var endNo = this.state.curPage + pageButtonCount
+      if (startNo < 1) {
+        startNo = 1
+        endNo =
+          pageButtonCount * 2 + 1 > this.state.totalPage
+            ? this.state.totalPage
+            : pageButtonCount * 2 + 1
+      } else if (endNo > this.state.totalPage) {
+        endNo = this.state.totalPage
+        startNo = endNo - pageButtonCount * 2 > 1 ? endNo - pageButtonCount * 2 : 1
+      }
+
+      for (var i = startNo; i <= endNo; i++) {
+        if (i < 1 || i > this.state.totalPage) continue
+        pageNoAry.push(i)
+      }
+
+      const paginationItems = pageNoAry.map((number) => (
+        <CPaginationItem
+          key={number}
+          onClick={() => this.populateArticleData(number, this.state.articleState)}
+          active={number == this.state.curPage}
+        >
+          {number}
+        </CPaginationItem>
+      ))
+
+      pagination = (
+        <CPagination align="center" aria-label="Page navigation example">
+          {prevButton}
+          {paginationItems}
+          {nextButton}
+        </CPagination>
+      )
+    }
+
+    return (
+      <>
+        <CAlert
+          color={this.state.alertColor}
+          dismissible
+          visible={this.state.alarmVisible}
+          onClose={() => this.setState({ alarmVisible: false })}
+        >
+          {this.state.alertMsg}
+        </CAlert>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Title</th>
+              <th>Action</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {articles.map((article) => {
+              //if (article.content != null && article.content.length > 0)
+              {
+                return (<tr key={article.id}>
+                  <td><CFormCheck id={article.id} label={article.id}
+                      checked={this.state.checkedItem[article.id]}
+                      onChange={(e) => {
+                        var ret = this.state.checkedItem
+                        ret[article.id] = e.target.checked
+                        this.setState({
+                          checkedItem: ret,
+                        })  
+                        console.log(e.target.checked, this.state.checkedItem[article.id])
+                      }}/></td>
+                  <td>{article.title}{(article.articleId == null 
+                            || article.articleId != '1234567890')
+                            && (<>&nbsp;<span className="badge text-bg-info">AF</span></>)}</td>
+                  <td>
+                    <Link to={`/article/view`} state={{ mode: 'VIEW', article: article }}>
+                      <CButton type="button">View</CButton>
+                    </Link>
+                    &nbsp;
+                    <CButton type="button" onClick={() => this.deleteArticleConfirm(article.id)}>
+                      Delete
+                    </CButton>
+                  </td>
+                  <td>
+                    {this.getArticleState(article.state)}
+                  </td>
+                </tr>)
+              }
+            })}
+            {articles.length > 0 && (
+            <tr>
+              <td colSpan={4}>
+                <table>
+                  <tr>
+                    <td>
+                      <CFormCheck id="checkAll" label="Chceck All | Selected" 
+                        onChange={(e) => {
+                          var checkedItem = this.state.checkedItem
+                          Object.keys(this.state.checkedItem).map((item)=>{
+                            checkedItem[item] = e.target.checked
+                            //console.log(item)
+                          })
+                          this.setState({
+                            checkedItem: checkedItem,
+                          })  
+                          //console.log(e.target.checked, this.state.checkedItem[article.id])
+                        }}
+                      />
+                    </td>
+                    <td className='px-2'>
+                      <Link onClick={() => this.setArticleState(2)}>Approval</Link>
+                    </td>
+                    <td className='px-2'>
+                      <Link onClick={() => this.setArticleState(1)}>UnApproval</Link>
+                    </td>
+                    <td className='px-2'>
+                      <Link onClick={() => this.setArticleState(3)}>Online</Link>
+                    </td>
+                    <td className='px-2'>
+                      <Link onClick={() => this.deleteBatchArticleConfirm()}>Delete</Link>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            )}
+          </tbody>
+        </table>
+        {pagination}
+      </>
+    )
+  }
+
+  render() {
+    let contents = this.state.loading ? (
+      <p>
+        <em>Loading...</em>
+      </p>
+    ) : (
+      this.renderArticlesTable(this.state.articles)
+    )
+    return (
+      <CCard className="mb-4">
+        <CCardHeader>
+          <CContainer>
+            <CRow>
+              <CCol className="align-self-start">Article List</CCol>
+              <CCol className="align-self-end" xs="auto">
+                <CFormSelect id="articleState" value={this.state.articleState} onChange={(obj) => this.viewArticleByState(obj.target.value)} size="sm" className="mb-3" aria-label="Small select example">
+                  <option value="0">All Pages</option>
+                  <option value="1">UnApproved</option>
+                  <option value="2">Approved</option>
+                  <option value="3">Online</option>
+                </CFormSelect>
+              </CCol>
+            </CRow>
+          </CContainer>
+        </CCardHeader>
+        <CCardBody>{contents}</CCardBody>
+      </CCard>
+    )
+  }
+
+  async populateArticleData(pageNo, articleState) {
+    this.setState({
+      loading: true,
+      checkedItem: {},
+    })
+
+    const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
+    const response = await fetch(
+      `${process.env.REACT_APP_SERVER_URL}article/` +
+        (projectId != '' ? projectId + '/' + articleState + '/' : '') +
+        pageNo +
+        '/25',
+    )
+    const data = await response.json()
+    await data.data.map((item, index) => {
+      var ret = this.state.checkedItem
+      ret[item.id] = false
+      this.setState({
+        checkedItem: ret,
+      })      
+      //console.log(ids, "<--", articleDocumentIds);
+    });
+
+    this.setState({
+      articles: data.data,
+      loading: false,
+      alarmVisible: false,
+      curPage: data.curPage,
+      totalPage: data.total,
+    })
+  }
+}
+
+ApprovalBase.propTypes = {
+  location: PropTypes.any,
+}
+
+const Approval = (props) => {
+  const location = useLocation()
+  if (location.state == null && location.search.length > 0) {
+    location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
+    domainName: new URLSearchParams(location.search).get('domainName'), 
+    domainIp: new URLSearchParams(location.search).get('domainIp') }
+  }
+  //console.log(location.state)
+  //console.log(location.search)
+  //console.log(new URLSearchParams(location.search).get('domainId'))
+  return <ApprovalBase location={location} {...props} />
+}
+export default Approval

@@ -370,7 +370,7 @@ class ListBase extends Component {
     const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}article/` +
-        (projectId != '' ? projectId + '/' : '') +
+        (projectId != '' ? projectId + '/0/' : '') +
         pageNo +
         '/25',
     )

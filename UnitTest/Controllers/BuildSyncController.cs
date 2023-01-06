@@ -153,7 +153,7 @@ namespace WebCreator.Controllers
                     CommonModule.DeleteAllContentInFolder(curFolder);
                 }
 
-
+                String articleUpdateStateIds = "";
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 Query query = articlesCol.WhereEqualTo("ProjectId", domainid);
                 QuerySnapshot snapshot = await query.GetSnapshotAsync();
@@ -161,7 +161,9 @@ namespace WebCreator.Controllers
                 foreach (DocumentSnapshot document in snapshot.Documents)
                 {
                     var article = document.ConvertTo<Article>();
-                    if (article.Content != null && article.Content.Length > 0) {
+                    if (article.Content != null && article.Content.Length > 0 
+                                && (article.State == 2 || article.State == 3)) {
+
                         String title = article.Title.Replace("?", "").Trim();
                         using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
                         {
@@ -197,7 +199,20 @@ namespace WebCreator.Controllers
                             writer.Write("</body>");
                             writer.Write("</html>");
                         }
+
+                        //{{Update state
+                        if (article.State == 2)
+                        {
+                            if (articleUpdateStateIds.Length > 0) articleUpdateStateIds += ",";
+                            articleUpdateStateIds += document.Id;
+                        }
+                        //}}Update state
                     }
+                }
+
+                if (articleUpdateStateIds.Length > 0)
+                {
+                    await CommonModule.UpdateBatchState(articleUpdateStateIds, 3);
                 }
             }
             catch (Exception ex)
@@ -228,7 +243,8 @@ namespace WebCreator.Controllers
                 if (snapshot.Exists)
                 {
                     var article = snapshot.ConvertTo<Article>();
-                    if (article.Content != null && article.Content.Length > 0)
+                    if (article.Content != null && article.Content.Length > 0 
+                        && (article.State == 2 || article.State == 3))
                     {
                         String title = article.Title.Replace("?", "").Trim();
                         using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
@@ -265,6 +281,17 @@ namespace WebCreator.Controllers
                             writer.Write("</body>");
                             writer.Write("</html>");
                         }
+
+                        //{{Update state
+                        if(article.State != 3)
+                        {
+                            Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                            {
+                                { "State", 3 },
+                            };
+                            await docRef.UpdateAsync(userUpdate);
+                        }
+                        //}}Update state
                     }
                 }
             }

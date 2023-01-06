@@ -34,13 +34,148 @@ import { Outlet, Link } from 'react-router-dom'
 
 const Keyword = (props) => {
   const location = useLocation()
+  const dispatch = useDispatch()
 
-  const [searchKeyword, setSearchKeyword] = useState('')
-  const [questionsCount, setQuestionsCount] = useState(50)
+  const activeProject = useSelector((state) => state.activeProject)
+  if (location.search.length > 0) {
+    //console.log()
+    location.state = { project: activeProject }
+    //console.log(location)
+  }
+
+  const [searchKeyword, setSearchKeyword] = useState(
+    location.state != null ? location.state.project.keyword : '',
+  )
+  const [questionsCount, setQuestionsCount] = useState(
+    location.state != null ? location.state.project.quesionsCount : 50,
+  )
+  
+  const [manualSearchKeyword, setManualSearchKeyword] = useState('')
+  const [fileSearchKeyword, setFileSearchKeyword] = useState('')
+
   const [alarmVisible, setAlarmVisible] = useState(false)
   const [alertColor, setAlertColor] = useState('success')
   const [alertMsg, setAlertMsg] = useState('')
   const [activeKey, setActiveKey] = useState(1)
+
+  const readKeyFile = async (e) => {
+    e.preventDefault()
+    const reader = new FileReader()
+    reader.onload = async (e) => { 
+      const text = (e.target.result)
+      //console.log(text)
+      //alert(text.replaceAll('\r\n', ';'))
+      var tmpKeyword = text.replaceAll('\r\n', ';')
+      if(tmpKeyword[tmpKeyword.length-1] == ';') tmpKeyword = tmpKeyword.substring(0, tmpKeyword.length-1)
+      setSearchKeyword(tmpKeyword);
+    };
+    reader.readAsText(e.target.files[0])
+  }
+
+  const readManualKeyFile = async (e) => {
+    e.preventDefault()
+    const reader = new FileReader()
+    reader.onload = async (e) => { 
+      const text = (e.target.result)
+      //console.log(text)
+      //alert(text.replaceAll('\r\n', ';'))
+      var tmpKeyword = text.replaceAll('\r\n', ';')
+      if(tmpKeyword[tmpKeyword.length-1] == ';') tmpKeyword = tmpKeyword.substring(0, tmpKeyword.length-1)
+      setFileSearchKeyword(tmpKeyword);
+    };
+    reader.readAsText(e.target.files[0])
+  }
+
+  const inputChangeHandler = (setFunction, event) => {
+    setFunction(event.target.value)
+  }
+
+  async function updateProject() {
+    const requestOptions = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: location.state ? location.state.project.id : '-1',
+        name: location.state.project.name,
+        ip: location.state.project.ip,
+        keyword: searchKeyword,
+        quesionscount: questionsCount,
+        language: location.state.project.language,
+        languageString: location.state.project.languageString,
+      }),
+    }
+
+    console.log( requestOptions );
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project`, requestOptions)
+    setAlertColor('danger')
+    setAlertMsg('Faild to update unfortunatley.')
+    let ret = await response.json()
+    if (response.status === 200 && ret) {
+      setAlertMsg('Updated scrap information successfully.')
+      setAlertColor('success')
+
+      location.state.project.keyword = searchKeyword
+      location.state.project.quesionsCount = questionsCount
+      dispatch({ type: 'set', activeProject: location.state.project })
+      console.log(location.state.project, "after update")
+    }
+    setAlarmVisible(true)
+  }
+
+  async function scrapQuery(_id, keyword, count) {
+    keyword = keyword.replaceAll(';', '&')
+    keyword = keyword.replaceAll('?', ';')
+    const response = await fetch(
+      `${process.env.REACT_APP_SERVER_URL}project/serpapi/` + _id + '/' + keyword + '/' + count,
+    )
+    setAlarmVisible(false)
+    setAlertMsg('Unfortunately, scrapping faild.')
+    setAlertColor('danger')
+    if (response.status === 200) {
+      //console.log('add success')
+      setAlertMsg('Completed to scrapping questions from google successfully.')
+      setAlertColor('success')
+    }
+    setAlarmVisible(true)
+  }
+
+  async function addManualArticleByTitle()
+  {
+    var kwd = manualSearchKeyword
+    kwd = kwd.replaceAll(';', '&')
+    kwd = kwd.replaceAll('?', ';')
+    const response = await fetch(
+      `${process.env.REACT_APP_SERVER_URL}article/addArticlesByTitle/` + location.state.project.id + '/' + kwd,
+    )
+    setAlarmVisible(false)
+    setAlertMsg('Unfortunately, To adding manual article faild.')
+    setAlertColor('danger')
+    if (response.status === 200) {
+      //console.log('add success')
+      setAlertMsg('Completed to add manual article successfully.')
+      setAlertColor('success')
+    }
+    setAlarmVisible(true)
+  }
+
+  async function addManualArticleByFileTitle()
+  {
+    var kwd = fileSearchKeyword
+    kwd = kwd.replaceAll(';', '&')
+    kwd = kwd.replaceAll('?', ';')
+    const response = await fetch(
+      `${process.env.REACT_APP_SERVER_URL}article/addArticlesByTitle/` + location.state.project.id + '/' + kwd,
+    )
+    setAlarmVisible(false)
+    setAlertMsg('Unfortunately, To adding manual article faild.')
+    setAlertColor('danger')
+    if (response.status === 200) {
+      //console.log('add success')
+      setAlertMsg('Completed to add manual article from file successfully.')
+      setAlertColor('success')
+    }
+    setAlarmVisible(true)
+  }
 
   return (
     <>
@@ -100,15 +235,15 @@ const Keyword = (props) => {
                             id="searchKeywordFormControlInput"
                             placeholder="Search Keyword"
                             aria-label="Search Keyword"
-                          // onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
+                            onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
                           // disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                          // value={searchKeyword}
+                            value={searchKeyword}
                           />
                         </CCol>
                         <CCol>
                           <CFormInput type="file"
                             id="formFile"
-                          // onChange={(e) => readKeyFile(e)}
+                            onChange={(e) => readKeyFile(e)}
                           // disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
                           />
                         </CCol>
@@ -120,27 +255,29 @@ const Keyword = (props) => {
                         type="text"
                         id="questionsCountFormControlInput"
                         placeholder="50"
-                      //onChange={(e) => inputChangeHandler(setQuestionsCount, e)}
+                        onChange={(e) => inputChangeHandler(setQuestionsCount, e)}
                       //required={simpleMode ? false : true}
                       //disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                      //value={questionsCount}
+                        value={questionsCount}
                       />
                     </div>
                     <div className={'mb-12 d-grid gap-2 col-6 mx-auto'}>
                       <CButton
                         type="button"
-                      // onClick={() =>
-                      //   scrapQuery(
-                      //     location.state.project.id,
-                      //     location.state.project.keyword,
-                      //     location.state.project.quesionsCount,
-                      //   )
-                      // }
+                        onClick={() =>
+                          scrapQuery(
+                            location.state.project.id,
+                            location.state.project.keyword,
+                            location.state.project.quesionsCount,
+                          )
+                        }
                       >
                         Scrap
                       </CButton>
                       &nbsp;
-                      <CButton type="button">Update</CButton>
+                      <CButton type="button" onClick={() =>
+                            updateProject()
+                          }>Update</CButton>
                     </div>
                   </CTabPane>
                   <CTabPane role="tabpanel" aria-labelledby="profile-tab" visible={activeKey === 2}>
@@ -155,15 +292,17 @@ const Keyword = (props) => {
                             id="searchKeywordFormControlInput"
                             placeholder="Search Keyword"
                             aria-label="Search Keyword"
-                          // onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
+                            onChange={(e) => inputChangeHandler(setManualSearchKeyword, e)}
                           // disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                          // value={searchKeyword}
+                            value={manualSearchKeyword}
                           />
                         </CCol>
                       </CRow>
                     </div>
                     <div className={'mb-12 d-grid gap-2 col-6 mx-auto'}>
-                      <CButton type="button">Add</CButton>
+                      <CButton type="button" onClick={() =>
+                            addManualArticleByTitle()
+                          }>Add</CButton>
                     </div>
                   </CTabPane>
                   <CTabPane role="tabpanel" aria-labelledby="contact-tab" visible={activeKey === 3}>
@@ -178,22 +317,24 @@ const Keyword = (props) => {
                             id="searchKeywordFormControlInput"
                             placeholder="Search Keyword"
                             aria-label="Search Keyword"
-                          // onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
+                            onChange={(e) => inputChangeHandler(setFileSearchKeyword, e)}
                           // disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                          // value={searchKeyword}
+                            value={fileSearchKeyword}
                           />
                         </CCol>
                         <CCol>
                           <CFormInput type="file"
-                            id="formFile"
-                          // onChange={(e) => readKeyFile(e)}
+                            id="fromManualFile"
+                            onChange={(e) => readManualKeyFile(e)}
                           // disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
                           />
                         </CCol>
                       </CRow>
                     </div>
                     <div className={'mb-12 d-grid gap-2 col-6 mx-auto'}>
-                      <CButton type="button">Add</CButton>
+                      <CButton type="button" onClick={() =>
+                            addManualArticleByFileTitle()
+                          }>Add</CButton>
                     </div>
                   </CTabPane>
                 </CTabContent>

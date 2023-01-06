@@ -274,5 +274,49 @@ namespace UnitTest.Lib
 
             return ret;
         }
+
+        public static async Task<bool> UpdateBatchState(String articleids, int state)
+        {
+            bool ret = false;
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+
+                int elemSize = 10;
+                int pageNo = 0;
+                String[] ids = articleids.Split(",");
+                do
+                {
+                    var subIds = ids.Skip(elemSize * pageNo).Take(elemSize);
+                    pageNo++;
+
+                    if (subIds.Count() > 0)
+                    {
+                        Query query = articlesCol.WhereIn(FieldPath.DocumentId, subIds);
+                        QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                        WriteBatch updateBatch = Config.FirebaseDB.StartBatch();
+                        Dictionary<string, object> articleUpdate = new Dictionary<string, object>()
+                        {
+                            { "State", state },
+                        };
+
+                        foreach (DocumentSnapshot document in snapshot.Documents)
+                        {
+                            updateBatch.Update(document.Reference, articleUpdate);
+                        }
+                        await updateBatch.CommitAsync();
+                    }
+                    else break;
+                } while (true);
+                ret = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return ret;
+        }
     }
 }

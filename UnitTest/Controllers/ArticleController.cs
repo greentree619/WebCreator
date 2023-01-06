@@ -362,44 +362,9 @@ namespace WebCreator.Controllers
         [HttpPut("UpdateBatchState/{articleids}/{state}")]
         public async Task<IActionResult> UpdateBatchStateAsync(String articleids, Int32 state)
         {
-            try
-            {
-                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+            bool ret = await CommonModule.UpdateBatchState(articleids, state);
 
-                int elemSize = 10;
-                int pageNo = 0;
-                String[] ids = articleids.Split(",");
-                do
-                {
-                    var subIds = ids.Skip(elemSize * pageNo).Take(elemSize);
-                    pageNo++;
-
-                    if (subIds.Count() > 0)
-                    {
-                        Query query = articlesCol.WhereIn(FieldPath.DocumentId, subIds);
-                        QuerySnapshot snapshot = await query.GetSnapshotAsync();
-
-                        WriteBatch updateBatch = Config.FirebaseDB.StartBatch();
-                        Dictionary<string, object> articleUpdate = new Dictionary<string, object>()
-                        {
-                            { "State", state },
-                        };
-
-                        foreach (DocumentSnapshot document in snapshot.Documents)
-                        {
-                            updateBatch.Update(document.Reference, articleUpdate);
-                        }
-                        await updateBatch.CommitAsync();
-                    }
-                    else break;
-                } while (true);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return Ok(true);
+            return Ok(ret);
         }
 
         [HttpPut("add")]
@@ -407,6 +372,13 @@ namespace WebCreator.Controllers
         {
             bool ret = await CommonModule.AddArticle(article, "1234567890", 100);
             return Ok(ret);
+        }
+
+        [HttpGet("AddArticlesByTitle/{domainId}/{keywords}")]
+        public async Task<IActionResult> AddArticleAsync(String domainId, String keywords)
+        {
+            Task.Run(() => this.ManualAddArticleAsync(domainId, keywords));
+            return Ok(true);
         }
 
         [HttpPut("update_content")]
@@ -461,6 +433,48 @@ namespace WebCreator.Controllers
             }
 
             return Ok();
+        }
+
+        private async Task<string> ManualAddArticleAsync(String _id, String keywords)
+        {
+            //Console.WriteLine($"GoogleSearchAsync keyword={keywords}");
+            keywords = keywords.Replace(';', '?');
+            keywords = keywords.Replace('&', ';');
+            String[] questions = keywords.Split(";");
+            try
+            {
+                foreach (String question in questions)
+                {
+                    var article = new Article
+                    {
+                        ProjectId = _id,
+                        Title = question,
+                        IsScrapping = false,
+                        ArticleId = "1234567890",
+                        Progress = 100,
+                        State = 0,
+                        UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                        CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                    };
+                    var articleData = article;
+
+                    CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                    Query query = articlesCol.OrderByDescending("CreatedTime")
+                        .WhereEqualTo("ProjectId", articleData.ProjectId)
+                        .WhereEqualTo("Title", articleData.Title).Limit(1);
+                    QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                    if (projectsSnapshot.Documents.Count == 0)
+                    {
+                        await articlesCol.AddAsync(articleData);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return $"Complted scrapping: DomainID={_id}";
         }
     }
 }

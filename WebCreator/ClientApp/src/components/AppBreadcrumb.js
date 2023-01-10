@@ -56,6 +56,7 @@ const AppBreadcrumb = () => {
   const breadcrumbs = getBreadcrumbs(currentLocation)
   const [isOnScrapping, setIsOnScrapping] = useState(false)
   const [isOnAFScrapping, setIsOnAFScrapping] = useState(false)
+  const [isOnPublish, setIsOnPublish] = useState(false)
 
   async function loadScrappingStatus() {
     //console.log("loadScrappingStatus->" + activeDomainId, activeDomainName);
@@ -72,11 +73,13 @@ const AppBreadcrumb = () => {
           //console.log(ret);
           setIsOnScrapping(ret.serpapi);
           setIsOnAFScrapping(ret.afapi);
+          setIsOnPublish(ret.publish);
         }
       }
       else {
         setIsOnScrapping(false);
         setIsOnAFScrapping(false);
+        setIsOnPublish(false);
       }
     } catch (e) {
       console.log(e);
@@ -133,7 +136,7 @@ const AppBreadcrumb = () => {
                     </CNavItem>
                     <CNavItem className="px-1">
                       <CNavLink href={'#/schedule/view/?domainId=' + activeDomainId} className="btn btn-primary text-white">
-                        Article Scrap Schedule
+                        Schedule
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
@@ -173,6 +176,8 @@ const AppBreadcrumb = () => {
             <CBadge color={isOnScrapping ? "success" : "dark"} shape="rounded-pill">Query Scrap</CBadge>
             &nbsp;
             <CBadge color={isOnAFScrapping ? "success" : "dark"} shape="rounded-pill">AF Schedule</CBadge>
+            &nbsp;
+            <CBadge color={isOnPublish ? "success" : "dark"} shape="rounded-pill">Publish</CBadge>
           </CCol>
         </CRow>
       </CContainer>

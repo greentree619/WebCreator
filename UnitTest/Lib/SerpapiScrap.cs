@@ -121,6 +121,74 @@ namespace UnitTest.Lib
             }
         }
 
+        public async Task PublishThreadAsync(String _id, String scheduleId)
+        {
+            {
+                CommonModule.SetDomainPublishScheduleAsync(_id, true);
+                try
+                {
+                    PublishSchedule schedule;
+                    CollectionReference scheduleCol = Config.FirebaseDB.Collection("PublishSchedules");
+                    DocumentReference docRef = scheduleCol.Document(scheduleId);
+                    DocumentSnapshot scheduleSnapshot = await docRef.GetSnapshotAsync();
+
+                    CollectionReference col = Config.FirebaseDB.Collection("Articles");
+                    Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("State", 2).OrderBy("UpdateTime");
+                    QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
+
+                    Stack<Article> scrapArticles = new Stack<Article>();
+                    foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                    {
+                        var article = document.ConvertTo<Article>();
+                        article.Id = document.Id;
+                        scrapArticles.Push(article);
+                    }
+
+                    ArticleForge af = new ArticleForge();
+                    bool afRet = false;
+                    if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
+                    {
+                        schedule = scheduleSnapshot.ConvertTo<PublishSchedule>();
+
+                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.publishThreadList[_id]; i++)
+                        {
+                            Article scrapAF = scrapArticles.Pop();
+                            do
+                            {
+                                Thread.Sleep(10000);
+                                //afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                            }
+                            while (!afRet && (bool)CommonModule.publishThreadList[_id]);
+                        }
+
+                        while ((bool)CommonModule.publishThreadList[_id])
+                        {
+                            Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+
+                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.publishThreadList[_id]; i++)
+                            {
+                                Article scrapAF = scrapArticles.Pop();
+                                do
+                                {
+                                    Thread.Sleep(10000);
+                                    //afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                                }
+                                while (!afRet && (bool)CommonModule.publishThreadList[_id]);
+
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+                CommonModule.SetDomainPublishScheduleAsync(_id, false);
+                CommonModule.publishThreadList[_id] = false;
+            }
+        }
+
         static void LogResult(Task<string> task)
         {
             Console.WriteLine($"Is Valid: {task.Result}");

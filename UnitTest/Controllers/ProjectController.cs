@@ -92,15 +92,38 @@ namespace WebCreator.Controllers
             return Ok(new { id = domainid, data = schedule });
         }
 
+        [HttpGet("publishSchedule/{domainid}")]
+        public async Task<IActionResult> GetPublishScheduleAsync(String domainid)
+        {
+            Schedule schedule = null;
+            try
+            {
+                CollectionReference col = Config.FirebaseDB.Collection("PublishSchedules");
+                Query query = col.WhereEqualTo("ProjectId", domainid).Limit(1);
+                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                if (projectsSnapshot.Documents.Count > 0)
+                {
+                    schedule = projectsSnapshot.Documents[0].ConvertTo<Schedule>();
+                    schedule.Id = projectsSnapshot.Documents[0].Id;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return Ok(new { id = domainid, data = schedule });
+        }
+
         [HttpGet("isscrapping/{domainId}")]
         public async Task<IActionResult> GetIsScrapping(String domainId)
         {
             //Omitted JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(domainId);
             bool isScrapping = (CommonModule.threadList[domainId] != null ? (bool)CommonModule.threadList[domainId] : false);
             bool isAFScrapping = (CommonModule.afThreadList[domainId] != null ? (bool)CommonModule.afThreadList[domainId] : false);
+            bool isPublishing = (CommonModule.publishThreadList[domainId] != null ? (bool)CommonModule.publishThreadList[domainId] : false);
 
             //return list;
-            return Ok(new { serpapi=isScrapping, afapi= isAFScrapping });
+            return Ok(new { serpapi=isScrapping, afapi= isAFScrapping, publish= isPublishing });
         }
 
         [HttpPost]
@@ -110,12 +133,13 @@ namespace WebCreator.Controllers
             var project = new Project
             {
                 Name = projectInput.Name,
-                Keyword = projectInput.Keyword,                
+                Keyword = projectInput.Keyword,
                 QuesionsCount = projectInput.QuesionsCount,
                 Language = projectInput.Language,
                 Ip = projectInput.Ip,
                 OnScrapping = false,
                 OnAFScrapping = false,
+                OnPublishSchedule = false,
                 LanguageString = projectInput.LanguageString,
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
@@ -238,6 +262,36 @@ namespace WebCreator.Controllers
             return Ok(true);
         }
 
+        [HttpPut("updatePublishSchedule")]
+        public async Task<ActionResult> UpdatePublishScheduleAsync([FromBody] PublishSchedule schedule)
+        {
+            Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+            {
+                { "ProjectId", schedule.ProjectId },
+                { "JustNowCount", schedule.JustNowCount },
+                { "EachCount", schedule.EachCount },
+                { "SpanTime", schedule.SpanTime },
+                { "SpanUnit", schedule.SpanUnit },
+                { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
+            };
+
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("PublishSchedules");
+                DocumentReference docRef = articlesCol.Document(schedule.Id);
+                await docRef.UpdateAsync(userUpdate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                userUpdate["CreatedTime"] = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+                CollectionReference scheduleCol = Config.FirebaseDB.Collection("PublishSchedules");
+                await scheduleCol.AddAsync(userUpdate);
+            }
+
+            return Ok(true);
+        }
+
         [HttpDelete("{projectid}")]
         public async Task<IActionResult> DeleteProjectAsync(String projectid)
         {
@@ -308,12 +362,30 @@ namespace WebCreator.Controllers
             if (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false)
             {
                 CommonModule.afThreadList[_id] = true;
-                Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(_id, sid));
+                Task.Run(() => new SerpapiScrap().PublishThreadAsync(_id, sid));
                 ret = true;
             }
             else
             {
                 CommonModule.afThreadList[_id] = false;
+                ret = false;
+            }
+            return Ok(ret);
+        }
+
+        [HttpGet("startPublish/{_id}/{sid}")]
+        public ActionResult StartPublishapi(String _id, String sid)
+        {
+            bool ret = false;
+            if (CommonModule.publishThreadList[_id] == null || (bool)CommonModule.publishThreadList[_id] == false)
+            {
+                CommonModule.publishThreadList[_id] = true;
+                Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(_id, sid));
+                ret = true;
+            }
+            else
+            {
+                CommonModule.publishThreadList[_id] = false;
                 ret = false;
             }
             return Ok(ret);

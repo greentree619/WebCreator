@@ -19,6 +19,7 @@ namespace UnitTest.Lib
     {
         public static Hashtable threadList = new Hashtable();
         public static Hashtable afThreadList = new Hashtable();
+        public static Hashtable publishThreadList = new Hashtable();
         public static Hashtable refKeyCash = new Hashtable();
         public static ArticleForgeSetting afSetting = new ArticleForgeSetting();
 
@@ -61,6 +62,26 @@ namespace UnitTest.Lib
                 Console.WriteLine(ex.Message);
             }
         }
+
+        public static async Task SetDomainPublishScheduleAsync(String domainId, bool isRunning)
+        {
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Projects");
+                DocumentReference docRef = articlesCol.Document(domainId);
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                {
+                    { "OnPublishSchedule",  isRunning},
+                    { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
+                };
+                await docRef.UpdateAsync(userUpdate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }        
 
         public static async Task<JObject> IsDomainScrappingAsync(String domainId)
         {

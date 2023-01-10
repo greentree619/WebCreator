@@ -169,6 +169,7 @@ const Add = (props) => {
   const [languageValue, setLanguageValue] = useState('en')
   const [isOnScrapping, setIsOnScrapping] = useState(false)
   const [isOnAFScrapping, setIsOnAFScrapping] = useState(false)
+  const [isOnPublish, setIsOnPublish] = useState(false)
 
   let ipAddressMap = [
     { ip: '3.14.14.86', value: '3.14.14.86' },

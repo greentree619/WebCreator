@@ -27,6 +27,15 @@ import { Col } from 'reactstrap'
 
 const View = (props) => {
   const location = useLocation()
+
+  if (location.state == null && location.search.length > 0) {
+    location.state = { projectid: new URLSearchParams(location.search).get('domainId'),
+                      isOnAFScrapping: new URLSearchParams(location.search).get('isOnAFScrapping'),
+                      isOnPublish: new URLSearchParams(location.search).get('isOnPublish'), }
+  }
+
+  //console.log(location.state);
+
   const [alarmVisible, setAlarmVisible] = useState(false)
   const [alertColor, setAlertColor] = useState('success')
   const [alertMsg, setAlertMsg] = useState('')
@@ -43,8 +52,8 @@ const View = (props) => {
   const [publishBetweenUnit, setPublishBetweenUnit] = useState(86400)//1 min as default
   const [publishBetweenUnitLabel, setPublishBetweenUnitLabel] = useState('Days(s)')
 
-  const [scrapCommand, setScrapCommand] = useState('Start Scrapping')
-  const [publishCommand, setPublishCommand] = useState('Start Publish')
+  const [scrapCommand, setScrapCommand] = useState((location.state.isOnAFScrapping == 'true' ? 'Stop Scrapping' : 'Start Scrapping'))
+  const [publishCommand, setPublishCommand] = useState((location.state.isOnPublish == 'true' ? 'Stop Publish' : 'Start Publish'))
   const navigate = useNavigate()
 
   let unitMap = [
@@ -95,15 +104,6 @@ const View = (props) => {
       setPublishBetweenUnit(ret.data.spanUnit);
       setPublishBetweenUnitLabel(unitLabelMap[ret.data.spanUnit]);
     }    
-  }
-
-  if (location.state == null && location.search.length > 0) {
-    location.state = { projectid: new URLSearchParams(location.search).get('domainId') }
-  }
-
-  if ( location.search.length > 0) {
-    
-    new URLSearchParams(location.search).get('domainId')
   }
 
   useEffect(() => {

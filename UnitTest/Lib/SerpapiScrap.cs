@@ -132,6 +132,11 @@ namespace UnitTest.Lib
                     DocumentReference docRef = scheduleCol.Document(scheduleId);
                     DocumentSnapshot scheduleSnapshot = await docRef.GetSnapshotAsync();
 
+                    CollectionReference col2 = Config.FirebaseDB.Collection("Projects");
+                    DocumentReference docRef2 = col2.Document(_id);
+                    DocumentSnapshot projectSnapshot = await docRef2.GetSnapshotAsync();
+                    var projInfo = projectSnapshot.ConvertTo<Project>();
+
                     CollectionReference col = Config.FirebaseDB.Collection("Articles");
                     Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("State", 2).OrderBy("UpdateTime");
                     QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
@@ -156,7 +161,10 @@ namespace UnitTest.Lib
                             do
                             {
                                 Thread.Sleep(10000);
-                                //afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                                //{{
+                                await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id);
+                                await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
+                                //}}
                             }
                             while (!afRet && (bool)CommonModule.publishThreadList[_id]);
                         }
@@ -171,7 +179,10 @@ namespace UnitTest.Lib
                                 do
                                 {
                                     Thread.Sleep(10000);
-                                    //afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                                    //{{
+                                    await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id);
+                                    await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
+                                    //}}
                                 }
                                 while (!afRet && (bool)CommonModule.publishThreadList[_id]);
 

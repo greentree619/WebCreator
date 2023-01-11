@@ -362,7 +362,7 @@ namespace WebCreator.Controllers
             if (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false)
             {
                 CommonModule.afThreadList[_id] = true;
-                Task.Run(() => new SerpapiScrap().PublishThreadAsync(_id, sid));
+                Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(_id, sid));
                 ret = true;
             }
             else
@@ -380,7 +380,7 @@ namespace WebCreator.Controllers
             if (CommonModule.publishThreadList[_id] == null || (bool)CommonModule.publishThreadList[_id] == false)
             {
                 CommonModule.publishThreadList[_id] = true;
-                Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(_id, sid));
+                Task.Run(() => new SerpapiScrap().PublishThreadAsync(_id, sid));
                 ret = true;
             }
             else

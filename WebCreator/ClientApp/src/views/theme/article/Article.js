@@ -57,29 +57,15 @@ const Article = (props) => {
     }
 
     const data = new FormData();
-    data.append(
-      "file",
-      selectedFile,
-      //location.state.domainName + ".zip"
-    );
+    data.append(`theme`, selectedFile, selectedFile.name);
 
-    // const requestOptions = {
-    //   method: 'POST',
-    //   //headers: { 'Content-Type': 'multipart/form-data' },
-    //   body: selectedFile,
-    //   headers: {
-    //     'content-type': selectedFile.type,
-    //     'content-length': `${selectedFile.size}`,
-    //   },
-    // }
     const requestOptions = {
       method: 'POST',
-      //headers: { 'Content-Type': 'multipart/form-data' },
       body: data,
     }
 
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}project/themeUpload`,
+      `${process.env.REACT_APP_SERVER_URL}project/themeUpload/${location.state.domainName}`,
       requestOptions,
     )
 

@@ -181,6 +181,7 @@ namespace WebCreator.Controllers
             {
                 var factories = context.ValueProviderFactories;
                 factories.RemoveType<FormValueProviderFactory>();
+                factories.RemoveType<FormFileValueProviderFactory>();
                 factories.RemoveType<JQueryFormValueProviderFactory>();
             }
 
@@ -190,13 +191,20 @@ namespace WebCreator.Controllers
         }
         //}}
 
-        [HttpPost("themeUpload")]
-        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
+
+        [HttpPost("themeUpload/{domainName}")]
         [DisableFormValueModelBinding]
-        public async Task<IActionResult> themeUpload()
+        public async Task<IActionResult> themeUpload(String domainName)
         {
             try
             {
+                String curFolder = Directory.GetCurrentDirectory();
+                curFolder += $"\\Theme\\{domainName}";
+                if (!Directory.Exists(curFolder))
+                {
+                    Directory.CreateDirectory(curFolder);
+                }
+
                 if (IsMultipartContentType(Request.ContentType))
                 {
                     var boundary = GetBoundary(Request.ContentType);
@@ -211,7 +219,7 @@ namespace WebCreator.Controllers
                         var bytesRead = 0;
                         var fileName = GetFileName(section.ContentDisposition);
 
-                        using (var stream = new FileStream(fileName, FileMode.Append))
+                        using (var stream = new FileStream(curFolder + "/" + fileName, FileMode.Append))
                         {
                             do
                             {

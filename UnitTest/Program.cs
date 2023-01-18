@@ -3,13 +3,16 @@ using Aspose.Zip.Saving;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.IO.Compression;
 using System.Text;
+using UnitTest.Interfaces;
 using UnitTest.Lib;
+using UnitTest.Services;
 using WebCreator;
 
 WebCreator.Config.FirebaseCredentialJson = File.ReadAllText("webcreator-dc8f8-35607d000566.json");
@@ -127,6 +130,7 @@ Task.Run(() => new CommonModule().UpdateArticleScrappingProgress());
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddTransient<IStreamFileUploadService, StreamFileUploadLocalService>();
 
 builder.Services.AddCors(options =>
 {
@@ -142,6 +146,7 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<FormOptions>(x => x.ValueCountLimit = 50000);
 
 var app = builder.Build();
 

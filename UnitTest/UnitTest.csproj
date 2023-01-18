@@ -9,16 +9,19 @@
 
   <ItemGroup>
     <PackageReference Include="Aspose.Zip" Version="22.11.0" />
+    <PackageReference Include="Consul" Version="1.6.10.8" />
     <PackageReference Include="FirebaseSharp" Version="2.0.4" />
     <PackageReference Include="FireSharp" Version="2.0.4" />
     <PackageReference Include="google-search-results-dotnet" Version="2.0.1" />
     <PackageReference Include="Google.Cloud.Firestore" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNet.WebHelpers" Version="3.2.9" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Migamake.API.CloudFlare" Version="3.0.104" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="NOW.FeatureFlagExtensions.FeatureManagement" Version="1.1.0-preview" />
     <PackageReference Include="RestSharp" Version="109.0.0-preview.1" />
+    <PackageReference Include="System.Web.Http.AspNetCore" Version="0.1.0-alpha.21259.1" />
   </ItemGroup>
 
   <ItemGroup>

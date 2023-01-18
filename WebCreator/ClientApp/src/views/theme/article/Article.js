@@ -50,43 +50,6 @@ const Article = (props) => {
   useEffect(() => {
   }, [])
 
-  const handleDownload = () => {
-    fileDownload(articlejs, 'article.js')
-  }
-
-  const articlejs = "var getUrlParameter = function getUrlParameter(sParam) {\
-    var sPageURL = window.location.search.substring(1),\
-        sURLVariables = sPageURL.split('&'),\
-        sParameterName,\
-        i;\
-\
-    for (i = 0; i < sURLVariables.length; i++) {\
-        sParameterName = sURLVariables[i].split('=');\
-\
-        if (sParameterName[0] === sParam) {\
-            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);\
-        }\
-    }\
-    return false;\
-};\
-\
-$(document).ready(function () {\
-    var title = getUrlParameter('article');\
-    $.get(\"articles/\" + title + \"-meta\", function (data) {\
-        $(\"meta[name='description']\").remove();\
-        $(\"meta[name='keywords']\").remove();\
-        $(\"meta[name='author']\").remove();\
-        $(\"title\").before(data);\
-\
-    });\
-    $.get(\"articles/\" + title + \"-title\", function (data) {\
-        $(\"title\").html(data);\
-    });\
-    $.get(\"articles/\" + title + \"-body\", function (data) {\
-        $(\"div#article-content\").html(data);\
-    });\
-});"
-
   async function uploadHandler() {
     if(selectedFile == null){
       alert('Please select theme zip file.');
@@ -95,14 +58,23 @@ $(document).ready(function () {\
 
     const data = new FormData();
     data.append(
-      "theme",
+      "file",
       selectedFile,
-      location.state.domainName + ".zip"
+      //location.state.domainName + ".zip"
     );
 
+    // const requestOptions = {
+    //   method: 'POST',
+    //   //headers: { 'Content-Type': 'multipart/form-data' },
+    //   body: selectedFile,
+    //   headers: {
+    //     'content-type': selectedFile.type,
+    //     'content-length': `${selectedFile.size}`,
+    //   },
+    // }
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'multipart/form-data' },
+      //headers: { 'Content-Type': 'multipart/form-data' },
       body: data,
     }
 
@@ -145,46 +117,6 @@ $(document).ready(function () {\
             </CCol>
             <CCol>
               <CButton color="primary" onClick={uploadHandler}>Upload Theme Zip</CButton>
-            </CCol>
-          </CRow>
-          <br/>
-          <CRow>
-            <CCol>
-            <CCard>
-              <CCardBody>
-                <CCardTitle>HowTo Upload Theme</CCardTitle>
-                <CCardSubtitle className="mb-2 text-medium-emphasis">(This theme is only for this domain.)</CCardSubtitle>
-                <CCardText>
-                  1. Make sure to ready &ldquo;index.html&ldquo; file and &ldquo;assets&ldquo; folder in same folder.
-                </CCardText>
-                <CCardText>
-                  2. Update &ldquo;index.html&ldquo; file like following:<br/>
-                  &emsp;a&#41;. Add below tags before head close tag - &lt;/head&gt;.
-                  <CCallout color="primary">
-                  &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js&quot;&gt;&lt;/script&gt;<br/>
-                  &lt;script src=&quot;article.js&quot;&gt;&lt;/script&gt;
-                  </CCallout>
-                  &emsp;b&#41;. Wrap part where should be put article content adding below tag and comment mark.
-                  <CCallout color="primary">
-                  &lt;!--CONTENT BEGIN--&gt;<br/>
-                  &lt;div id=&quot;article-content&quot;&gt;<br/>
-                  Article Content Tags<br/>
-                  &lt;/div&gt;<br/>
-                  &lt;!--CONTENT END--&gt;
-                  </CCallout>
-                </CCardText>
-                <CCardText>
-                  3. <CButton color="link" onClick={() => handleDownload()}>Download</CButton> &ldquo;article.js&ldquo; file and copy in same folder that is &ldquo;index.html&ldquo; file.
-                </CCardText>
-                
-                <CCardText>
-                  4. Compress as zip &ldquo;index.html&ldquo;, &ldquo;article.js&ldquo; files and &ldquo;assets&ldquo; Folder without sub folder in zip file.
-                </CCardText>
-                <CCardText>
-                  5. Upload above zip file.
-                </CCardText>
-              </CCardBody>
-            </CCard>              
             </CCol>
           </CRow>
         </CCardBody>

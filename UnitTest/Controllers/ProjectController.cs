@@ -18,6 +18,16 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using UnitTest.Lib;
+using Consul;
+using RestSharp;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Web.Helpers;
+using Microsoft.Net.Http.Headers;
+using UnitTest.Interfaces;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace WebCreator.Controllers
 {
@@ -25,6 +35,12 @@ namespace WebCreator.Controllers
     [Route("[controller]")]
     public class ProjectController : ControllerBase
     {
+        readonly IStreamFileUploadService _streamFileUploadService;
+        //public ProjectController(IStreamFileUploadService streamFileUploadService)
+        //{
+        //    _streamFileUploadService = streamFileUploadService;
+        //}
+
         public class Item
         {
             public int curPage { get; set; }
@@ -126,59 +142,92 @@ namespace WebCreator.Controllers
             return Ok(new { serpapi=isScrapping, afapi= isAFScrapping, publish= isPublishing });
         }
 
+        //{{
+        private static bool IsMultipartContentType(string contentType)
+        {
+            return
+                !string.IsNullOrEmpty(contentType) &&
+                contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static string GetBoundary(string contentType)
+        {
+            var elements = contentType.Split(' ');
+            var element = elements.Where(entry => entry.StartsWith("boundary=")).First();
+            var boundary = element.Substring("boundary=".Length);
+            // Remove quotes
+            if (boundary.Length >= 2 && boundary[0] == '"' &&
+                boundary[boundary.Length - 1] == '"')
+            {
+                boundary = boundary.Substring(1, boundary.Length - 2);
+            }
+            return boundary;
+        }
+
+        private string GetFileName(string contentDisposition)
+        {
+            return contentDisposition
+                .Split(';')
+                .SingleOrDefault(part => part.Contains("filename"))
+                .Split('=')
+                .Last()
+                .Trim('"');
+        }
+
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+        public class DisableFormValueModelBindingAttribute : Attribute, IResourceFilter
+        {
+            public void OnResourceExecuting(ResourceExecutingContext context)
+            {
+                var factories = context.ValueProviderFactories;
+                factories.RemoveType<FormValueProviderFactory>();
+                factories.RemoveType<JQueryFormValueProviderFactory>();
+            }
+
+            public void OnResourceExecuted(ResourceExecutedContext context)
+            {
+            }
+        }
+        //}}
+
         [HttpPost("themeUpload")]
-        [Consumes("multipart/form-data")]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
+        [DisableFormValueModelBinding]
         public async Task<IActionResult> themeUpload()
         {
             try
             {
-                if (!Request.Content.IsMimeMultipartContent())
+                if (IsMultipartContentType(Request.ContentType))
                 {
-                    this.Request.CreateResponse(HttpStatusCode.UnsupportedMediaType);
+                    var boundary = GetBoundary(Request.ContentType);
+                    var reader = new MultipartReader(boundary, Request.Body);
+                    var section = await reader.ReadNextSectionAsync();
+
+                    while (section != null)
+                    {
+                        // process each image
+                        const int chunkSize = 1024;
+                        var buffer = new byte[chunkSize];
+                        var bytesRead = 0;
+                        var fileName = GetFileName(section.ContentDisposition);
+
+                        using (var stream = new FileStream(fileName, FileMode.Append))
+                        {
+                            do
+                            {
+                                bytesRead = await section.Body.ReadAsync(buffer, 0, buffer.Length);
+                                stream.Write(buffer, 0, bytesRead);
+
+                            } while (bytesRead > 0);
+                        }
+
+                        section = await reader.ReadNextSectionAsync();
+                    }
                 }
-
-                string root = HttpContext.Current.Server.MapPath("~/temp/uploads");
-                var provider = new MultipartFormDataStreamProvider(root);
-                var result = await Request.Content.ReadAsMultipartAsync(provider);
-
-                //var files = Request.Form.Files;
-                //if (files.Count > 0)
-                //{
-                //    String fname = files[0].FileName;
-                //}
-                //foreach (IFormFile file in files)
-                //{
-                //    if (file.Length == 0)
-                //        continue;
-
-                //    string tempFilename = Path.Combine(Path.GetTempPath(), file.FileName);
-                //    System.Diagnostics.Trace.WriteLine($"Saved file to: {tempFilename}");
-
-                //    using (var fileStream = new FileStream(tempFilename, FileMode.Create))
-                //    {
-                //        file.CopyTo(fileStream);
-                //    }
-                //}
             }
             catch (Exception ex)
             {
             }
-
-            //var file = Request.f HttpContext.Current.Request.Files.Count > 0 ?
-            //        HttpContext.Current.Request.Files[0] : null;
-
-            //if (file != null && file.ContentLength > 0)
-            //{
-            //    var fileName = Path.GetFileName(file.FileName);
-
-            //    var path = Path.Combine(
-            //        HttpContext.Current.Server.MapPath("~/uploads"),
-            //        fileName
-            //    );
-
-            //    file.SaveAs(path);
-            //}
-
             return Ok(true);
         }
 

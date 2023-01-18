@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom'
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
+const ArticleThemeUpload = React.lazy(() => import('./views/theme/article/Article'))
 const AddProject = React.lazy(() => import('./views/project/add/Add'))
 const Keyword = React.lazy(() => import('./views/project/keyword/Keyword'))
 const ListProject = React.lazy(() => import('./views/project/list/List'))
@@ -80,6 +81,7 @@ const routes = [
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
+  { path: '/theme/article', name: 'Article Theme Upload', element: ArticleThemeUpload },
   { path: '/project/add', name: 'AddProject', element: AddProject },
   { path: '/project/list', name: 'All Websites', element: ListProject },
   { path: '/project/keyword', name: 'Keyword', element: Keyword },

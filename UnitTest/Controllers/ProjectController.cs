@@ -126,6 +126,62 @@ namespace WebCreator.Controllers
             return Ok(new { serpapi=isScrapping, afapi= isAFScrapping, publish= isPublishing });
         }
 
+        [HttpPost("themeUpload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> themeUpload()
+        {
+            try
+            {
+                if (!Request.Content.IsMimeMultipartContent())
+                {
+                    this.Request.CreateResponse(HttpStatusCode.UnsupportedMediaType);
+                }
+
+                string root = HttpContext.Current.Server.MapPath("~/temp/uploads");
+                var provider = new MultipartFormDataStreamProvider(root);
+                var result = await Request.Content.ReadAsMultipartAsync(provider);
+
+                //var files = Request.Form.Files;
+                //if (files.Count > 0)
+                //{
+                //    String fname = files[0].FileName;
+                //}
+                //foreach (IFormFile file in files)
+                //{
+                //    if (file.Length == 0)
+                //        continue;
+
+                //    string tempFilename = Path.Combine(Path.GetTempPath(), file.FileName);
+                //    System.Diagnostics.Trace.WriteLine($"Saved file to: {tempFilename}");
+
+                //    using (var fileStream = new FileStream(tempFilename, FileMode.Create))
+                //    {
+                //        file.CopyTo(fileStream);
+                //    }
+                //}
+            }
+            catch (Exception ex)
+            {
+            }
+
+            //var file = Request.f HttpContext.Current.Request.Files.Count > 0 ?
+            //        HttpContext.Current.Request.Files[0] : null;
+
+            //if (file != null && file.ContentLength > 0)
+            //{
+            //    var fileName = Path.GetFileName(file.FileName);
+
+            //    var path = Path.Combine(
+            //        HttpContext.Current.Server.MapPath("~/uploads"),
+            //        fileName
+            //    );
+
+            //    file.SaveAs(path);
+            //}
+
+            return Ok(true);
+        }
+
         [HttpPost]
         public async Task<ActionResult> AddProjectAsync([FromBody] Project projectInput)
         {

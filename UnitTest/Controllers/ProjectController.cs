@@ -219,7 +219,7 @@ namespace WebCreator.Controllers
                         var bytesRead = 0;
                         var fileName = GetFileName(section.ContentDisposition);
 
-                        using (var stream = new FileStream(curFolder + "/" + fileName, FileMode.Append))
+                        using (var stream = new FileStream(curFolder + "/theme.zip", FileMode.Append))
                         {
                             do
                             {

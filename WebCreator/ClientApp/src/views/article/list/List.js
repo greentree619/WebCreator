@@ -204,8 +204,8 @@ class ListBase extends Component {
   async downloadAllArticles(_id, domain) {
     try {
       const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        // method: 'GET',
+        mode: 'no-cors',
       }
 
       //console.log("progress status : ->");

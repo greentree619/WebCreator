@@ -149,7 +149,11 @@ namespace WebCreator.Controllers
             themeFolder += $"\\Theme\\{domainName}\\theme";
 
             await CommonModule.BuildPagesThreadAsync(domainId, domainName);
-            FileSystem.CopyDirectory(themeFolder, curFolder, true);
+            try
+            {
+                FileSystem.CopyDirectory(themeFolder, curFolder, true);
+            }
+            catch (Exception e) { }
 
             String tmpFolder = Directory.GetCurrentDirectory();
             tmpFolder += $"\\Temp";

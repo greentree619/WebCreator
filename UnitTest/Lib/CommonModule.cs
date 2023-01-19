@@ -342,6 +342,78 @@ namespace UnitTest.Lib
             return ret;
         }
 
+        static public String GetArticleTemplate(String domainName)
+        {
+            String templateHtml = "";
+            String templateFile = Directory.GetCurrentDirectory();
+            templateFile += $"\\Theme\\{domainName}\\theme\\articlepage.html";
+            if (File.Exists(templateFile))
+            {
+                templateHtml = File.ReadAllText(templateFile);
+            }
+            
+            return templateHtml;
+        }
+
+        static public void GenerateArticleHtml(String fileName, Article article, String articleTemplate)
+        {
+            using (StreamWriter writer = new StreamWriter(fileName))
+            {
+                if (articleTemplate.Length == 0)
+                {
+                    writer.Write("<!DOCTYPE html>");
+                    writer.Write("<html>");
+                    writer.Write("<head>");
+                    writer.Write($"<title>{article.Title}</title>");
+                    if (article.MetaDescription != null && article.MetaDescription.Length > 0)
+                    {
+                        writer.Write($"<meta name=\"description\" content=\"{article.MetaDescription}\">");
+                    }
+
+                    if (article.MetaKeywords != null && article.MetaKeywords.Length > 0)
+                    {
+                        writer.Write($"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">");
+                    }
+
+                    if (article.MetaAuthor != null && article.MetaAuthor.Length > 0)
+                    {
+                        writer.Write($"<meta name=\"author\" content=\"{article.MetaAuthor}\">");
+                    }
+
+                    writer.Write($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+                    writer.Write("</head>");
+                    writer.Write("<body>");
+                    writer.Write(article.Content);
+                    if (article.Footer != null && article.Footer.Length > 0)
+                    {
+                        writer.Write("<footer>");
+                        writer.Write(article.Footer);
+                        writer.Write("</footer>");
+                    }
+                    writer.Write("</body>");
+                    writer.Write("</html>");
+                }
+                else
+                {
+                    if (article.MetaDescription == null) article.MetaDescription = "";
+                    if (article.MetaKeywords == null) article.MetaKeywords = "";
+                    if (article.MetaAuthor == null) article.MetaAuthor = "";
+
+                    String metaDesc = $"<meta name=\"description\" content=\"{article.MetaDescription}\">";
+                    String metaKeywd = $"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">";
+                    String metaAuthor = $"<meta name=\"author\" content=\"{article.MetaAuthor}\">";
+
+                    articleTemplate = articleTemplate.Replace("{{TITLE}}", article.Title);
+                    articleTemplate = articleTemplate.Replace("{{CONTENT}}", article.Content);
+                    articleTemplate = articleTemplate.Replace("{{FOOTER}}", article.Footer);
+                    articleTemplate = articleTemplate.Replace("{{META_DESC}}", metaDesc);
+                    articleTemplate = articleTemplate.Replace("{{META_KEYWORD}}", metaKeywd);
+                    articleTemplate = articleTemplate.Replace("{{META_AUTHOR}}", metaAuthor);
+                    writer.Write(articleTemplate);
+                }
+            }
+        }
+
         static public async Task BuildArticlePageThreadAsync(String domainid, String domain, String articleId)
         {
             try
@@ -372,40 +444,8 @@ namespace UnitTest.Lib
                         //}}Stop When update theme
                         String title = article.Title.Replace("?", "").Trim();
                         title = title.Replace(" ", "-");
-                        using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
-                        {
-                            writer.Write("<!DOCTYPE html>");
-                            writer.Write("<html>");
-                            writer.Write("<head>");
-                            writer.Write($"<title>{article.Title}</title>");
-                            if (article.MetaDescription != null && article.MetaDescription.Length > 0)
-                            {
-                                writer.Write($"<meta name=\"description\" content=\"{article.MetaDescription}\">");
-                            }
-
-                            if (article.MetaKeywords != null && article.MetaKeywords.Length > 0)
-                            {
-                                writer.Write($"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">");
-                            }
-
-                            if (article.MetaAuthor != null && article.MetaAuthor.Length > 0)
-                            {
-                                writer.Write($"<meta name=\"author\" content=\"{article.MetaAuthor}\">");
-                            }
-
-                            writer.Write($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-                            writer.Write("</head>");
-                            writer.Write("<body>");
-                            writer.Write(article.Content);
-                            if (article.Footer != null && article.Footer.Length > 0)
-                            {
-                                writer.Write("<footer>");
-                                writer.Write(article.Footer);
-                                writer.Write("</footer>");
-                            }
-                            writer.Write("</body>");
-                            writer.Write("</html>");
-                        }
+                        String articleTemplate = GetArticleTemplate(domain);
+                        GenerateArticleHtml(curFolder + "\\" + title + ".html", article, articleTemplate);
 
                         //{{Update state
                         if (article.State != 3)
@@ -441,6 +481,8 @@ namespace UnitTest.Lib
                     CommonModule.DeleteAllContentInFolder(curFolder);
                 }
 
+                String articleTemplate = GetArticleTemplate(domain);
+
                 String articleUpdateStateIds = "";
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 Query query = articlesCol.WhereEqualTo("ProjectId", domainid);
@@ -459,40 +501,41 @@ namespace UnitTest.Lib
                         //}}Stop When update theme
                         String title = article.Title.Replace("?", "").Trim();
                         title = title.Replace(" ", "-");
-                        using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
-                        {
-                            writer.Write("<!DOCTYPE html>");
-                            writer.Write("<html>");
-                            writer.Write("<head>");
-                            writer.Write($"<title>{article.Title}</title>");
-                            if (article.MetaDescription != null && article.MetaDescription.Length > 0)
-                            {
-                                writer.Write($"<meta name=\"description\" content=\"{article.MetaDescription}\">");
-                            }
+                        GenerateArticleHtml(curFolder + "\\" + title + ".html", article, articleTemplate);
+                        //using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
+                        //{
+                        //    writer.Write("<!DOCTYPE html>");
+                        //    writer.Write("<html>");
+                        //    writer.Write("<head>");
+                        //    writer.Write($"<title>{article.Title}</title>");
+                        //    if (article.MetaDescription != null && article.MetaDescription.Length > 0)
+                        //    {
+                        //        writer.Write($"<meta name=\"description\" content=\"{article.MetaDescription}\">");
+                        //    }
 
-                            if (article.MetaKeywords != null && article.MetaKeywords.Length > 0)
-                            {
-                                writer.Write($"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">");
-                            }
+                        //    if (article.MetaKeywords != null && article.MetaKeywords.Length > 0)
+                        //    {
+                        //        writer.Write($"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">");
+                        //    }
 
-                            if (article.MetaAuthor != null && article.MetaAuthor.Length > 0)
-                            {
-                                writer.Write($"<meta name=\"author\" content=\"{article.MetaAuthor}\">");
-                            }
+                        //    if (article.MetaAuthor != null && article.MetaAuthor.Length > 0)
+                        //    {
+                        //        writer.Write($"<meta name=\"author\" content=\"{article.MetaAuthor}\">");
+                        //    }
 
-                            writer.Write($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-                            writer.Write("</head>");
-                            writer.Write("<body>");
-                            writer.Write(article.Content);
-                            if (article.Footer != null && article.Footer.Length > 0)
-                            {
-                                writer.Write("<footer>");
-                                writer.Write(article.Footer);
-                                writer.Write("</footer>");
-                            }
-                            writer.Write("</body>");
-                            writer.Write("</html>");
-                        }
+                        //    writer.Write($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+                        //    writer.Write("</head>");
+                        //    writer.Write("<body>");
+                        //    writer.Write(article.Content);
+                        //    if (article.Footer != null && article.Footer.Length > 0)
+                        //    {
+                        //        writer.Write("<footer>");
+                        //        writer.Write(article.Footer);
+                        //        writer.Write("</footer>");
+                        //    }
+                        //    writer.Write("</body>");
+                        //    writer.Write("</html>");
+                        //}
 
                         //{{Update state
                         if (article.State == 2)

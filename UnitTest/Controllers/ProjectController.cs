@@ -231,7 +231,11 @@ namespace WebCreator.Controllers
                     }
 
                     if (System.IO.File.Exists(curFolder + "/theme.zip"))
-                        System.IO.Compression.ZipFile.ExtractToDirectory(curFolder + "/theme.zip", curFolder + "/theme");
+                    {
+                        if(System.IO.Directory.Exists(curFolder + "/theme"))
+                            CommonModule.DeleteAllContentInFolder(curFolder + "/theme");
+                        System.IO.Compression.ZipFile.ExtractToDirectory(curFolder + "/theme.zip", curFolder + "/theme", true);
+                    }   
 
                     CommonModule.onThemeUpdateCash[domainId] = false;
 

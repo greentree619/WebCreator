@@ -15,6 +15,7 @@ const context =  [
   "/project/publishSchedule",
   "/project/startaf",
   "/project/themeUpload",
+  "/project/allDownload",
   "/article",
   "/article/scrap",
   "/article/fromid",

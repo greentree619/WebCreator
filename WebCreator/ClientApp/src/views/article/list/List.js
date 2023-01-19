@@ -201,6 +201,24 @@ class ListBase extends Component {
     await this.onSync(_id, domain, ip);
   }
 
+  async downloadAllArticles(_id, domain) {
+    try {
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+
+      //console.log("progress status : ->");
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/allDownload/${_id}/${domain}`, requestOptions)
+      let ret = await response.json()
+      if (response.status === 200 && ret) {
+        //console.log(this.state.sync);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   renderArticlesTable = (articles) => {
     let pageButtonCount = 3
     let pagination = <p></p>
@@ -354,6 +372,15 @@ class ListBase extends Component {
                                                     )}
                   >
                     All Sync
+                  </CButton>
+                  &nbsp;
+                  <CButton
+                    type="button"
+                    onClick={() => this.downloadAllArticles(this.state.projectInfo.projectid,
+                                                    this.state.projectInfo.domainName
+                                                    )}
+                  >
+                    Download
                   </CButton>
                   </CCol>
                   </>)

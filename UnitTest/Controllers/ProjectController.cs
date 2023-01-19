@@ -28,6 +28,10 @@ using UnitTest.Interfaces;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.IO.Compression;
+using Microsoft.VisualBasic.FileIO;
+using System.Text;
+using System.Net;
 
 namespace WebCreator.Controllers
 {
@@ -136,6 +140,70 @@ namespace WebCreator.Controllers
             return Ok(new { serpapi=isScrapping, afapi= isAFScrapping, publish= isPublishing });
         }
 
+        [HttpGet("allDownload/{domainId}/{domainName}")]
+        public async Task<FileResult> AllDownload(String domainId, String domainName)
+        {
+            String curFolder = Directory.GetCurrentDirectory();
+            curFolder += $"\\Build\\{domainName}";
+            String themeFolder = Directory.GetCurrentDirectory();
+            themeFolder += $"\\Theme\\{domainName}\\theme";
+
+            await CommonModule.BuildPagesThreadAsync(domainId, domainName);
+            FileSystem.CopyDirectory(themeFolder, curFolder, true);
+
+            String tmpFolder = Directory.GetCurrentDirectory();
+            tmpFolder += $"\\Temp";
+            if (!Directory.Exists(tmpFolder))
+            {
+                Directory.CreateDirectory(tmpFolder);
+            }
+
+            string dirRoot = curFolder;
+            string[] filesToZip = Directory.GetFiles(dirRoot, "*.*", System.IO.SearchOption.AllDirectories);
+            string zipFileName = string.Format($"{domainName}.zip", DateTime.Now);
+
+            using (MemoryStream zipMS = new MemoryStream())
+            {
+                using (ZipArchive zipArchive = new ZipArchive(zipMS, ZipArchiveMode.Create, true, Encoding.UTF8))
+                {
+                    //loop through files to add
+                    foreach (string fileToZip in filesToZip)
+                    {
+                        //read the file bytes
+                        byte[] fileToZipBytes = System.IO.File.ReadAllBytes(fileToZip);
+                        String zipEntry = fileToZip.Replace(dirRoot + "\\", "");
+                        ZipArchiveEntry zipFileEntry = zipArchive.CreateEntry(zipEntry);
+
+                        //add the file contents
+                        using (Stream zipEntryStream = zipFileEntry.Open())
+                        using (BinaryWriter zipFileBinary = new BinaryWriter(zipEntryStream))
+                        {
+                            zipFileBinary.Write(fileToZipBytes);
+                        }
+                    }
+                }
+
+                using (FileStream finalZipFileStream = new FileStream($"{tmpFolder}\\" + zipFileName, FileMode.Create))
+                {
+                    zipMS.Seek(0, SeekOrigin.Begin);
+                    zipMS.CopyTo(finalZipFileStream);
+                }
+            }
+
+            String tempOutput = $"{tmpFolder}\\" + zipFileName;
+            byte[] finalResult = System.IO.File.ReadAllBytes(tempOutput);
+            if (System.IO.File.Exists(tempOutput))
+            {
+                System.IO.File.Delete(tempOutput);
+            }
+            if (finalResult == null || !finalResult.Any())
+            {
+                throw new Exception(String.Format("Nothing found"));
+            }
+
+            return File(finalResult, "application/zip", zipFileName);
+        }
+
         //{{
         private static bool IsMultipartContentType(string contentType)
         {
@@ -196,7 +264,7 @@ namespace WebCreator.Controllers
                 {
                     CommonModule.onThemeUpdateCash[domainId] = true;
                 }
-                    String curFolder = Directory.GetCurrentDirectory();
+                String curFolder = Directory.GetCurrentDirectory();
                 curFolder += $"\\Theme\\{domainName}";
                 if (!Directory.Exists(curFolder))
                 {
@@ -217,7 +285,7 @@ namespace WebCreator.Controllers
                         var bytesRead = 0;
                         var fileName = GetFileName(section.ContentDisposition);
 
-                        using (var stream = new FileStream(curFolder + "/theme.zip", FileMode.Append))
+                        using (var stream = new FileStream(curFolder + "/theme.zip", FileMode.Create))
                         {
                             do
                             {
@@ -235,6 +303,13 @@ namespace WebCreator.Controllers
                         if(System.IO.Directory.Exists(curFolder + "/theme"))
                             CommonModule.DeleteAllContentInFolder(curFolder + "/theme");
                         System.IO.Compression.ZipFile.ExtractToDirectory(curFolder + "/theme.zip", curFolder + "/theme", true);
+                        //using (ZipArchive archive = ZipFile.OpenRead(curFolder + "/theme.zip"))
+                        //{
+                        //    foreach (ZipArchiveEntry entry in archive.Entries)
+                        //    {
+                        //        entry.ExtractToFile(Path.Combine(curFolder + "/theme", entry.FullName));
+                        //    }
+                        //}
                     }   
 
                     CommonModule.onThemeUpdateCash[domainId] = false;

@@ -15,6 +15,24 @@ extractPath = '/var/www/html/'
 def on_created(event):
     #print(f"hey, {event.src_path} has been created!")
     time.sleep(5)
+	##{{
+    #print("checking if readable file...")
+    while True:   # repeat until the try statement succeeds
+        try:
+            the_zip_file = zipfile.ZipFile(event.src_path)
+            ret = the_zip_file.testzip()
+
+            if ret is not None:
+                time.sleep(1)
+                continue
+            else:
+                break
+        except:
+            time.sleep(1)
+            pass
+    #print("create file okay!!!")
+    ##}}
+
     with zipfile.ZipFile(event.src_path, 'r') as zip_ref:
         zip_ref.extractall(extractPath)
     os.remove(event.src_path)

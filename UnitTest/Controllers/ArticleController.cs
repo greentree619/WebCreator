@@ -47,7 +47,7 @@ namespace WebCreator.Controllers
                 QuerySnapshot totalSnapshot = await articlesCol.WhereNotEqualTo("State", 4).GetSnapshotAsync();
                 total = (int)Math.Ceiling((double)totalSnapshot.Count / count);
 
-                Query query = articlesCol.OrderBy("State").WhereNotEqualTo("State", 4).OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
+                Query query = articlesCol.OrderByDescending("State").WhereNotEqualTo("State", 4).OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
 
                 foreach (DocumentSnapshot document in projectsSnapshot.Documents)

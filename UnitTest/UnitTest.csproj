@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Lib\CommonModule.cs~RF98feaf.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Aspose.Zip" Version="22.11.0" />
     <PackageReference Include="Consul" Version="1.6.10.8" />
     <PackageReference Include="FirebaseSharp" Version="2.0.4" />

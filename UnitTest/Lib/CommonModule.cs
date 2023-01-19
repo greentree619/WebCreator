@@ -22,6 +22,7 @@ namespace UnitTest.Lib
         public static Hashtable afThreadList = new Hashtable();
         public static Hashtable publishThreadList = new Hashtable();
         public static Hashtable refKeyCash = new Hashtable();
+        public static Hashtable onThemeUpdateCash = new Hashtable();
         public static ArticleForgeSetting afSetting = new ArticleForgeSetting();
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
@@ -366,7 +367,11 @@ namespace UnitTest.Lib
                     if (article.Content != null && article.Content.Length > 0
                         && (article.State == 2 || article.State == 3))
                     {
+                        //{{Stop When update theme
+                        while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
+                        //}}Stop When update theme
                         String title = article.Title.Replace("?", "").Trim();
+                        title = title.Replace(" ", "-");
                         using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
                         {
                             writer.Write("<!DOCTYPE html>");
@@ -421,7 +426,7 @@ namespace UnitTest.Lib
             }
         }
 
-        static public async Task BuildPagesThreadAsync(String domainid, String domain)
+        static public async Task BuildPagesThreadAsync(String domainid, String domain, int defaultState=2, bool force = true)
         {
             try
             {
@@ -445,10 +450,15 @@ namespace UnitTest.Lib
                 {
                     var article = document.ConvertTo<Article>();
                     if (article.Content != null && article.Content.Length > 0
-                                && (article.State == 2 || article.State == 3))
+                                && (
+                                (force && (article.State == 2 || article.State == 3)) || article.State == defaultState)
+                                )
                     {
-
+                        //{{Stop When update theme
+                        while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
+                        //}}Stop When update theme
                         String title = article.Title.Replace("?", "").Trim();
+                        title = title.Replace(" ", "-");
                         using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
                         {
                             writer.Write("<!DOCTYPE html>");
@@ -557,6 +567,28 @@ namespace UnitTest.Lib
                     }
 
                     String cmd = $"pscp -i {exeFolder}\\searchsystem.ppk {tmpFolder}\\{domain}.zip ubuntu@{ipaddr}:/home/ubuntu";
+
+                    Console.WriteLine("SyncWithServerThreadAsync --> " + cmd);
+                    ExecuteCmd.ExecuteCommandAsync(cmd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        static public async Task SyncThemeWithServerThreadAsync(String domain, String ipaddr)
+        {
+            try
+            {
+                String curFolder = Directory.GetCurrentDirectory();
+                String exeFolder = curFolder;
+                curFolder += $"\\Theme\\{domain}\\theme.zip";
+
+                if (File.Exists(curFolder))
+                {
+                    String cmd = $"pscp -i {exeFolder}\\searchsystem.ppk {curFolder} ubuntu@{ipaddr}:/home/ubuntu";
 
                     Console.WriteLine("SyncWithServerThreadAsync --> " + cmd);
                     ExecuteCmd.ExecuteCommandAsync(cmd);

@@ -65,7 +65,7 @@ const Article = (props) => {
     }
 
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}project/themeUpload/${location.state.domainName}`,
+      `${process.env.REACT_APP_SERVER_URL}project/themeUpload/${location.state.projectid}/${location.state.domainName}/${location.state.domainIp}`,
       requestOptions,
     )
 
@@ -103,6 +103,33 @@ const Article = (props) => {
             </CCol>
             <CCol>
               <CButton color="primary" onClick={uploadHandler}>Upload Theme Zip</CButton>
+            </CCol>
+          </CRow>
+          <br/>
+          <CRow>
+            <CCol>
+            <CCard>
+              <CCardBody>
+                <CCardTitle>HowTo Upload Theme</CCardTitle>
+                <CCardSubtitle className="mb-2 text-medium-emphasis">(This theme is only for this domain.)</CCardSubtitle>
+                <CCardText>
+                  1. Make sure to ready &ldquo;index.html&ldquo;, &ldquo;articlepage.html&ldquo; file and &ldquo;assets&ldquo; folder in same folder.
+                </CCardText>
+                <CCardText>
+                  2. Update &ldquo;articlepage.html&ldquo; file like following:<br/>
+                  &emsp;TODO&#41;. Put below code where should be put article content.
+                  <CCallout color="primary">
+                  &#123;&#123;CONTENT&#125;&#125;
+                  </CCallout>
+                </CCardText>                
+                <CCardText>
+                  3. Compress as zip &ldquo;index.html&ldquo;, &ldquo;articlepage.html&ldquo; files and &ldquo;assets&ldquo; Folder without sub folder in zip file.
+                </CCardText>
+                <CCardText>
+                  4. Upload above zip file.
+                </CCardText>
+              </CCardBody>
+            </CCard>              
             </CCol>
           </CRow>
         </CCardBody>

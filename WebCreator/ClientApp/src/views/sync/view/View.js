@@ -50,6 +50,7 @@ class ListBase extends Component {
 
   getLink(title) {
     title = title.replace("?", "");
+    title = title.replaceAll(" ", "-");
     return `http://${this.state.projectInfo.projectDomain}/${title}.html`;
   }
 

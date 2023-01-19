@@ -200,6 +200,20 @@ namespace UnitTest.Lib
             }
         }
 
+        //_id: domain id
+        public async Task UpdateArticleThemeThreadAsync(String domainid, String domainName, String ipaddr)
+        {
+            try
+            {
+                await CommonModule.BuildPagesThreadAsync(domainid, domainName, 3, false);
+                await CommonModule.SyncWithServerThreadAsync(domainid, domainName, ipaddr);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         static void LogResult(Task<string> task)
         {
             Console.WriteLine($"Is Valid: {task.Result}");

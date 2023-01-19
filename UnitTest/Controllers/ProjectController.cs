@@ -35,12 +35,6 @@ namespace WebCreator.Controllers
     [Route("[controller]")]
     public class ProjectController : ControllerBase
     {
-        readonly IStreamFileUploadService _streamFileUploadService;
-        //public ProjectController(IStreamFileUploadService streamFileUploadService)
-        //{
-        //    _streamFileUploadService = streamFileUploadService;
-        //}
-
         public class Item
         {
             public int curPage { get; set; }
@@ -192,13 +186,17 @@ namespace WebCreator.Controllers
         //}}
 
 
-        [HttpPost("themeUpload/{domainName}")]
+        [HttpPost("themeUpload/{domainId}/{domainName}/{ipaddr}")]
         [DisableFormValueModelBinding]
-        public async Task<IActionResult> themeUpload(String domainName)
+        public async Task<IActionResult> themeUpload(String domainId, String domainName, String ipaddr)
         {
             try
             {
-                String curFolder = Directory.GetCurrentDirectory();
+                if (CommonModule.onThemeUpdateCash[domainId] == null || (bool)CommonModule.onThemeUpdateCash[domainId] == false)
+                {
+                    CommonModule.onThemeUpdateCash[domainId] = true;
+                }
+                    String curFolder = Directory.GetCurrentDirectory();
                 curFolder += $"\\Theme\\{domainName}";
                 if (!Directory.Exists(curFolder))
                 {
@@ -231,6 +229,14 @@ namespace WebCreator.Controllers
 
                         section = await reader.ReadNextSectionAsync();
                     }
+
+                    if (System.IO.File.Exists(curFolder + "/theme.zip"))
+                        System.IO.Compression.ZipFile.ExtractToDirectory(curFolder + "/theme.zip", curFolder + "/theme");
+
+                    CommonModule.onThemeUpdateCash[domainId] = false;
+
+                    await CommonModule.SyncThemeWithServerThreadAsync(domainName, ipaddr);//Task.Run(() => this.SyncWithServerThreadAsync(domainid, domain, ipaddr));
+                    Task.Run(() => new SerpapiScrap().UpdateArticleThemeThreadAsync(domainId, domainName, ipaddr));//Only for online article
                 }
             }
             catch (Exception ex)

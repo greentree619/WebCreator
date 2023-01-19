@@ -5,25 +5,84 @@ import os
 import zipfile
 from pathlib import Path
 
-LANG_FLAG = 0x800               # bit 11 indicates UTF-8 for filenames
-OS_FLAG = 3                     # 3 represents UNIX
-FILEMODE = 0o100664             # filemode byte for -rw-rw-r--
+import zipfile
+import os, shutil
+import subprocess
+import signal
+import threading
+from time import sleep
+from multiprocessing import Process
+from subprocess import check_output
+import multiprocessing
 
 # {{Global Setting Value
 # targetPath = "D:\\Workstation\\AutoUploadPy\\path"
 # screenshotPath = "D:\\Workstation\\AutoUploadPy\\screenshot\\"
 #----------------------------------------------------------------
 targetPath = "/home/ubuntu/"
-extractPath = '/home/ubuntu/'
+extractPath = '/var/www/html/'
 # }}Global Setting Value
 
-with zipfile.ZipFile("/home/ubuntu/traepiller.net.zip", 'r') as ztf:
-    ztf.comment = zf.comment
-    for zinfo in zf.infolist():
-        zinfo.CRC = None
-        ztinfo = copy(zinfo)
-        ztinfo.filename = zinfo.filename.encode('cp437').decode('gbk')
-        ztinfo.flag_bits |= LANG_FLAG
-        ztinfo.create_system = OS_FLAG
-        ztinfo.external_attr = FILEMODE << 16
-        ztf.writestr(ztinfo, zf.read(zinfo))
+def on_created(event):
+    print(f"hey, {event.src_path} has been created!")
+    time.sleep(5)
+
+	##{{
+    print("checking if readable file...")
+    while True:   # repeat until the try statement succeeds
+        try:
+            the_zip_file = zipfile.ZipFile(event.src_path)
+            ret = the_zip_file.testzip()
+
+            if ret is not None:
+                sleep(1)
+                continue
+            else:
+                break
+        except:
+            sleep(1)
+            pass
+    print("create file okay!!!")
+    ##}}
+
+    with zipfile.ZipFile(event.src_path, 'r') as zip_ref:
+        zip_ref.extractall(extractPath)
+    os.remove(event.src_path)
+
+
+def on_deleted(event):
+    #print(f"what the f**k! Someone deleted {event.src_path}!")
+    pass
+
+def on_modified(event):
+    #print(f"hey buddy,{event.event_type}-{event.is_directory}  {event.src_path} has been modified")
+    pass
+
+def on_moved(event):
+    #print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
+    pass
+
+if __name__ == "__main__":
+    #print(f"Hellow!, I'm fine...")
+    patterns = "*"
+    ignore_patterns = ""
+    ignore_directories = False
+    case_sensitive = True
+    my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+    my_event_handler.on_created = on_created
+    my_event_handler.on_deleted = on_deleted
+    #my_event_handler.on_modified = on_modified
+    #my_event_handler.on_moved = on_moved
+
+    path = targetPath
+    go_recursively = True
+    my_observer = Observer()
+    my_observer.schedule(my_event_handler, path, recursive=go_recursively)
+
+    my_observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        my_observer.stop()
+        my_observer.join()

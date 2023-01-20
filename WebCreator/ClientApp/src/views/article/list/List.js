@@ -202,18 +202,26 @@ class ListBase extends Component {
   }
 
   async downloadAllArticles(_id, domain) {
+    //window.open(`${process.env.REACT_APP_SERVER_URL}project/allDownload/${_id}/${domain}`, '_blank');
     try {
       const requestOptions = {
-        // method: 'GET',
-        mode: 'no-cors',
+        method: 'GET',
+        //mode: 'no-cors',
       }
 
       //console.log("progress status : ->");
-      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/allDownload/${_id}/${domain}`, requestOptions)
-      let ret = await response.json()
-      if (response.status === 200 && ret) {
-        //console.log(this.state.sync);
-      }
+      fetch(`${process.env.REACT_APP_SERVER_URL}project/allDownload/${_id}/${domain}`, requestOptions).then(res => {
+        return res.blob();
+      }).then(blob => {
+          const href = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = href;
+          link.setAttribute('download', `${domain}.zip`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      });
+      
     } catch (e) {
       console.log(e);
     }

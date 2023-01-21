@@ -11,6 +11,7 @@ import {
   CContainer,
   CRow,
   CCol,
+  CBadge,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
@@ -18,6 +19,7 @@ import PropTypes from 'prop-types'
 import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import { useDispatch, useSelector } from 'react-redux'
 
 class ListBase extends Component {
   static displayName = ListBase.name
@@ -306,7 +308,9 @@ class ListBase extends Component {
                   <td>{article.id}</td>
                   <td>{article.title}{(article.articleId == null 
                             || article.articleId != '1234567890')
-                            && (<>&nbsp;<span className="badge text-bg-info">AF</span></>)}</td>
+                            && (<>&nbsp;<CBadge color={
+                              (article.content == null || article.content.length == 0) ? "info" : "success"
+                            }>AF</CBadge></>)}</td>
                   <td>
                     <CButton
                       type="button"
@@ -487,6 +491,9 @@ ListBase.propTypes = {
 
 const List = (props) => {
   const location = useLocation()
+  const dispatch = useDispatch()
+  dispatch({ type: 'set', activeTab: 'article_list' })
+
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
     domainName: new URLSearchParams(location.search).get('domainName'), 

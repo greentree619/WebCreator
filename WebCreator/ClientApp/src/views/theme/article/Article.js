@@ -32,6 +32,7 @@ import plugins from 'suneditor/src/plugins'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
+import { useDispatch, useSelector } from 'react-redux'
 
 const Article = (props) => {
   const location = useLocation()
@@ -40,6 +41,9 @@ const Article = (props) => {
   const [alertMsg, setAlertMsg] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
   const navigate = useNavigate()
+
+  const dispatch = useDispatch()
+  dispatch({ type: 'set', activeTab: 'theme_article' })
 
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 

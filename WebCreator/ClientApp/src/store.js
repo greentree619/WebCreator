@@ -9,6 +9,7 @@ const initialState = {
   activeZoneName: '',
   activeZoneStatus: '',
   activeProject: {},
+  activeTab: 'project_add',
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {

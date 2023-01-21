@@ -24,9 +24,12 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import { Col } from 'reactstrap'
+import { useDispatch, useSelector } from 'react-redux'
 
 const View = (props) => {
   const location = useLocation()
+  const dispatch = useDispatch()
+  dispatch({ type: 'set', activeTab: 'schedule_view' })
 
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'),
@@ -95,8 +98,8 @@ const View = (props) => {
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/publishSchedule/${domainId}`, requestOptions)
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      console.log(ret, ret.data.publishJustNowCount);
-      console.log(unitLabelMap[ret.data.publishSpanUnit], ret.data.publishSpanUnit);
+      //console.log(ret, ret.data.publishJustNowCount);
+      //console.log(unitLabelMap[ret.data.publishSpanUnit], ret.data.publishSpanUnit);
       location.state.publishScheduleId = ret.data.id;
       setPublishCountForNow(ret.data.justNowCount);
       setPublishEachCount(ret.data.eachCount);

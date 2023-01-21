@@ -329,6 +329,7 @@ const Add = (props) => {
     //  }
     //  var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
     console.log("location.search.length = " + location.search.length)
+    dispatch({ type: 'set', activeTab: "project_add" })
     if (location.search.length == 0
       && (location.state != null && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT'))) {
       //normal link

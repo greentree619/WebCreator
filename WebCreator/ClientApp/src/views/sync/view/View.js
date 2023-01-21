@@ -236,6 +236,9 @@ ListBase.propTypes = {
 
 const List = (props) => {
   const location = useLocation()
+  const dispatch = useDispatch()
+  dispatch({ type: 'set', activeTab: 'sync_view' })
+
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
     projectDomain: new URLSearchParams(location.search).get('domain') }

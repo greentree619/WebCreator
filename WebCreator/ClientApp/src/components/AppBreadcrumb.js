@@ -30,7 +30,8 @@ const AppBreadcrumb = () => {
   const activeZoneId = useSelector((state) => state.activeZoneId)
   const activeZoneName = useSelector((state) => state.activeZoneName)
   const activeZoneStatus = useSelector((state) => state.activeZoneStatus)
-  //const activeProject = useSelector((state) => state.activeProject)
+  const activeTab = useSelector((state) => state.activeTab)
+    //const activeProject = useSelector((state) => state.activeProject)
 
   const getRouteName = (pathname, routes) => {
     const currentRoute = routes.find((route) => route.path === pathname)
@@ -98,6 +99,13 @@ const AppBreadcrumb = () => {
     }
   }, [activeDomainId])
 
+  const isSelctedTab = (urlToken) => {
+    //console.log(activeTab);
+    var activeClass = "btn-secondary";
+    if(activeTab == urlToken) activeClass = "btn-primary";
+    return "btn " + activeClass + " text-white";
+  }
+
   return (
     <>
       <CContainer>
@@ -118,50 +126,50 @@ const AppBreadcrumb = () => {
 
               <CHeaderNav className="d-md-flex me-auto">
                 <CNavItem className="px-1">
-                  <CNavLink href="#/project/add?mode=view" className="btn btn-primary text-white">
+                  <CNavLink href="#/project/add?mode=view&tab=project_add" className={isSelctedTab("project_add")}>
                     {'DOMAIN : ' + activeDomainName}
                   </CNavLink>
                 </CNavItem>
                 {activeDomainName.length > 0 && (
                   <>
                     <CNavItem className="px-1">
-                      <CNavLink href={'#/project/keyword/?domainId=' + activeZoneId + '&domainName=' + activeZoneName} className="btn btn-primary text-white">
+                      <CNavLink className={isSelctedTab("project_keyword")} href={'#/project/keyword/?tab=project_keyword&domainId=' + activeZoneId + '&domainName=' + activeZoneName}>
                         Keyword
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink href={'#/cloudflare/dns/?domainId=' + activeZoneId + '&domainName=' + activeZoneName} className="btn btn-primary text-white">
+                      <CNavLink className={isSelctedTab("cloudflare_dns")} href={'#/cloudflare/dns/?tab=cloudflare_dns&domainId=' + activeZoneId + '&domainName=' + activeZoneName}>
                         DNS Status
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink href={'#/theme/article/?domainId=' + activeDomainId + '&domainName=' + activeZoneName + '&domainIp=' + activeDomainIp} className="btn btn-primary text-white">
+                      <CNavLink className={isSelctedTab("theme_article")} href={'#/theme/article/?tab=theme_article&domainId=' + activeDomainId + '&domainName=' + activeZoneName + '&domainIp=' + activeDomainIp}>
                         Theme
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink href={'#/schedule/view/?domainId=' + activeDomainId + '&isOnAFScrapping=' + isOnAFScrapping + '&isOnPublish=' + isOnPublish} className="btn btn-primary text-white">
+                      <CNavLink className={isSelctedTab("schedule_view")} href={'#/schedule/view/?tab=schedule_view&domainId=' + activeDomainId + '&isOnAFScrapping=' + isOnAFScrapping + '&isOnPublish=' + isOnPublish}>
                         Schedule
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
                       <CNavLink
-                        className="btn btn-primary text-white"
-                        href={'#/article/approval/?domainId=' + activeDomainId + '&domainName=' + activeDomainName + '&domainIp=' + activeDomainIp}
+                        className={isSelctedTab("article_approval")}
+                        href={'#/article/approval/?tab=article_approval&domainId=' + activeDomainId + '&domainName=' + activeDomainName + '&domainIp=' + activeDomainIp}
                       >
                         Approval Article
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
                       <CNavLink
-                        className="btn btn-primary text-white"
-                        href={'#/article/list/?domainId=' + activeDomainId + '&domainName=' + activeDomainName + '&domainIp=' + activeDomainIp}
+                        className={isSelctedTab("article_list")}
+                        href={'#/article/list/?tab=article_list&domainId=' + activeDomainId + '&domainName=' + activeDomainName + '&domainIp=' + activeDomainIp}
                       >
                         Article Pages
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink className="btn btn-primary text-white" href={'#/sync/view?domainId=' + activeDomainId + '&domain=' + activeDomainName}>
+                      <CNavLink className={isSelctedTab("sync_view")} href={'#/sync/view?tab=sync_view&domainId=' + activeDomainId + '&domain=' + activeDomainName}>
                         Sync
                       </CNavLink>
                     </CNavItem>

@@ -58,6 +58,8 @@ const Keyword = (props) => {
   const [alertMsg, setAlertMsg] = useState('')
   const [activeKey, setActiveKey] = useState(1)
 
+  dispatch({ type: 'set', activeTab: "project_keyword" })
+
   const readKeyFile = async (e) => {
     e.preventDefault()
     const reader = new FileReader()
@@ -196,7 +198,7 @@ const Keyword = (props) => {
                 <CNav variant="tabs" role="tablist">
                   <CNavItem>
                     <CNavLink
-                      href="javascript:void(0);"
+                      href={void(0)}
                       active={activeKey === 1}
                       onClick={() => setActiveKey(1)}
                     >
@@ -205,7 +207,7 @@ const Keyword = (props) => {
                   </CNavItem>
                   <CNavItem>
                     <CNavLink
-                      href="javascript:void(0);"
+                      href={void(0)}
                       active={activeKey === 2}
                       onClick={() => setActiveKey(2)}
                     >
@@ -214,7 +216,7 @@ const Keyword = (props) => {
                   </CNavItem>
                   <CNavItem>
                     <CNavLink
-                      href="javascript:void(0);"
+                      href={void(0)}
                       active={activeKey === 3}
                       onClick={() => setActiveKey(3)}
                     >

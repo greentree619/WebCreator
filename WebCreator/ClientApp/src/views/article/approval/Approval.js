@@ -14,6 +14,7 @@ import {
   CFormSelect,
   CFormCheck,
   CLink,
+  CBadge,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
@@ -21,6 +22,7 @@ import PropTypes from 'prop-types'
 import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import { useDispatch, useSelector } from 'react-redux'
 
 class ApprovalBase extends Component {
   static displayName = ApprovalBase.name
@@ -280,7 +282,9 @@ class ApprovalBase extends Component {
                       }}/></td>
                   <td>{article.title}{(article.articleId == null 
                             || article.articleId != '1234567890')
-                            && (<>&nbsp;<span className="badge text-bg-info">AF</span></>)}</td>
+                            && (<>&nbsp;<CBadge color={
+                              (article.content == null || article.content.length == 0) ? "info" : "success"
+                            }>AF</CBadge></>)}</td>
                   <td>
                     <Link to={`/article/view`} state={{ mode: 'VIEW', article: article }}>
                       <CButton type="button">View</CButton>
@@ -409,6 +413,9 @@ ApprovalBase.propTypes = {
 
 const Approval = (props) => {
   const location = useLocation()
+  const dispatch = useDispatch()
+  dispatch({ type: 'set', activeTab: 'article_approval' })
+
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
     domainName: new URLSearchParams(location.search).get('domainName'), 

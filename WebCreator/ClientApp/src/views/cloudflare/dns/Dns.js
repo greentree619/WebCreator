@@ -11,6 +11,7 @@ import {
 import { DocsLink } from 'src/components'
 import { Outlet, Link } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
 
 class DnsBase extends Component {
@@ -176,6 +177,9 @@ DnsBase.propTypes = {
 
 const Dns = (props) => {
   const location = useLocation()
+  const dispatch = useDispatch()
+  dispatch({ type: 'set', activeTab: 'cloudflare_dns' })
+
   //console.log(location.state)
   if (location.state == null && location.search.length > 0) {
     location.state = { 

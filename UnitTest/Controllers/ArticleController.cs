@@ -367,6 +367,19 @@ namespace WebCreator.Controllers
             return Ok(ret);
         }
 
+        [HttpGet("scrapAFManual/{domainId}/{articleids}")]
+        public async Task<IActionResult> ScrapAFManualAsync(String domainId, String articleids)
+        {
+            bool ret = false;
+            if (CommonModule.isManualAFScrapping == false && (CommonModule.afThreadList[domainId] == null || (bool)CommonModule.afThreadList[domainId] == false))
+            {
+                Task.Run(() => new SerpapiScrap().ScrappingManualAFThreadAsync(domainId, articleids));
+                ret = true;
+                CommonModule.isManualAFScrapping = true;
+            }
+            return Ok(ret);
+        }
+
         [HttpPut("add")]
         public async Task<IActionResult> AddArticleAsync([FromBody] Article article)
         {

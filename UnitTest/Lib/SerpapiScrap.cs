@@ -121,6 +121,42 @@ namespace UnitTest.Lib
             }
         }
 
+        public async Task ScrappingManualAFThreadAsync(String _id, String articleIds)
+        {
+            try
+            {
+                CollectionReference col = Config.FirebaseDB.Collection("Articles");
+                Query query = col.WhereIn(FieldPath.DocumentId, articleIds.Split(','));
+                QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
+
+                Stack<Article> scrapArticles = new Stack<Article>();
+                foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                {
+                    var article = document.ConvertTo<Article>();
+                    article.Id = document.Id;
+                    scrapArticles.Push(article);
+                }
+
+                ArticleForge af = new ArticleForge();
+                bool afRet = false;
+                while (scrapArticles.Count > 0 && (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false))
+                {
+                    Article scrapAF = scrapArticles.Pop();
+                    do
+                    {
+                        Thread.Sleep(10000);
+                        afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                    }
+                    while (!afRet && (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            CommonModule.isManualAFScrapping = false;
+        }
+
         public async Task PublishThreadAsync(String _id, String scheduleId)
         {
             {

@@ -104,6 +104,40 @@ class ApprovalBase extends Component {
     });
   };
 
+  scrapFromAF = async () => {
+    var checkedItem = this.state.checkedItem
+    var articleIds = ''
+    Object.keys( checkedItem ).map((item)=>{
+      if( checkedItem[item] )
+      {
+        if(articleIds.length > 0) articleIds += ","
+        articleIds += item
+      }
+    })
+
+    const requestOptions = {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    }
+
+    console.log(this.state.projectInfo, this.state.projectInfo.projectid);
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrapAFManual/` + this.state.projectInfo.projectid + `/${articleIds}`, requestOptions)
+    this.setState({
+      alarmVisible: false,
+      alertMsg: 'Failed to scrapping from AF manually. Please check If AF Scheduleing is running. To use this feature must be to be off AF Scheduling',
+      alertColor: 'danger',
+    })
+    let ret = await response.json()
+    if (response.status === 200 && ret) {
+      //console.log('add success')
+      this.setState({
+        alertMsg: 'Started to scrapping from AF Successfully.',
+        alertColor: 'success',
+      })
+    }
+    this.setState({ alarmVisible: true })    
+  };
+
   async deleteArticle(_id) {
     const requestOptions = {
       method: 'DELETE',
@@ -321,16 +355,19 @@ class ApprovalBase extends Component {
                       />
                     </td>
                     <td className='px-2'>
-                      <Link onClick={() => this.setArticleState(2)}>Approval</Link>
+                      <CButton onClick={() => this.setArticleState(2)}>Approval</CButton>
                     </td>
                     <td className='px-2'>
-                      <Link onClick={() => this.setArticleState(1)}>UnApproval</Link>
+                      <CButton onClick={() => this.setArticleState(1)}>UnApproval</CButton>
                     </td>
                     <td className='px-2'>
-                      <Link onClick={() => this.setArticleState(3)}>Online</Link>
+                      <CButton onClick={() => this.setArticleState(3)}>Online</CButton>
                     </td>
                     <td className='px-2'>
-                      <Link onClick={() => this.deleteBatchArticleConfirm()}>Delete</Link>
+                      <CButton onClick={() => this.scrapFromAF()}>Scrap From AF</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.deleteBatchArticleConfirm()}>Delete</CButton>
                     </td>
                   </tr>
                 </table>

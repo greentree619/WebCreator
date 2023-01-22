@@ -25,6 +25,7 @@ const context =  [
   "/article/valid",
   "/article/UpdateBatchState",
   "/article/addArticlesByTitle",
+  "/article/scrapAFManual",
   "/dns",
   "/dns/byname",
   "/buildsync",

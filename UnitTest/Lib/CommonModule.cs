@@ -24,6 +24,7 @@ namespace UnitTest.Lib
         public static Hashtable refKeyCash = new Hashtable();
         public static Hashtable onThemeUpdateCash = new Hashtable();
         public static ArticleForgeSetting afSetting = new ArticleForgeSetting();
+        public static bool isManualAFScrapping = false;
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {

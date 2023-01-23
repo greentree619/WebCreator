@@ -371,11 +371,11 @@ namespace WebCreator.Controllers
         public async Task<IActionResult> ScrapAFManualAsync(String domainId, String articleids)
         {
             bool ret = false;
-            if (CommonModule.isManualAFScrapping == false && (CommonModule.afThreadList[domainId] == null || (bool)CommonModule.afThreadList[domainId] == false))
+            if (CommonModule.isManualAFScrapping == false)
             {
-                Task.Run(() => new SerpapiScrap().ScrappingManualAFThreadAsync(domainId, articleids));
-                ret = true;
                 CommonModule.isManualAFScrapping = true;
+                ret = true;
+                Task.Run(() => new SerpapiScrap().ScrappingManualAFThreadAsync(domainId, articleids));
             }
             return Ok(ret);
         }

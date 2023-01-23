@@ -87,6 +87,9 @@ namespace UnitTest.Lib
                             Article scrapAF = scrapArticles.Pop();
                             do {
                                 Thread.Sleep(10000);
+                                //{{In case start manual scrap, sleep untile complete
+                                while( CommonModule.isManualAFScrapping ) Thread.Sleep(5000);
+                                //}}In case start manual scrap, sleep untile complete
                                 afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
                             }
                             while (!afRet && (bool)CommonModule.afThreadList[_id]);
@@ -101,6 +104,9 @@ namespace UnitTest.Lib
                                 Article scrapAF = scrapArticles.Pop();
                                 do {
                                     Thread.Sleep(10000);
+                                    //{{In case start manual scrap, sleep untile complete
+                                    while (CommonModule.isManualAFScrapping) Thread.Sleep(5000);
+                                    //}}In case start manual scrap, sleep untile complete
                                     afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
                                 }
                                 while ( !afRet && (bool)CommonModule.afThreadList[_id]);

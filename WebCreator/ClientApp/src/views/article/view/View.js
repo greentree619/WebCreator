@@ -34,6 +34,7 @@ const View = (props) => {
   const [alertColor, setAlertColor] = useState('success')
   const [alertMsg, setAlertMsg] = useState('')
   const [title, setTitle] = useState('')
+  const [article, setArticle] = useState({})
   const [content, setContent] = useState('')
   const [footer, setFooter] = useState('')
   const [metaDescription, setMetaDescription] = useState('')
@@ -55,6 +56,7 @@ const View = (props) => {
       if (data.data.metaAuthor != null) setMetaAuthor(data.data.metaAuthor)
       if (data.data.content != null) setContent(data.data.content)      
       if (data.data.footer != null) setFooter(data.data.footer)
+      setArticle(data.data)
     }
     getFetch()
 
@@ -77,10 +79,13 @@ const View = (props) => {
         metaAuthor: metaAuthor,
         content: content,
         footer: footer,
+        state: article.state,
       }),
     }
 
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/update_content`, requestOptions)
+    console.log(location.state.projectInfo);
+
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/update_content/${location.state.projectInfo.projectid}/${location.state.projectInfo.domainName}/${location.state.projectInfo.domainIp}`, requestOptions)
     setAlertColor('danger')
     setAlertMsg('Faild to update content unfortunatley.')
     let ret = await response.json()

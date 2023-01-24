@@ -330,7 +330,7 @@ class ListBase extends Component {
                       Sync
                     </CButton>
                     &nbsp;
-                    <Link to={`/article/view`} state={{ mode: 'VIEW', article: article }}>
+                    <Link to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
                       <CButton type="button">View</CButton>
                     </Link>
                     &nbsp;

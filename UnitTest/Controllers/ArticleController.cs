@@ -3,6 +3,7 @@ using FireSharp.Interfaces;
 using FireSharp.Response;
 using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -240,6 +241,7 @@ namespace WebCreator.Controllers
                 DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
                 if (articleSnapshot.Exists) {
                     article = articleSnapshot.ConvertTo<Article>();
+                    article.Content = CommonModule.PreAdjustForTitleImage(article.Content);
                 }
 #if false
                 if (article.Progress == 0 
@@ -359,10 +361,27 @@ namespace WebCreator.Controllers
             return Ok(true);
         }
 
-        [HttpPut("UpdateBatchState/{articleids}/{state}")]
-        public async Task<IActionResult> UpdateBatchStateAsync(String articleids, Int32 state)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="articleids"></param>
+        /// <param name="state">0: Unknow, 1: unapproval, 2: approval, 3:online, 4:delete</param>
+        /// <returns></returns>
+        [HttpPut("UpdateBatchState/{domainId}/{domainName}/{ipAddr}/{articleids}/{state}")]
+        public async Task<IActionResult> UpdateBatchStateAsync(String domainId, String domainName, String ipAddr, String articleids, Int32 state)
         {
-            bool ret = await CommonModule.UpdateBatchState(articleids, state);
+            bool ret = false;
+            if (state == 1 || state == 2 || state == 4 || 
+                (state == 3 && !CommonModule.isManualSync))
+            {
+                if(state == 3)
+                {
+                    CommonModule.isManualSync = true;
+                    Task.Run(() => new SerpapiScrap().ManualArticlesSyncAsync(domainId, domainName, ipAddr, articleids));
+                }
+
+                ret = await CommonModule.UpdateBatchState(articleids, state);
+            }
 
             return Ok(ret);
         }
@@ -394,23 +413,32 @@ namespace WebCreator.Controllers
             return Ok(true);
         }
 
-        [HttpPut("update_content")]
-        public async Task<IActionResult> UpdateContentAsync([FromBody] Article article)
+        [HttpPut("update_content/{domainId}/{domainName}/{ipAddr}")]
+        public async Task<IActionResult> UpdateContentAsync(string domainId, string domainName, string ipAddr, [FromBody] Article article)
         {
-            try
+            try 
             {
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 DocumentReference docRef = articlesCol.Document(article.Id);
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
-                {
-                    { "MetaAuthor", article.MetaAuthor },
-                    { "MetaDescription", article.MetaDescription },
-                    { "MetaKeywords", article.MetaKeywords },
-                    { "Content", article.Content },
-                    { "Footer", article.Footer },
-                };
+                    {
+                        { "MetaAuthor", article.MetaAuthor },
+                        { "MetaDescription", article.MetaDescription },
+                        { "MetaKeywords", article.MetaKeywords },
+                        { "Content", article.Content },
+                        { "Footer", article.Footer },
+                    };
                 await docRef.UpdateAsync(userUpdate);
+
+                //If article is online, build & sync
+                if (article.State == 3)
+                {
+                    CommonModule.isManualSync = true;
+                    await CommonModule.BuildArticlePageThreadAsync(domainId, domainName, article.Id);
+                    await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr);
+                    CommonModule.isManualSync = false;
+                }
             }
             catch (Exception ex)
             {

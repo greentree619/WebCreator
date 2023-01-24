@@ -13,6 +13,7 @@ using System.Collections;
 using System.Net;
 using System.Web;
 using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace UnitTest.Lib
 {
@@ -25,6 +26,7 @@ namespace UnitTest.Lib
         public static Hashtable onThemeUpdateCash = new Hashtable();
         public static ArticleForgeSetting afSetting = new ArticleForgeSetting();
         public static bool isManualAFScrapping = false;
+        public static bool isManualSync = false;
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -503,40 +505,6 @@ namespace UnitTest.Lib
                         String title = article.Title.Replace("?", "").Trim();
                         title = title.Replace(" ", "-");
                         GenerateArticleHtml(curFolder + "\\" + title + ".html", article, articleTemplate);
-                        //using (StreamWriter writer = new StreamWriter(curFolder + "\\" + title + ".html"))
-                        //{
-                        //    writer.Write("<!DOCTYPE html>");
-                        //    writer.Write("<html>");
-                        //    writer.Write("<head>");
-                        //    writer.Write($"<title>{article.Title}</title>");
-                        //    if (article.MetaDescription != null && article.MetaDescription.Length > 0)
-                        //    {
-                        //        writer.Write($"<meta name=\"description\" content=\"{article.MetaDescription}\">");
-                        //    }
-
-                        //    if (article.MetaKeywords != null && article.MetaKeywords.Length > 0)
-                        //    {
-                        //        writer.Write($"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">");
-                        //    }
-
-                        //    if (article.MetaAuthor != null && article.MetaAuthor.Length > 0)
-                        //    {
-                        //        writer.Write($"<meta name=\"author\" content=\"{article.MetaAuthor}\">");
-                        //    }
-
-                        //    writer.Write($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-                        //    writer.Write("</head>");
-                        //    writer.Write("<body>");
-                        //    writer.Write(article.Content);
-                        //    if (article.Footer != null && article.Footer.Length > 0)
-                        //    {
-                        //        writer.Write("<footer>");
-                        //        writer.Write(article.Footer);
-                        //        writer.Write("</footer>");
-                        //    }
-                        //    writer.Write("</body>");
-                        //    writer.Write("</html>");
-                        //}
 
                         //{{Update state
                         if (article.State == 2)
@@ -551,6 +519,49 @@ namespace UnitTest.Lib
                 if (articleUpdateStateIds.Length > 0)
                 {
                     await CommonModule.UpdateBatchState(articleUpdateStateIds, 3);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        static public async Task BuildPagesFromArtidleIdsAsync(String domainid, String domain, String articleIds)
+        {
+            try
+            {
+                String[] aids = articleIds.Split(',');
+                String curFolder = Directory.GetCurrentDirectory();
+                curFolder += $"\\Build\\{domain}";
+                if (!Directory.Exists(curFolder))
+                {
+                    Directory.CreateDirectory(curFolder);
+                }
+                else
+                {
+                    CommonModule.DeleteAllContentInFolder(curFolder);
+                }
+
+                String articleTemplate = GetArticleTemplate(domain);
+
+                String articleUpdateStateIds = "";
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                Query query = articlesCol.WhereIn(FieldPath.DocumentId, aids);
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot document in snapshot.Documents)
+                {
+                    var article = document.ConvertTo<Article>();
+                    if (article.Content != null && article.Content.Length > 0)
+                    {
+                        //{{Stop When update theme
+                        while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
+                        //}}Stop When update theme
+                        String title = article.Title.Replace("?", "").Trim();
+                        title = title.Replace(" ", "-");
+                        GenerateArticleHtml(curFolder + "\\" + title + ".html", article, articleTemplate);
+                    }
                 }
             }
             catch (Exception ex)
@@ -642,6 +653,27 @@ namespace UnitTest.Lib
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        static public String PreAdjustForTitleImage(String content)
+        {
+            String tmpContent = content;
+            Regex regex = new Regex("([{][^{}]+[}])");
+
+            while (tmpContent.Contains("|"))
+            {
+                string[] subContents = regex.Split(tmpContent);
+                tmpContent = "";
+                foreach (String sub in subContents)
+                {
+                    if (sub.Length == 0) continue;
+
+                    if (sub[0] == '{' && sub[sub.Length - 1] == '}') tmpContent += sub.Split("|")[0].Substring(1);
+                    else tmpContent += sub;
+                }
+            }
+            
+            return tmpContent;
         }
     }
 }

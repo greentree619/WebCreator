@@ -145,7 +145,7 @@ namespace UnitTest.Lib
 
                 ArticleForge af = new ArticleForge();
                 bool afRet = false;
-                while (scrapArticles.Count > 0 && (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false))
+                while (scrapArticles.Count > 0)
                 {
                     Article scrapAF = scrapArticles.Pop();
                     do
@@ -153,7 +153,7 @@ namespace UnitTest.Lib
                         Thread.Sleep(10000);
                         afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
                     }
-                    while (!afRet && (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false));
+                    while ( !afRet );
                 }
             }
             catch (Exception ex)
@@ -161,6 +161,13 @@ namespace UnitTest.Lib
                 Console.WriteLine(ex.Message);
             }
             CommonModule.isManualAFScrapping = false;
+        }
+
+        public async Task ManualArticlesSyncAsync(String domainId, String domainName, String ipAddr, String articleIds)
+        {
+            await CommonModule.BuildPagesFromArtidleIdsAsync(domainId, domainName, articleIds);
+            await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr);
+            CommonModule.isManualSync = false;
         }
 
         public async Task PublishThreadAsync(String _id, String scheduleId)
@@ -192,7 +199,6 @@ namespace UnitTest.Lib
                     }
 
                     ArticleForge af = new ArticleForge();
-                    bool afRet = false;
                     if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
                     {
                         schedule = scheduleSnapshot.ConvertTo<PublishSchedule>();
@@ -203,12 +209,16 @@ namespace UnitTest.Lib
                             do
                             {
                                 Thread.Sleep(10000);
+                                
+                                //Incase manual sync, sleep untile complete
+                                while (CommonModule.isManualSync) Thread.Sleep(5000);
+
                                 //{{
                                 await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id);
                                 await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
                                 //}}
                             }
-                            while (!afRet && (bool)CommonModule.publishThreadList[_id]);
+                            while ((bool)CommonModule.publishThreadList[_id]);
                         }
 
                         while ((bool)CommonModule.publishThreadList[_id])
@@ -221,12 +231,15 @@ namespace UnitTest.Lib
                                 do
                                 {
                                     Thread.Sleep(10000);
+                                    //Incase manual sync, sleep untile complete
+                                    while (CommonModule.isManualSync) Thread.Sleep(5000);
+
                                     //{{
                                     await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id);
                                     await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
                                     //}}
                                 }
-                                while (!afRet && (bool)CommonModule.publishThreadList[_id]);
+                                while ((bool)CommonModule.publishThreadList[_id]);
 
                             }
                         }

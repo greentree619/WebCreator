@@ -192,7 +192,7 @@ class ApprovalBase extends Component {
       headers: { 'Content-Type': 'application/json' },
     }
 
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/UpdateBatchState/${articleIds}/${articleState}`, requestOptions)
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/UpdateBatchState/${this.state.projectInfo.projectid}/${this.state.projectInfo.domainName}/${this.state.projectInfo.domainIp}/${articleIds}/${articleState}`, requestOptions)
     this.setState({
       alarmVisible: false,
       alertMsg: 'Failed to change State.',
@@ -320,7 +320,7 @@ class ApprovalBase extends Component {
                               (article.content == null || article.content.length == 0) ? "info" : "success"
                             }>AF</CBadge></>)}</td>
                   <td>
-                    <Link to={`/article/view`} state={{ mode: 'VIEW', article: article }}>
+                    <Link to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
                       <CButton type="button">View</CButton>
                     </Link>
                     &nbsp;

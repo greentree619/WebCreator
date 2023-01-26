@@ -25,6 +25,8 @@ import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import { Col } from 'reactstrap'
 import { useDispatch, useSelector } from 'react-redux'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const View = (props) => {
   const location = useLocation()
@@ -139,26 +141,59 @@ const View = (props) => {
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}project/startaf/${domainId}/${location.state.scheduleId}`,
     )
-    setAlarmVisible(false)
-    setAlertMsg('Unfortunately, scrapping faild.')
-    setAlertColor('danger')
+    // setAlarmVisible(false)
+    // setAlertMsg('Unfortunately, scrapping faild.')
+    // setAlertColor('danger')
     if (response.status === 200) {
       //console.log('add success')
       let ret = await response.json()
       if(ret)
       {
         setScrapCommand('Stop Scrapping')
-        setAlertMsg('Article Forge Scrapping Schedule started successfully.')
-        setAlertColor('success')
+        // setAlertMsg('Article Forge Scrapping Schedule started successfully.')
+        // setAlertColor('success')
+        toast.success('Article Forge Scrapping Schedule started successfully.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          });
       }
       else
       {
         setScrapCommand('Start Scrapping')
-        setAlertMsg('Article Forge Scrapping Schedule stopped.')
-        setAlertColor('success')
+        // setAlertMsg('Article Forge Scrapping Schedule stopped.')
+        // setAlertColor('success')
+        toast.success('Article Forge Scrapping Schedule stopped.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          });
       }
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Unfortunately, scrapping faild.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
 
     console.log('clicked ' + betweenUnit)
   }
@@ -167,26 +202,59 @@ const View = (props) => {
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}project/startPublish/${domainId}/${location.state.publishScheduleId}`,
     )
-    setAlarmVisible(false)
-    setAlertMsg('Unfortunately, Publish Schedule faild.')
-    setAlertColor('danger')
+    // setAlarmVisible(false)
+    // setAlertMsg('Unfortunately, Publish Schedule faild.')
+    // setAlertColor('danger')
     if (response.status === 200) {
       //console.log('add success')
       let ret = await response.json()
       if(ret)
       {
         setPublishCommand('Stop Publish')
-        setAlertMsg('Publish Schedule started successfully.')
-        setAlertColor('success')
+        // setAlertMsg('Publish Schedule started successfully.')
+        // setAlertColor('success')
+        toast.success('Publish Schedule started successfully.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          });
       }
       else
       {
         setPublishCommand('Start Publish')
-        setAlertMsg('Publish Schedule stopped.')
-        setAlertColor('success')
+        // setAlertMsg('Publish Schedule stopped.')
+        // setAlertColor('success')
+        toast.success('Publish Schedule stopped.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          });
       }
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Unfortunately, Publish Schedule faild.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
 
     console.log('clicked ' + betweenUnit)
   }
@@ -228,14 +296,37 @@ const View = (props) => {
     }
 
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/updateSchedule`, requestOptions)
-    setAlertColor('danger')
-    setAlertMsg('Faild to update AF schedule unfortunatley.')
+    // setAlertColor('danger')
+    // setAlertMsg('Faild to update AF schedule unfortunatley.')
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertMsg('Updated AF schedule successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Updated AF schedule successfully.')
+      // setAlertColor('success')
+      toast.success('Updated AF schedule successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Faild to update AF schedule unfortunatley.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   const handlePublishSubmit = (event) => {
@@ -267,18 +358,53 @@ const View = (props) => {
     }
 
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/updatePublishSchedule`, requestOptions)
-    setAlertColor('danger')
-    setAlertMsg('Faild to update publish schedule unfortunatley.')
+    // setAlertColor('danger')
+    // setAlertMsg('Faild to update publish schedule unfortunatley.')
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertMsg('Updated publish schedule successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Updated publish schedule successfully.')
+      // setAlertColor('success')
+      toast.success('Updated publish schedule successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Faild to update publish schedule unfortunatley.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   return (
     <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <CAlert
         color={alertColor}
         dismissible

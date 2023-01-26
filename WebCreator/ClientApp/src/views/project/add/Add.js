@@ -25,6 +25,8 @@ import { DocsLink } from 'src/components'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { Outlet, Link } from 'react-router-dom'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Add = (props) => {
   let languageMap = [
@@ -215,16 +217,40 @@ const Add = (props) => {
     }
 
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project`, requestOptions)
-    setAlertColor('danger')
-    setAlertMsg('Faild to create/update new domain unfortunatley.')
+    // setAlertColor('danger')
+    // setAlertMsg('Faild to create/update new domain unfortunatley.')
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertMsg('Created/Updated new domain successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Created/Updated new domain successfully.')
+      // setAlertColor('success')
+      toast.success('Created/Updated new domain successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
 
       if (simpleMode) navigate('/dashboard')
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Faild to create/update new domain unfortunatley.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    //setAlarmVisible(true)
+    
   }
 
   const handleClick = (lang, value) => {
@@ -267,15 +293,38 @@ const Add = (props) => {
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}project/serpapi/` + _id + '/' + keyword + '/' + count,
     )
-    setAlarmVisible(false)
-    setAlertMsg('Unfortunately, scrapping faild.')
-    setAlertColor('danger')
+    // setAlarmVisible(false)
+    // setAlertMsg('Unfortunately, scrapping faild.')
+    // setAlertColor('danger')
     if (response.status === 200) {
       //console.log('add success')
-      setAlertMsg('Completed to scrapping questions from google successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Completed to scrapping questions from google successfully.')
+      // setAlertColor('success')
+      toast.success('Completed to scrapping questions from google successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Unfortunately, scrapping faild.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   const renderLanguageItem = () => {
@@ -367,6 +416,18 @@ const Add = (props) => {
 
   return (
     <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <CContainer className="px-4">
         <CRow xs={{ gutterX: 5 }}>
           <CCol>

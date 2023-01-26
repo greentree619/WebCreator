@@ -27,6 +27,8 @@ import plugins from 'suneditor/src/plugins'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const View = (props) => {
   const location = useLocation()
@@ -86,14 +88,37 @@ const View = (props) => {
     console.log(location.state.projectInfo);
 
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/update_content/${location.state.projectInfo.projectid}/${location.state.projectInfo.domainName}/${location.state.projectInfo.domainIp}`, requestOptions)
-    setAlertColor('danger')
-    setAlertMsg('Faild to update content unfortunatley.')
+    // setAlertColor('danger')
+    // setAlertMsg('Faild to update content unfortunatley.')
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertMsg('Article content is updated successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Article content is updated successfully.')
+      // setAlertColor('success')
+      toast.success('Article content is updated successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Faild to update content unfortunatley.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   const footEditor = useRef(null)
@@ -112,6 +137,18 @@ const View = (props) => {
       <CCard className="mb-4">
         <CCardHeader>Article View</CCardHeader>
         <CCardBody>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
           <CAlert
             color={alertColor}
             dismissible

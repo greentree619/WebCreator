@@ -26,6 +26,8 @@ import { DocsLink } from 'src/components'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Setting = (props) => {
   const location = useLocation()
@@ -96,14 +98,37 @@ const Setting = (props) => {
     }
 
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}setting/afsetting`, requestOptions)
-    setAlertColor('danger')
-    setAlertMsg('Faild to update Article Forge Setting unfortunatley.')
+    // setAlertColor('danger')
+    // setAlertMsg('Faild to update Article Forge Setting unfortunatley.')
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertMsg('Updated Article Forge Setting successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Updated Article Forge Setting successfully.')
+      // setAlertColor('success')
+      toast.success('Updated Article Forge Setting successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Faild to update Article Forge Setting unfortunatley.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   return (
@@ -111,6 +136,18 @@ const Setting = (props) => {
       <CCard className="mb-4">
         <CCardHeader>Article Forge Setting</CCardHeader>
         <CCardBody>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
           <CAlert
             color={alertColor}
             dismissible

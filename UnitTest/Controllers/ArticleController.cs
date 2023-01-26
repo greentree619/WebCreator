@@ -70,7 +70,7 @@ namespace WebCreator.Controllers
         {
             if (state == 0)
             {//missed content
-                query = query.WhereNotEqualTo("State", 4);
+                query = query.OrderBy("State").WhereNotEqualTo("State", 4);
             }
             else if (state == 1)
             {//missed content

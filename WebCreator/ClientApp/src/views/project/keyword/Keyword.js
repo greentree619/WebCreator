@@ -31,6 +31,8 @@ import { DocsLink } from 'src/components'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { Outlet, Link } from 'react-router-dom'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Keyword = (props) => {
   const location = useLocation()
@@ -109,19 +111,43 @@ const Keyword = (props) => {
 
     console.log( requestOptions );
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project`, requestOptions)
-    setAlertColor('danger')
-    setAlertMsg('Faild to update unfortunatley.')
+    // setAlertColor('danger')
+    // setAlertMsg('Faild to update unfortunatley.')
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertMsg('Updated scrap information successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Updated scrap information successfully.')
+      // setAlertColor('success')
 
       location.state.project.keyword = searchKeyword
       location.state.project.quesionsCount = questionsCount
       dispatch({ type: 'set', activeProject: location.state.project })
       console.log(location.state.project, "after update")
+
+      toast.success('Updated scrap information successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Faild to update unfortunatley.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   async function scrapQuery(_id, keyword, count) {
@@ -130,15 +156,38 @@ const Keyword = (props) => {
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}project/serpapi/` + _id + '/' + keyword + '/' + count,
     )
-    setAlarmVisible(false)
-    setAlertMsg('Unfortunately, scrapping faild.')
-    setAlertColor('danger')
+    // setAlarmVisible(false)
+    // setAlertMsg('Unfortunately, scrapping faild.')
+    // setAlertColor('danger')
     if (response.status === 200) {
       //console.log('add success')
-      setAlertMsg('Completed to scrapping questions from google successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Completed to scrapping questions from google successfully.')
+      // setAlertColor('success')
+      toast.success('Completed to scrapping questions from google successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Unfortunately, scrapping faild.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   async function addManualArticleByTitle()
@@ -149,15 +198,38 @@ const Keyword = (props) => {
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}article/addArticlesByTitle/` + location.state.project.id + '/' + kwd,
     )
-    setAlarmVisible(false)
-    setAlertMsg('Unfortunately, To adding manual article faild.')
-    setAlertColor('danger')
+    // setAlarmVisible(false)
+    // setAlertMsg('Unfortunately, To adding manual article faild.')
+    // setAlertColor('danger')
     if (response.status === 200) {
       //console.log('add success')
-      setAlertMsg('Completed to add manual article successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Completed to add manual article successfully.')
+      // setAlertColor('success')
+      toast.success('Completed to add manual article successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Unfortunately, To adding manual article faild.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   async function addManualArticleByFileTitle()
@@ -168,15 +240,38 @@ const Keyword = (props) => {
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}article/addArticlesByTitle/` + location.state.project.id + '/' + kwd,
     )
-    setAlarmVisible(false)
-    setAlertMsg('Unfortunately, To adding manual article faild.')
-    setAlertColor('danger')
+    // setAlarmVisible(false)
+    // setAlertMsg('Unfortunately, To adding manual article faild.')
+    // setAlertColor('danger')
     if (response.status === 200) {
       //console.log('add success')
-      setAlertMsg('Completed to add manual article from file successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Completed to add manual article from file successfully.')
+      // setAlertColor('success')
+      toast.success('Completed to add manual article from file successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Unfortunately, To adding manual article faild.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   return (
@@ -187,6 +282,18 @@ const Keyword = (props) => {
             <CCard className="mb-4">
               <CCardHeader>Keyword Management</CCardHeader>
               <CCardBody>
+                <ToastContainer
+                  position="top-right"
+                  autoClose={5000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  theme="colored"
+                />
                 <CAlert
                   color={alertColor}
                   dismissible

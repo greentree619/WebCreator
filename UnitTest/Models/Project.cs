@@ -5,6 +5,20 @@ namespace WebCreator.Models
     [FirestoreData]
     public class _ContactInfo
     {
+        public _ContactInfo()
+        {
+            Brandname = "";
+            StreetAddress = "";
+            AdrdressLocality = "";
+            AddressRegion = "";
+            PostalCode = "";
+            Country = "";
+            Phone = "";
+            Website = "";
+            DescriptionOfCompany = "";
+            OpeningHours = "";
+        }
+
         [FirestoreProperty]
         public String Brandname { get; set; }//: Organic Wine Online
         [FirestoreProperty]

@@ -72,6 +72,7 @@ namespace WebCreator.Controllers
                 {
                     var project = document.ConvertTo<Project>();
                     project.Id = document.Id;
+                    if (project.ContactInfo == null) project.ContactInfo = new _ContactInfo();
                     list.Add(project);
                 }
             }

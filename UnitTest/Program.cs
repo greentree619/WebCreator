@@ -138,7 +138,7 @@ catch (Exception ex)
 ////{{OpenAI Content Generate TEST
 //OpenAIAPI api = new OpenAIAPI("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");
 //var result = await api.Completions.CreateCompletionAsync(
-//    new CompletionRequest("Write a Blogpost for 500 words about: what is the healthiest red wine to drink"
+//    new CompletionRequest("Write a Blogpost for 500 words about: what is a good Amarone red wine"
 //    , model: Model.DavinciText
 //    , temperature: 0.1
 //    , max_tokens: 1000));

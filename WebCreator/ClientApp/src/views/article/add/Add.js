@@ -27,6 +27,8 @@ import plugins from 'suneditor/src/plugins'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Add = (props) => {
   const location = useLocation()
@@ -74,14 +76,37 @@ const Add = (props) => {
     }
 
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/add`, requestOptions)
-    setAlertColor('danger')
-    setAlertMsg('Faild to add article unfortunatley.')
+    // setAlertColor('danger')
+    // setAlertMsg('Faild to add article unfortunatley.')
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertMsg('Article content is added successfully.')
-      setAlertColor('success')
+      // setAlertMsg('Article content is added successfully.')
+      // setAlertColor('success')
+      toast.success('Article content is added successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true)
+    else
+    {
+      toast.error('Faild to add article unfortunatley.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true)
   }
 
   const updatePixabayURL = async (val) => {
@@ -112,6 +137,18 @@ const Add = (props) => {
           >
             {alertMsg}
           </CAlert>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
           <CForm className="row g-3 needs-validation">
           <div className="mb-3">
               <CFormLabel htmlFor="exampleFormControlInput1">Title</CFormLabel>

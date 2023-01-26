@@ -33,6 +33,8 @@ import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
 import { useDispatch, useSelector } from 'react-redux'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Article = (props) => {
   const location = useLocation()
@@ -73,14 +75,37 @@ const Article = (props) => {
       requestOptions,
     )
 
-    setAlertColor('danger');
-    setAlertMsg('Theme upload is failed, unfortunatley.');
+    // setAlertColor('danger');
+    // setAlertMsg('Theme upload is failed, unfortunatley.');
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      setAlertColor('success');
-      setAlertMsg('Zip file was created successfully.');
+      // setAlertColor('success');
+      // setAlertMsg('Zip file was created successfully.');
+      toast.success('Zip file was created successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    setAlarmVisible(true);
+    else
+    {
+      toast.error('Theme upload is failed, unfortunatley.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // setAlarmVisible(true);
   }
 
   const handleFileReader = (event) => {
@@ -92,6 +117,18 @@ const Article = (props) => {
       <CCard className="mb-4">
         <CCardHeader>Theme Upload</CCardHeader>
         <CCardBody>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
           <CAlert
             color={alertColor}
             dismissible

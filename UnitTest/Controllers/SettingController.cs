@@ -37,5 +37,19 @@ namespace WebCreator.Controllers
             await CommonModule.afSetting.SaveSettingAsync(afSet);
             return Ok(true);
         }
+
+        [HttpGet("openAISetting")]
+        public async Task<IActionResult> GetOpenAISettingAsync()
+        {
+            OpenAISetting setting = await CommonModule.openAISetting.GetSettingAsync();
+            return Ok(new { data = setting });
+        }
+
+        [HttpPut("openAISetting")]
+        public async Task<IActionResult> PutOpenAISettingAsync([FromBody] OpenAISetting openAISet)
+        {
+            await CommonModule.openAISetting.SaveSettingAsync(openAISet);
+            return Ok(true);
+        }
     }
 }

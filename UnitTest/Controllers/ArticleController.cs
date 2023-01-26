@@ -386,15 +386,22 @@ namespace WebCreator.Controllers
             return Ok(ret);
         }
 
-        [HttpGet("scrapAFManual/{domainId}/{articleids}")]
-        public async Task<IActionResult> ScrapAFManualAsync(String domainId, String articleids)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mode">0: AF, 1: OpenAI</param>
+        /// <param name="domainId"></param>
+        /// <param name="articleids"></param>
+        /// <returns></returns>
+        [HttpGet("scrapArticleManual/{mode}/{domainId}/{articleids}")]
+        public async Task<IActionResult> ScrapAFManualAsync(String mode, String domainId, String articleids)
         {
             bool ret = false;
-            if (CommonModule.isManualAFScrapping == false)
+            if (mode == "0" && CommonModule.isManualAFScrapping == false || mode == "1")
             {
-                CommonModule.isManualAFScrapping = true;
+                if(mode == "0") CommonModule.isManualAFScrapping = true;
                 ret = true;
-                Task.Run(() => new SerpapiScrap().ScrappingManualAFThreadAsync(domainId, articleids));
+                Task.Run(() => new SerpapiScrap().ScrappingManualThreadAsync(mode, domainId, articleids));
             }
             return Ok(ret);
         }

@@ -57,6 +57,11 @@ const AppHeader = () => {
             AF Setting
           </CNavLink>
         </CNavItem>
+        <CNavItem>
+          <CNavLink href={'#/openai/setting/?domainId=' + activeDomainId}>
+            OpenAI Setting
+          </CNavLink>
+        </CNavItem>
         </CHeaderNav>
         <CHeaderNav>
           <CNavItem>

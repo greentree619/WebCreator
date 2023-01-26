@@ -104,7 +104,8 @@ class ApprovalBase extends Component {
     });
   };
 
-  scrapFromAF = async () => {
+  //mode - 0: AF, 1: OpenAI  
+  scrapFromAPI = async (mode) => {
     var checkedItem = this.state.checkedItem
     var articleIds = ''
     Object.keys( checkedItem ).map((item)=>{
@@ -121,7 +122,7 @@ class ApprovalBase extends Component {
     }
 
     console.log(this.state.projectInfo, this.state.projectInfo.projectid);
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrapAFManual/` + this.state.projectInfo.projectid + `/${articleIds}`, requestOptions)
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrapArticleManual/${mode}/` + this.state.projectInfo.projectid + `/${articleIds}`, requestOptions)
     this.setState({
       alarmVisible: false,
       alertMsg: 'Failed to scrapping from AF manually. Please check If AF Scheduleing is running. To use this feature must be to be off AF Scheduling',
@@ -314,11 +315,14 @@ class ApprovalBase extends Component {
                         })  
                         console.log(e.target.checked, this.state.checkedItem[article.id])
                       }}/></td>
-                  <td>{article.title}{(article.articleId == null 
-                            || article.articleId != '1234567890')
-                            && (<>&nbsp;<CBadge color={
-                              (article.content == null || article.content.length == 0) ? "info" : "success"
-                            }>AF</CBadge></>)}</td>
+                  <td>{article.title}{((article.articleId == null || (article.articleId != '1234567890' && article.articleId != '55555'))
+                                                                                        && (<>&nbsp;<CBadge color={
+                                                            (article.content == null || article.content.length == 0) ? "info" : "success"
+                                                            }>AF</CBadge></>) 
+                                      || (article.articleId != null && article.articleId == '55555' && (<>&nbsp;<CBadge color={
+                                                            (article.content == null || article.content.length == 0) ? "info" : "success"
+                                                            }>OpenAI</CBadge></>) ))}
+                  </td>
                   <td>
                     <Link to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
                       <CButton type="button">View</CButton>
@@ -364,7 +368,10 @@ class ApprovalBase extends Component {
                       <CButton onClick={() => this.setArticleState(3)}>Online</CButton>
                     </td>
                     <td className='px-2'>
-                      <CButton onClick={() => this.scrapFromAF()}>Scrap From AF</CButton>
+                      <CButton onClick={() => this.scrapFromAPI(0)}>Scrap From AF</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.scrapFromAPI(1)}>Scrap From OpenAI</CButton>
                     </td>
                     <td className='px-2'>
                       <CButton onClick={() => this.deleteBatchArticleConfirm()}>Delete</CButton>

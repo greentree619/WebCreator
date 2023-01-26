@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
+using OpenAI_API;
 using System.Collections;
 using System.IO.Compression;
 using System.Text;
@@ -131,6 +132,16 @@ catch (Exception ex)
 //Regex regex = new Regex("[{]([^{}]+)[}]");
 //string[] substrings = regex.Split(content);
 ////}}REGEXPRESS TEST
+
+////{{OpenAI Content Generate TEST
+//OpenAIAPI api = new OpenAIAPI("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");
+//var result = await api.Completions.CreateCompletionAsync(
+//    new CompletionRequest("Write a Blogpost for 500 words about: what is the healthiest red wine to drink"
+//    , model: Model.DavinciText
+//    , temperature: 0.1
+//    , max_tokens: 1000));
+//Console.WriteLine(result.ToString());
+////}}OpenAI Content Generate TEST
 
 //Refresh Article Forge Scrapping status.
 Task.Run(() => new CommonModule().UpdateArticleScrappingProgress());

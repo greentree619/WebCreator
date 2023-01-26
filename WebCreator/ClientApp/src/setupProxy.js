@@ -25,12 +25,13 @@ const context =  [
   "/article/valid",
   "/article/UpdateBatchState",
   "/article/addArticlesByTitle",
-  "/article/scrapAFManual",
+  "/article/scrapArticleManual",
   "/dns",
   "/dns/byname",
   "/buildsync",
   "/buildsync/sync",
   "/setting/afsetting",
+  "/setting/openAISetting",
 ];
 
 module.exports = function(app) {

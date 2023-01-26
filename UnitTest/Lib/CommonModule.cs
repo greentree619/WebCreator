@@ -14,6 +14,7 @@ using System.Net;
 using System.Web;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
+using OpenAI_API;
 
 namespace UnitTest.Lib
 {
@@ -25,6 +26,7 @@ namespace UnitTest.Lib
         public static Hashtable refKeyCash = new Hashtable();
         public static Hashtable onThemeUpdateCash = new Hashtable();
         public static ArticleForgeSetting afSetting = new ArticleForgeSetting();
+        public static OpenAIAPISetting openAISetting = new OpenAIAPISetting();
         public static bool isManualAFScrapping = false;
         public static bool isManualSync = false;
 
@@ -152,6 +154,43 @@ namespace UnitTest.Lib
                     await docRef.UpdateAsync(userUpdate);
                     status = true;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return status;
+        }
+
+        public static async Task<bool> ScrapArticleByOpenAIAsync(OpenAIAPI openAI, String question, String articleid)
+        {
+            bool status = false;
+            try
+            {
+                var result = await openAI.Completions.CreateCompletionAsync(
+                    new CompletionRequest(CommonModule.openAISetting.GetPrompt(question)
+                    , model: CommonModule.openAISetting.setInf.Model
+                    , temperature: CommonModule.openAISetting.setInf.Temperature
+                    , max_tokens: CommonModule.openAISetting.setInf.MaxTokens
+                    , top_p: CommonModule.openAISetting.setInf.TopP
+                    , numOutputs: CommonModule.openAISetting.setInf.N
+                    , presencePenalty: CommonModule.openAISetting.setInf.PresencePenalty
+                    , frequencyPenalty: CommonModule.openAISetting.setInf.FrequencyPenalty));
+
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                DocumentReference docRef = articlesCol.Document(articleid);
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                    {
+                        { "ArticleId", "55555" },
+                        { "Progress", 100 },
+                        { "Content", result.ToString() },
+                        { "IsScrapping", false },
+                        { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
+                    };
+                await docRef.UpdateAsync(userUpdate);
+                status = true;
             }
             catch (Exception ex)
             {

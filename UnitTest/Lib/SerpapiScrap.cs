@@ -1,5 +1,6 @@
 ﻿using Google.Cloud.Firestore;
 using Newtonsoft.Json.Linq;
+using OpenAI_API;
 using SerpApi;
 using System;
 using System.Collections;
@@ -13,7 +14,10 @@ using WebCreator.Models;
 namespace UnitTest.Lib
 {
     internal class SerpapiScrap
-    {   public SerpapiScrap()
+    {
+        ArticleForge manualAF = new ArticleForge();
+        OpenAIAPI manualOpenAI = new OpenAIAPI(Config.OpenAIKey);
+        public SerpapiScrap()
         {
         }
 
@@ -127,7 +131,7 @@ namespace UnitTest.Lib
             }
         }
 
-        public async Task ScrappingManualAFThreadAsync(String _id, String articleIds)
+        public async Task ScrappingManualThreadAsync(String mode, String _id, String articleIds)
         {
             try
             {
@@ -143,15 +147,22 @@ namespace UnitTest.Lib
                     scrapArticles.Push(article);
                 }
 
-                ArticleForge af = new ArticleForge();
                 bool afRet = false;
                 while (scrapArticles.Count > 0)
                 {
                     Article scrapAF = scrapArticles.Pop();
                     do
                     {
-                        Thread.Sleep(10000);
-                        afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                        switch(mode)
+                        {
+                            case "0"://AF
+                                Thread.Sleep(10000);
+                                afRet = await CommonModule.ScrapArticleAsync(manualAF, scrapAF.Title, scrapAF.Id);
+                                break;
+                            case "1"://OpenAI
+                                afRet = await CommonModule.ScrapArticleByOpenAIAsync(manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                break;
+                        }
                     }
                     while ( !afRet );
                 }
@@ -160,7 +171,8 @@ namespace UnitTest.Lib
             {
                 Console.WriteLine(ex.Message);
             }
-            CommonModule.isManualAFScrapping = false;
+
+            if(mode == "0") CommonModule.isManualAFScrapping = false;
         }
 
         public async Task ManualArticlesSyncAsync(String domainId, String domainName, String ipAddr, String articleIds)

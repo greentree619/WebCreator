@@ -13,6 +13,7 @@ const NewArticle = React.lazy(() => import('./views/article/add/Add'))
 const ArticleView = React.lazy(() => import('./views/article/view/View'))
 const ApprovalArticle = React.lazy(() => import('./views/article/approval/Approval'))
 const AFSetting = React.lazy(() => import('./views/article/setting/Setting'))
+const OpenAISetting = React.lazy(() => import('./views/openai/setting/Setting'))
 const AllZoneList = React.lazy(() => import('./views/cloudflare/zone/Zone'))
 const AllDnsList = React.lazy(() => import('./views/cloudflare/dns/Dns'))
 const BuildSync = React.lazy(() => import('./views/build/build/BuildSync'))
@@ -90,6 +91,7 @@ const routes = [
   { path: '/article/add', name: 'Create New Article', element: NewArticle },
   { path: '/article/approval', name: 'Approval Article', element: ApprovalArticle },
   { path: '/article/setting', name: 'Article Forge Setting', element: AFSetting },
+  { path: '/openai/setting', name: 'OpenAI API Setting', element: OpenAISetting },
   { path: '/cloudflare/zone', name: 'Zone List View', element: AllZoneList },
   { path: '/cloudflare/dns', name: 'Dns List View', element: AllDnsList },
   { path: '/build/build', name: 'Build & SYNC', element: BuildSync },

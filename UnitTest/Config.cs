@@ -25,6 +25,7 @@ namespace WebCreator
         public static String PixabayKey = "27944002-ca9bbda02c769f32ad5769e81";
         public static String CloudFlareAPIKey = "vKQiwIFU0Eyz269KeOjBsliYyaaEQMqZRe3QA9TE";
         public static String CloudFlareAPIEmail= "uniqtop@gmail.com";
+        public static String OpenAIKey = "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";
     }
 
     public class FirebaseSettings

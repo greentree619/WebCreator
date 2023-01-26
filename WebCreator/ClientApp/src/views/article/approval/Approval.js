@@ -32,6 +32,7 @@ class ApprovalBase extends Component {
       articles: [],
       sync:{},
       checkedItem:{},
+      indexMap:{},
       loading: true,
       curPage: 1,
       totalPage: 1,
@@ -109,7 +110,7 @@ class ApprovalBase extends Component {
     var checkedItem = this.state.checkedItem
     var articleIds = ''
     Object.keys( checkedItem ).map((item)=>{
-      if( checkedItem[item] )
+      if( checkedItem[item].checked )
       {
         if(articleIds.length > 0) articleIds += ","
         articleIds += item
@@ -177,11 +178,13 @@ class ApprovalBase extends Component {
   async setArticleState(articleState)
   {
     var checkedItem = this.state.checkedItem
+    var articles = this.state.articles
     //console.log(Object.keys(checkedItem).length)
     var articleIds = ''
     Object.keys( checkedItem ).map((item)=>{
-      if( checkedItem[item] )
+      if( checkedItem[item].checked )
       {
+        articles[checkedItem[item].index].state = articleState
         if(articleIds.length > 0) articleIds += ","
         articleIds += item
       }
@@ -198,6 +201,7 @@ class ApprovalBase extends Component {
       alarmVisible: false,
       alertMsg: 'Failed to change State.',
       alertColor: 'danger',
+      articles: articles,
     })
     let ret = await response.json()
     //console.log("scrapArticle", ret);
@@ -306,15 +310,16 @@ class ApprovalBase extends Component {
               {
                 return (<tr key={article.id}>
                   <td><CFormCheck id={article.id} label={article.id}
-                      checked={this.state.checkedItem[article.id]}
+                      checked={this.state.checkedItem[article.id].checked}
                       onChange={(e) => {
                         var ret = this.state.checkedItem
-                        ret[article.id] = e.target.checked
+                        ret[article.id].checked = e.target.checked
                         this.setState({
                           checkedItem: ret,
                         })  
-                        console.log(e.target.checked, this.state.checkedItem[article.id])
-                      }}/></td>
+                        // console.log(e.target.checked, this.state.checkedItem[article.id])
+                      }}/>
+                  </td>
                   <td>{article.title}{((article.articleId == null || (article.articleId != '1234567890' && article.articleId != '55555'))
                                                                                         && (<>&nbsp;<CBadge color={
                                                             (article.content == null || article.content.length == 0) ? "info" : "success"
@@ -348,7 +353,7 @@ class ApprovalBase extends Component {
                         onChange={(e) => {
                           var checkedItem = this.state.checkedItem
                           Object.keys(this.state.checkedItem).map((item)=>{
-                            checkedItem[item] = e.target.checked
+                            checkedItem[item].checked = e.target.checked
                             //console.log(item)
                           })
                           this.setState({
@@ -434,7 +439,7 @@ class ApprovalBase extends Component {
     const data = await response.json()
     await data.data.map((item, index) => {
       var ret = this.state.checkedItem
-      ret[item.id] = false
+      ret[item.id] = {checked: false, index: index}
       this.setState({
         checkedItem: ret,
       })      

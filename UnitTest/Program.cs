@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Linq;
 using OpenAI_API;
 using System.Collections;
 using System.IO.Compression;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnitTest.Interfaces;
@@ -150,6 +152,34 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IStreamFileUploadService, StreamFileUploadLocalService>();
 
+// Register the Swagger generator, defining 1 or more Swagger documents 
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "EShopping  WebAPI",
+        Description = "ASP.NET Core Web API",
+        TermsOfService = new Uri("https://www.linkedin.com/in/aman-toumaj-92114051/"),
+        Contact = new OpenApiContact
+        {
+            Name = "EShopping  Web API",
+            Email = string.Empty,
+            Url = new Uri("https://www.linkedin.com/in/aman-toumaj-92114051/"),
+        },
+        License = new OpenApiLicense
+        {
+            Name = "Aman Toumaj",
+            Url = new Uri("https://www.linkedin.com/in/aman-toumaj-92114051/"),
+        }
+    });
+
+    // Set the comments path for the Swagger JSON and UI.
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -176,7 +206,27 @@ if (!app.Environment.IsDevelopment())
 }
 
 //Omitted app.UseHttpsRedirection();//FIXME
+//{{Swagger
+app.UseSwagger(c =>
+{
+    c.SerializeAsV2 = true;
+});
+
+// Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+// specifying the Swagger JSON endpoint.
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    c.RoutePrefix = string.Empty;
+});
+
 app.UseStaticFiles();
+
+// Register the Swagger generator and the Swagger UI middlewares
+//Omitted app.UseOpenApi();
+
+app.UseSwaggerUI();
+//}}Swagger
 app.UseRouting();
 app.UseCors(MyAllowSpecificOrigins);
 

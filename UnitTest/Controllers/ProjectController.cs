@@ -342,6 +342,7 @@ namespace WebCreator.Controllers
                 OnAFScrapping = false,
                 OnPublishSchedule = false,
                 LanguageString = projectInput.LanguageString,
+                ContactInfo = projectInput.ContactInfo,
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             };

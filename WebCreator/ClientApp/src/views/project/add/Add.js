@@ -454,7 +454,7 @@ const Add = (props) => {
                       </CDropdownMenu>
                     </CDropdown>
                   </div>
-                  <div className={simpleMode ? 'd-none' : 'mb-3'}>
+                  <div className={simpleMode ? 'd-none' : 'd-none'}>
                     <CFormLabel htmlFor="exampleFormControlInput1">
                       Search Keyword(can use multiple keywords using &apos;;&apos;)
                     </CFormLabel>
@@ -478,7 +478,7 @@ const Add = (props) => {
                       </CCol>
                     </CRow>
                   </div>
-                  <div className={simpleMode ? 'd-none' : 'mb-3'}>
+                  <div className={simpleMode ? 'd-none' : 'd-none'}>
                     <CFormLabel htmlFor="exampleFormControlInput1">Questions Count</CFormLabel>
                     <CFormInput
                       type="text"

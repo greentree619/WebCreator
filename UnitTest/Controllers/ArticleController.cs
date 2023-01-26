@@ -66,11 +66,11 @@ namespace WebCreator.Controllers
             return new OkObjectResult(new Item { curPage = page, total = total, data = list });
         }
 
-        private Query filterByState(Query query, int state)
+        private Query filterByState(Query query, int state, bool sortByCreateTime=false)
         {
             if (state == 0)
             {//missed content
-                query = query.OrderBy("State").WhereNotEqualTo("State", 4);
+                query = query.WhereNotEqualTo("State", 4);
             }
             else if (state == 1)
             {//missed content
@@ -84,6 +84,8 @@ namespace WebCreator.Controllers
             {// Online on server
                 query = query.WhereEqualTo("State", 3);
             }
+            
+            if (sortByCreateTime) query = query.OrderByDescending("CreatedTime");
             return query;
         }
 
@@ -104,9 +106,9 @@ namespace WebCreator.Controllers
                 total = (int)Math.Ceiling((double)totalSnapshot.Count / count);
 
                 query = articlesCol.WhereEqualTo("ProjectId", domainid);
-                query = filterByState(query, state);
+                query = filterByState(query, state, true);
 
-                query = query.OrderByDescending("CreatedTime").Offset((page - 1) * count).Limit(count);
+                query = query.Offset((page - 1) * count).Limit(count);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
 
                 foreach (DocumentSnapshot document in projectsSnapshot.Documents)

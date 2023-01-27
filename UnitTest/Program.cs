@@ -158,12 +158,12 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "EShopping  WebAPI",
+        Title = "WebCreator WebAPI",
         Description = "ASP.NET Core Web API",
         TermsOfService = new Uri("https://www.linkedin.com/in/aman-toumaj-92114051/"),
         Contact = new OpenApiContact
         {
-            Name = "EShopping  Web API",
+            Name = "WebCreator Web API",
             Email = string.Empty,
             Url = new Uri("https://www.linkedin.com/in/aman-toumaj-92114051/"),
         },

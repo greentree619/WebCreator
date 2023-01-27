@@ -411,6 +411,8 @@ namespace WebCreator.Controllers
         [HttpPut("add")]
         public async Task<IActionResult> AddArticleAsync([FromBody] Article article)
         {
+            await CommonModule.historyLog.LogKeywordAction(article.ProjectId, article.Title, true, true);
+
             bool ret = await CommonModule.AddArticle(article, "1234567890", 100);
             return Ok(ret);
         }
@@ -487,6 +489,8 @@ namespace WebCreator.Controllers
 
         private async Task<string> ManualAddArticleAsync(String _id, String keywords)
         {
+            await CommonModule.historyLog.LogKeywordAction(_id, keywords, true, true);
+
             //Console.WriteLine($"GoogleSearchAsync keyword={keywords}");
             keywords = keywords.Replace(';', '?');
             keywords = keywords.Replace('&', ';');

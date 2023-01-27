@@ -335,6 +335,8 @@ namespace UnitTest.Lib
                             QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
                             if (projectsSnapshot.Documents.Count == 0)
                             {
+                                await CommonModule.historyLog.LogScrapKeywordAction(_id, articleData.Title);
+
                                 await articlesCol.AddAsync(articleData);
                                 curCount++;
                             }
@@ -386,6 +388,8 @@ namespace UnitTest.Lib
                                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
                                 if (projectsSnapshot.Documents.Count == 0)
                                 {
+                                    await CommonModule.historyLog.LogScrapKeywordAction(_id, articleData.Title);
+
                                     await articlesCol.AddAsync(articleData);
                                     curCount++;
                                 }

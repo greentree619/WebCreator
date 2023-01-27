@@ -288,6 +288,7 @@ namespace WebCreator.Controllers
                         var buffer = new byte[chunkSize];
                         var bytesRead = 0;
                         var fileName = GetFileName(section.ContentDisposition);
+                        await CommonModule.historyLog.ThemeUploadAction(domainId, fileName);
 
                         using (var stream = new FileStream(curFolder + "/theme.zip", FileMode.Create))
                         {
@@ -399,6 +400,7 @@ namespace WebCreator.Controllers
                 QuesionsCount = projectInput.QuesionsCount,
                 Language = projectInput.Language,
                 LanguageString = projectInput.LanguageString,
+                ContactInfo = projectInput.ContactInfo,
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             };
 
@@ -422,6 +424,7 @@ namespace WebCreator.Controllers
                     { "QuesionsCount", projectInput.QuesionsCount },
                     { "Language", projectInput.Language },
                     { "LanguageString", projectInput.LanguageString },
+                    { "ContactInfo", projectInput.ContactInfo },
                     { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                 };
                 await docRef.UpdateAsync(userUpdate);

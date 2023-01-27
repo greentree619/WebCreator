@@ -161,6 +161,37 @@ const Add = (props) => {
   const [questionsCount, setQuestionsCount] = useState(
     location.state != null && !simpleMode ? location.state.project.quesionsCount : 50,
   )
+  const [brandName, setBrandName] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.brandname : '',
+  )
+  const [streetAddress, setStreetAddress] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.streetAddress : '',
+  )
+  const [adrdressLocality, setAddressLocality] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.adrdressLocality : '',
+  )
+  const [addressRegion, setAddressRegion] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.addressRegion : '',
+  )
+  const [postalCode, setPostalCode] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.postalCode : '',
+  )
+  const [country, setCountry] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.country : '',
+  )
+  const [phone, setPhone] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.phone : '',
+  )
+  const [website, setWebsite] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.website : '',
+  )
+  const [descriptionOfCompany, setDescriptionOfCompany] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.descriptionOfCompany : '',
+  )
+  const [openingHours, setOpeningHours] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.openingHours : '',
+  )
+
   const [alarmVisible, setAlarmVisible] = useState(false)
   const [alertColor, setAlertColor] = useState('success')
   const [alertMsg, setAlertMsg] = useState('')
@@ -213,6 +244,19 @@ const Add = (props) => {
         quesionscount: questionsCount,
         language: languageValue,
         languageString: language,
+        contactInfo:{
+          brandName: brandName,
+          brandname: brandName,
+          streetAddress: streetAddress,
+          adrdressLocality: adrdressLocality,
+          addressRegion: addressRegion,
+          postalCode: postalCode,
+          country: country,
+          phone: phone,
+          website: website,
+          descriptionOfCompany: descriptionOfCompany,
+          openingHours: openingHours,
+        }
       }),
     }
 
@@ -232,12 +276,23 @@ const Add = (props) => {
         draggable: true,
         progress: undefined,
         theme: "colored",
-        });
+      });
+
+      location.state.project.contactInfo.brandname = brandName
+      location.state.project.contactInfo.streetAddress = streetAddress
+      location.state.project.contactInfo.adrdressLocality = adrdressLocality
+      location.state.project.contactInfo.addressRegion = addressRegion
+      location.state.project.contactInfo.postalCode = postalCode
+      location.state.project.contactInfo.country = country
+      location.state.project.contactInfo.phone = phone
+      location.state.project.contactInfo.website = website
+      location.state.project.contactInfo.descriptionOfCompany = descriptionOfCompany
+      location.state.project.contactInfo.openingHours = openingHours
+      dispatch({ type: 'set', activeProject: location.state.project })
 
       if (simpleMode) navigate('/dashboard')
     }
-    else
-    {
+    else {
       toast.error('Faild to create/update new domain unfortunatley.', {
         position: "top-right",
         autoClose: 5000,
@@ -247,10 +302,10 @@ const Add = (props) => {
         draggable: true,
         progress: undefined,
         theme: "colored",
-        });
+      });
     }
     //setAlarmVisible(true)
-    
+
   }
 
   const handleClick = (lang, value) => {
@@ -309,10 +364,9 @@ const Add = (props) => {
         draggable: true,
         progress: undefined,
         theme: "colored",
-        });
+      });
     }
-    else
-    {
+    else {
       toast.error('Unfortunately, scrapping faild.', {
         position: "top-right",
         autoClose: 5000,
@@ -322,7 +376,7 @@ const Add = (props) => {
         draggable: true,
         progress: undefined,
         theme: "colored",
-        });
+      });
     }
     // setAlarmVisible(true)
   }
@@ -332,24 +386,24 @@ const Add = (props) => {
     return 'English'
   }
 
-  async function getZoneInformation()  {
+  async function getZoneInformation() {
     try {
-     if(location.state != null && location.state.project != null 
-       && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT')){
-      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}dns/byname/${location.state.project.name}`)
-      const data = await response.json()
-      //console.log(data.result);
-      if(data.result.length > 0){
-        //console.log(data.result[0].name);
-        //console.log(data.result[0].id);
-        dispatch({ type: 'set', activeZoneName: data.result[0].name })
-        dispatch({ type: 'set', activeZoneId: data.result[0].id })
-        dispatch({ type: 'set', activeZoneStatus: data.result[0].status })
+      if (location.state != null && location.state.project != null
+        && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT')) {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}dns/byname/${location.state.project.name}`)
+        const data = await response.json()
+        //console.log(data.result);
+        if (data.result.length > 0) {
+          //console.log(data.result[0].name);
+          //console.log(data.result[0].id);
+          dispatch({ type: 'set', activeZoneName: data.result[0].name })
+          dispatch({ type: 'set', activeZoneId: data.result[0].id })
+          dispatch({ type: 'set', activeZoneStatus: data.result[0].status })
+        }
       }
-     }
-   } catch (e) {
-       console.log(e);
-   }
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   useEffect(() => {
@@ -403,12 +457,12 @@ const Add = (props) => {
   const readKeyFile = async (e) => {
     e.preventDefault()
     const reader = new FileReader()
-    reader.onload = async (e) => { 
+    reader.onload = async (e) => {
       const text = (e.target.result)
       //console.log(text)
       //alert(text.replaceAll('\r\n', ';'))
       var tmpKeyword = text.replaceAll('\r\n', ';')
-      if(tmpKeyword[tmpKeyword.length-1] == ';') tmpKeyword = tmpKeyword.substring(0, tmpKeyword.length-1)
+      if (tmpKeyword[tmpKeyword.length - 1] == ';') tmpKeyword = tmpKeyword.substring(0, tmpKeyword.length - 1)
       setSearchKeyword(tmpKeyword);
     };
     reader.readAsText(e.target.files[0])
@@ -431,7 +485,7 @@ const Add = (props) => {
       <CContainer className="px-4">
         <CRow xs={{ gutterX: 5 }}>
           <CCol>
-          {/* <CContainer>
+            {/* <CContainer>
               <CRow xs={{ cols: 2 }}>
                 <CCol className="border border-secondary text-center">
                   SerpAPI Scrapping
@@ -478,103 +532,183 @@ const Add = (props) => {
                   validated={validated}
                   onSubmit={handleSubmit}
                 >
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="exampleFormControlInput1">Domain</CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="projectNameFormControlInput"
-                      placeholder="www.domain.com"
-                      aria-label="Domain"
-                      required
-                      onChange={(e) => inputChangeHandler(setProjectName, e)}
-                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                      value={projectName}
-                    />
-                  </div>
-                  <div className={simpleMode ? 'd-none' : 'mb-3'}>
-                    <CFormLabel htmlFor="exampleFormControlInput1">IP Address</CFormLabel>
-                    &nbsp;
-                    <CDropdown
-                      id="axes-dd"
-                      className="float-right mr-0"
-                      size="sm"
-                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                    >
-                      <CDropdownToggle
-                        id="axes-ddt"
-                        color="secondary"
-                        size="sm"
-                        disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                      >
-                        {ipAddress}
-                      </CDropdownToggle>
-                      <CDropdownMenu>
-                        {ipAddressMap.map((ipAddr, index) => {
-                          return renderIpAddrItem(ipAddr.ip)
-                        })}
-                      </CDropdownMenu>
-                    </CDropdown>
-                  </div>
-                  <div className={simpleMode ? 'd-none' : 'd-none'}>
-                    <CFormLabel htmlFor="exampleFormControlInput1">
-                      Search Keyword(can use multiple keywords using &apos;;&apos;)
-                    </CFormLabel>
-                    <CRow>
-                      <CCol className='col-9'>
+                  <CRow>
+                    <CCol>
+                      <div className="mb-3">
+                        <CFormLabel htmlFor="exampleFormControlInput1">Domain</CFormLabel>
                         <CFormInput
                           type="text"
-                          id="searchKeywordFormControlInput"
-                          placeholder="Search Keyword"
-                          aria-label="Search Keyword"
-                          onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
+                          id="projectNameFormControlInput"
+                          placeholder="www.domain.com"
+                          aria-label="Domain"
+                          required
+                          onChange={(e) => inputChangeHandler(setProjectName, e)}
                           disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                          value={searchKeyword}
+                          value={projectName}
                         />
-                      </CCol>
-                      <CCol>
-                        <CFormInput type="file" 
-                        id="formFile" 
-                        onChange={(e) => readKeyFile(e)}
-                        disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
-                      </CCol>
-                    </CRow>
-                  </div>
-                  <div className={simpleMode ? 'd-none' : 'd-none'}>
-                    <CFormLabel htmlFor="exampleFormControlInput1">Questions Count</CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="questionsCountFormControlInput"
-                      placeholder="50"
-                      onChange={(e) => inputChangeHandler(setQuestionsCount, e)}
-                      required={simpleMode ? false : true}
-                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                      value={questionsCount}
-                    />
-                  </div>
-                  <div className={simpleMode ? 'd-none' : 'mb-3'}>
-                    <CFormLabel htmlFor="exampleFormControlInput1">Language</CFormLabel>
-                    &nbsp;
-                    <CDropdown
-                      id="axes-dd"
-                      className="float-right mr-0"
-                      size="sm"
-                      disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                    >
-                      <CDropdownToggle
-                        id="axes-ddt"
-                        color="secondary"
-                        size="sm"
-                        disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                      >
-                        {language}
-                      </CDropdownToggle>
-                      <CDropdownMenu>
-                        {languageMap.map((langInfo, index) => {
-                          return renderItem(langInfo.lang, langInfo.value)
-                        })}
-                      </CDropdownMenu>
-                    </CDropdown>
-                  </div>
+                      </div>
+                      <div className={simpleMode ? 'd-none' : 'mb-3'}>
+                        <CFormLabel htmlFor="exampleFormControlInput1">IP Address</CFormLabel>
+                        &nbsp;
+                        <CDropdown
+                          id="axes-dd"
+                          className="float-right mr-0"
+                          size="sm"
+                          disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                        >
+                          <CDropdownToggle
+                            id="axes-ddt"
+                            color="secondary"
+                            size="sm"
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                          >
+                            {ipAddress}
+                          </CDropdownToggle>
+                          <CDropdownMenu>
+                            {ipAddressMap.map((ipAddr, index) => {
+                              return renderIpAddrItem(ipAddr.ip)
+                            })}
+                          </CDropdownMenu>
+                        </CDropdown>
+                      </div>
+                      <div className={simpleMode ? 'd-none' : 'd-none'}>
+                        <CFormLabel htmlFor="exampleFormControlInput1">
+                          Search Keyword(can use multiple keywords using &apos;;&apos;)
+                        </CFormLabel>
+                        <CRow>
+                          <CCol className='col-9'>
+                            <CFormInput
+                              type="text"
+                              id="searchKeywordFormControlInput"
+                              placeholder="Search Keyword"
+                              aria-label="Search Keyword"
+                              onChange={(e) => inputChangeHandler(setSearchKeyword, e)}
+                              disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                              value={searchKeyword}
+                            />
+                          </CCol>
+                          <CCol>
+                            <CFormInput type="file"
+                              id="formFile"
+                              onChange={(e) => readKeyFile(e)}
+                              disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'} />
+                          </CCol>
+                        </CRow>
+                      </div>
+                      <div className={simpleMode ? 'd-none' : 'd-none'}>
+                        <CFormLabel htmlFor="exampleFormControlInput1">Questions Count</CFormLabel>
+                        <CFormInput
+                          type="text"
+                          id="questionsCountFormControlInput"
+                          placeholder="50"
+                          onChange={(e) => inputChangeHandler(setQuestionsCount, e)}
+                          required={simpleMode ? false : true}
+                          disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                          value={questionsCount}
+                        />
+                      </div>
+                      <div className={simpleMode ? 'd-none' : 'mb-3'}>
+                        <CFormLabel htmlFor="exampleFormControlInput1">Language</CFormLabel>
+                        &nbsp;
+                        <CDropdown
+                          id="axes-dd"
+                          className="float-right mr-0"
+                          size="sm"
+                          disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                        >
+                          <CDropdownToggle
+                            id="axes-ddt"
+                            color="secondary"
+                            size="sm"
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                          >
+                            {language}
+                          </CDropdownToggle>
+                          <CDropdownMenu>
+                            {languageMap.map((langInfo, index) => {
+                              return renderItem(langInfo.lang, langInfo.value)
+                            })}
+                          </CDropdownMenu>
+                        </CDropdown>
+                      </div>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="Brandname" className="col-sm-4 col-form-label">Brand Name</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="Brandname" value={brandName} onChange={(e) => inputChangeHandler(setBrandName, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="StreetAddress" className="col-sm-4 col-form-label">Street Address</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="StreetAddress" value={streetAddress} onChange={(e) => inputChangeHandler(setStreetAddress, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="AdrdressLocality" className="col-sm-4 col-form-label">Adrdress Locality</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="AdrdressLocality" value={adrdressLocality} onChange={(e) => inputChangeHandler(setAddressLocality, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="AddressRegion" className="col-sm-4 col-form-label">Address Region</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="AddressRegion" value={addressRegion} onChange={(e) => inputChangeHandler(setAddressRegion, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                    </CCol>
+                    <CCol>
+                      <CRow className="mb-3 py-3">
+                        &nbsp;
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="PostalCode" className="col-sm-4 col-form-label">Postal Code</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="PostalCode" value={postalCode} onChange={(e) => inputChangeHandler(setPostalCode, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="Country" className="col-sm-4 col-form-label">Country</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="Country" value={country} onChange={(e) => inputChangeHandler(setCountry, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="Phone" className="col-sm-4 col-form-label">Phone</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="Phone" value={phone} onChange={(e) => inputChangeHandler(setPhone, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="Website" className="col-sm-4 col-form-label">Website</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="Website" value={website} onChange={(e) => inputChangeHandler(setWebsite, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="DescriptionofCompany" className="col-sm-4 col-form-label">Description of Company</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="DescriptionofCompany" value={descriptionOfCompany} onChange={(e) => inputChangeHandler(setDescriptionOfCompany, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="OpeningHours" className="col-sm-4 col-form-label">Opening Hours</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="OpeningHours" value={openingHours} onChange={(e) => inputChangeHandler(setOpeningHours, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                    </CCol>
+                  </CRow>
+
                   <div className="mb-3">
                     {location.state != null && !simpleMode && (
                       <CButton type="button" onClick={() => navigate('/project/add')}>

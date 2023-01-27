@@ -29,6 +29,7 @@ namespace UnitTest.Lib
         public static OpenAIAPISetting openAISetting = new OpenAIAPISetting();
         public static bool isManualAFScrapping = false;
         public static bool isManualSync = false;
+        public static HistoryManagement historyLog = new HistoryManagement();
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {

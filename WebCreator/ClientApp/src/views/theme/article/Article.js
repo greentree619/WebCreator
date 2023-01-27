@@ -35,6 +35,7 @@ import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
 import { useDispatch, useSelector } from 'react-redux'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Outlet, Link } from 'react-router-dom';
 
 const Article = (props) => {
   const location = useLocation()
@@ -144,6 +145,11 @@ const Article = (props) => {
             </CCol>
             <CCol>
               <CButton color="primary" onClick={uploadHandler}>Upload Theme Zip</CButton>
+            </CCol>
+            <CCol className='d-flex justify-content-right'>
+              <Link to={`/history/view/?category=Theme&projectId=${location.state.projectid}`}>
+                <CButton type="button">History View</CButton>
+              </Link>
             </CCol>
           </CRow>
           <br/>

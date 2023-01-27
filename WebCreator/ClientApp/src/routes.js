@@ -19,6 +19,7 @@ const AllDnsList = React.lazy(() => import('./views/cloudflare/dns/Dns'))
 const BuildSync = React.lazy(() => import('./views/build/build/BuildSync'))
 const AFSchedule = React.lazy(() => import('./views/schedule/view/View'))
 const Sync = React.lazy(() => import('./views/sync/view/View'))
+const History = React.lazy(() => import('./views/history/view/View'))
 const SyncWithDomain = () => {
       const location = useLocation()
       //console.log(new URLSearchParams(location.search).get('url'));
@@ -97,6 +98,7 @@ const routes = [
   { path: '/build/build', name: 'Build & SYNC', element: BuildSync },
   { path: '/schedule/view', name: 'Article Forge Schedule', element: AFSchedule},
   { path: '/sync/view', name: 'Sync with domain', element: Sync},
+  { path: '/history/view', name: 'History View', element: History},
   { path: '/base', name: 'Base', element: Cards, exact: true },
   { path: '/base/accordion', name: 'Accordion', element: Accordion },
   { path: '/base/breadcrumbs', name: 'Breadcrumbs', element: Breadcrumbs },

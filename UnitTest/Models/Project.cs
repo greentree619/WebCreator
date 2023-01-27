@@ -64,7 +64,7 @@ namespace WebCreator.Models
         [FirestoreProperty]
         public String LanguageString { get; set; }
         [FirestoreProperty]
-        public _ContactInfo ContactInfo { get; set; }
+        public _ContactInfo? ContactInfo { get; set; }
         [FirestoreProperty]
         public DateTime CreatedTime { get; set; }
         [FirestoreProperty]

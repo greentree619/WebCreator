@@ -104,6 +104,7 @@ const Keyword = (props) => {
         ip: location.state.project.ip,
         keyword: searchKeyword,
         quesionscount: questionsCount,
+        contactInfo: location.state.project.contactInfo,
         language: location.state.project.language,
         languageString: location.state.project.languageString,
       }),
@@ -329,6 +330,12 @@ const Keyword = (props) => {
                     >
                       From File
                     </CNavLink>
+                  </CNavItem>                  
+                  <CNavItem>
+                    &nbsp;
+                    <Link to={`/history/view/?category=Keyword&projectId=${location.state.project.id}`}>
+                      <CButton type="button">History View</CButton>
+                    </Link>
                   </CNavItem>
                 </CNav>
                 <CTabContent>

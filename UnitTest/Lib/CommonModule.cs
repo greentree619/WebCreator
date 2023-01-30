@@ -402,39 +402,45 @@ namespace UnitTest.Lib
         {
             using (StreamWriter writer = new StreamWriter(fileName))
             {
+                if (article.MetaTitle == null || article.MetaTitle.Length == 0) 
+                    article.MetaTitle = article.Title;
+                
                 if (articleTemplate.Length == 0)
                 {
-                    writer.Write("<!DOCTYPE html>");
-                    writer.Write("<html>");
-                    writer.Write("<head>");
-                    writer.Write($"<title>{article.Title}</title>");
-                    if (article.MetaDescription != null && article.MetaDescription.Length > 0)
-                    {
-                        writer.Write($"<meta name=\"description\" content=\"{article.MetaDescription}\">");
+                    writer.WriteLine("<!DOCTYPE html>");
+                    writer.WriteLine("<html>");
+                    writer.WriteLine("<head>");
+                    writer.WriteLine($"<title>{article.MetaTitle}</title>");
+
+                    String metaDesc = article.MetaDescription;
+                    if (metaDesc == null || metaDesc.Length <= 0)
+                    {// auto fill
+                        metaDesc = PickupMetaDescription(article.Content);
                     }
+                    writer.WriteLine($"<meta name=\"description\" content=\"{metaDesc}\">");
 
                     if (article.MetaKeywords != null && article.MetaKeywords.Length > 0)
                     {
-                        writer.Write($"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">");
+                        writer.WriteLine($"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">");
                     }
 
                     if (article.MetaAuthor != null && article.MetaAuthor.Length > 0)
                     {
-                        writer.Write($"<meta name=\"author\" content=\"{article.MetaAuthor}\">");
+                        writer.WriteLine($"<meta name=\"author\" content=\"{article.MetaAuthor}\">");
                     }
 
-                    writer.Write($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-                    writer.Write("</head>");
-                    writer.Write("<body>");
-                    writer.Write(article.Content);
+                    writer.WriteLine($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+                    writer.WriteLine("</head>");
+                    writer.WriteLine("<body>");
+                    writer.WriteLine(article.Content);
                     if (article.Footer != null && article.Footer.Length > 0)
                     {
-                        writer.Write("<footer>");
-                        writer.Write(article.Footer);
-                        writer.Write("</footer>");
+                        writer.WriteLine("<footer>");
+                        writer.WriteLine(article.Footer);
+                        writer.WriteLine("</footer>");
                     }
-                    writer.Write("</body>");
-                    writer.Write("</html>");
+                    writer.WriteLine("</body>");
+                    writer.WriteLine("</html>");
                 }
                 else
                 {
@@ -442,11 +448,21 @@ namespace UnitTest.Lib
                     if (article.MetaKeywords == null) article.MetaKeywords = "";
                     if (article.MetaAuthor == null) article.MetaAuthor = "";
 
-                    String metaDesc = $"<meta name=\"description\" content=\"{article.MetaDescription}\">";
+                    String metaDescContent = article.MetaDescription;
+                    if (metaDescContent == null || metaDescContent.Length <= 0)
+                    {// auto fill
+                        metaDescContent = PickupMetaDescription(article.Content);
+                    }
+
+                    String metaDesc = $"<meta name=\"description\" content=\"{metaDescContent}\">";
                     String metaKeywd = $"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">";
                     String metaAuthor = $"<meta name=\"author\" content=\"{article.MetaAuthor}\">";
 
-                    articleTemplate = articleTemplate.Replace("{{TITLE}}", article.Title);
+                    articleTemplate = Regex.Replace(articleTemplate, @"([<]meta\s+name=""description""\s+[^<>]+[>])", metaDesc);
+                    articleTemplate = Regex.Replace(articleTemplate, @"([<]meta\s+name=""keywords""\s+[^<>]+[>])", metaKeywd);
+                    articleTemplate = Regex.Replace(articleTemplate, @"([<]meta\s+name=""author""\s+[^<>]+[>])", metaAuthor);
+
+                    articleTemplate = articleTemplate.Replace("{{TITLE}}", article.MetaTitle);
                     articleTemplate = articleTemplate.Replace("{{CONTENT}}", article.Content);
                     articleTemplate = articleTemplate.Replace("{{FOOTER}}", article.Footer);
                     articleTemplate = articleTemplate.Replace("{{META_DESC}}", metaDesc);
@@ -502,6 +518,10 @@ namespace UnitTest.Lib
                         //}}Update state
                     }
                 }
+
+                Query query = articlesCol.WhereEqualTo("ProjectId", domainid).WhereEqualTo("State", 3).OrderBy("Title");
+                QuerySnapshot qSnapshot = await query.GetSnapshotAsync();
+                GenerateURLFile(qSnapshot, curFolder, "url.html", $"http://{domain}");
             }
             catch (Exception ex)
             {
@@ -556,6 +576,10 @@ namespace UnitTest.Lib
                     }
                 }
 
+                query = query.WhereEqualTo("State", 3).OrderBy("Title");
+                snapshot = await query.GetSnapshotAsync();
+                GenerateURLFile(snapshot, curFolder, "url.html", $"http://{domain}");
+                
                 if (articleUpdateStateIds.Length > 0)
                 {
                     await CommonModule.UpdateBatchState(articleUpdateStateIds, 3);
@@ -603,6 +627,10 @@ namespace UnitTest.Lib
                         GenerateArticleHtml(curFolder + "\\" + title + ".html", article, articleTemplate);
                     }
                 }
+
+                query = articlesCol.WhereEqualTo("ProjectId", domainid).WhereEqualTo("State", 3).OrderBy("Title");
+                snapshot = await query.GetSnapshotAsync();
+                GenerateURLFile(snapshot, curFolder, "url.html", $"http://{domain}");
             }
             catch (Exception ex)
             {
@@ -714,6 +742,63 @@ namespace UnitTest.Lib
             }
             
             return tmpContent;
+        }
+
+        static public String PickupMetaDescription(String content, int limit = 160)
+        {
+            String tmpContent = "";
+            Regex regex = new Regex("[<]p[>]([^<>]+)[<][/]p[>]");
+
+            string[] subContents = regex.Split(content);
+            tmpContent = "";
+
+            foreach (String para in subContents)
+            {
+                if (para.Trim().Length > 0 && para.IndexOf("<") == -1)
+                {
+                    tmpContent = para;
+                    break;
+                }
+            }
+
+            if (tmpContent.Length > limit) {
+                string[] subSentence = tmpContent.Split('.');
+                tmpContent = "";
+                foreach (String sentence in subSentence)
+                {
+                    if (tmpContent.Length + sentence.Length > limit)
+                    {
+                        break;
+                    }
+                    tmpContent += sentence + ".";
+                }
+            }
+
+            return tmpContent;
+        }
+
+        static public void GenerateURLFile(QuerySnapshot snapshot, String folder, String fileName, String baseURL)
+        {
+            using (StreamWriter writer = new StreamWriter(folder + "//" + fileName))
+            {
+                writer.WriteLine("<!DOCTYPE html>");
+                writer.WriteLine("<html>");
+                writer.WriteLine("<head>");
+                writer.WriteLine($"<title>Online URLs</title>");
+                writer.WriteLine("</head>");
+                writer.WriteLine("<body>");
+                foreach (DocumentSnapshot document in snapshot.Documents)
+                {
+                    var article = document.ConvertTo<Article>();
+                    String orgTitle = article.Title;
+                    String titlelink = article.Title.Replace("?", "").Trim();
+                    titlelink = titlelink.Replace(" ", "-");
+                    titlelink += ".html";
+                    writer.WriteLine($"<a href='{baseURL}/{titlelink}'>{orgTitle}</a><br/>");
+                }
+                writer.WriteLine("</body>");
+                writer.WriteLine("</html>");
+            }
         }
     }
 }

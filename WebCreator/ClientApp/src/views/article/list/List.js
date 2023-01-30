@@ -20,6 +20,9 @@ import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useDispatch, useSelector } from 'react-redux'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class ListBase extends Component {
   static displayName = ListBase.name
@@ -38,6 +41,10 @@ class ListBase extends Component {
       alertMsg: '',
       alertColor: 'success',
     }
+  }
+
+  savePageState = () => {
+    saveToLocalStorage({articles: this.state.articles, sync: this.state.sync, curPage: this.state.curPage, totalPage: this.state.totalPage})
   }
 
   componentDidMount() {
@@ -82,21 +89,44 @@ class ListBase extends Component {
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}article/scrap/` + _id + '/' + title,
     )
-    this.setState({
-      alarmVisible: false,
-      alertMsg: 'Unfortunately, scrapping faild.',
-      alertColor: 'danger',
-    })
+    // this.setState({
+    //   alarmVisible: false,
+    //   alertMsg: 'Unfortunately, scrapping faild.',
+    //   alertColor: 'danger',
+    // })
     let ret = await response.json()
     console.log("scrapArticle", ret);
     if (response.status === 200 && ret) {
       //console.log('add success')
-      this.setState({
-        alertMsg: 'Started to scrapping article from Article Forge successfully.',
-        alertColor: 'success',
-      })
+      // this.setState({
+      //   alertMsg: 'Started to scrapping article from Article Forge successfully.',
+      //   alertColor: 'success',
+      // })
+      toast.success('Started to scrapping article from Article Forge successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    this.setState({ alarmVisible: true })
+    else
+    {
+      toast.error('Unfortunately, scrapping faild.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // this.setState({ alarmVisible: true })
   }
 
   deleteArticleConfirm = (_id) => {
@@ -182,20 +212,43 @@ class ListBase extends Component {
       `${process.env.REACT_APP_SERVER_URL}buildsync/sync/${_id}/${domain}/${ip}`,
       requestOptions,
     )
-    this.setState({
-      alertColor: 'danger',
-      alertMsg: 'Sync action failed, unfortunatley.',
-    })
+    // this.setState({
+    //   alertColor: 'danger',
+    //   alertMsg: 'Sync action failed, unfortunatley.',
+    // })
     let ret = await response.json()
     if (response.status === 200 && ret) {
-      this.setState({
-        alertColor: 'success',
-        alertMsg: 'Sync action compeleted, successfully.',
-      })
+      // this.setState({
+      //   alertColor: 'success',
+      //   alertMsg: 'Sync action compeleted, successfully.',
+      // })
+      toast.success('Sync action compeleted, successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    this.setState({
-      alarmVisible: true,
-    })
+    else
+    {
+      toast.error('Sync action failed, unfortunatley.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // this.setState({
+    //   alarmVisible: true,
+    // })
   }
 
   async syncArticle(_id, domain, ip, articleId) {
@@ -291,6 +344,18 @@ class ListBase extends Component {
         >
           {this.state.alertMsg}
         </CAlert>
+        <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
         <table className="table">
           <thead>
             <tr>
@@ -330,7 +395,7 @@ class ListBase extends Component {
                       Sync
                     </CButton>
                     &nbsp;
-                    <Link to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
+                    <Link onClick={()=>this.savePageState()} to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
                       <CButton type="button">View</CButton>
                     </Link>
                     &nbsp;
@@ -406,6 +471,20 @@ class ListBase extends Component {
   }
 
   async populateArticleData(pageNo) {
+    var store = loadFromLocalStorage();
+    if(store != undefined)
+    {
+      console.log(store)
+      this.setState({
+        articles: store.articles,
+        sync: store.sync,
+        curPage: store.curPage,
+        totalPage: store.totalPage,
+        loading: false,
+      })
+      clearLocalStorage()
+      return
+    }
     const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}article/` +

@@ -166,10 +166,10 @@ const Article = (props) => {
                   2. Update &ldquo;articlepage.html&ldquo; file like following:<br/>
                   &emsp;TODO&#41;. Put below code where should be put article content.
                   <CCallout color="primary">
-                  &#123;&#123;TITLE&#125;&#125;<br/>
-                  &#123;&#123;META_DESC&#125;&#125;<br/>
-                  &#123;&#123;META_KEYWORD&#125;&#125;<br/>
-                  &#123;&#123;META_AUTHOR&#125;&#125;<br/>
+                  &#123;&#123;TITLE&#125;&#125;, Example: &lt;title&gt;&#123;&#123;TITLE&#125;&#125;&lt;/title&gt;<br/>
+                  &#123;&#123;META_DESC&#125;&#125; : Will be replace with &lt;meta name=&quot;description&quot; content=&quot;Description String&quot;&gt;<br/>
+                  &#123;&#123;META_KEYWORD&#125;&#125; : Will be replace with &lt;meta name=&quot;keywords&quot; content=&quot;&#123;&#123;META_KEYWORD&#125;&#125;&quot;&gt;<br/>
+                  &#123;&#123;META_AUTHOR&#125;&#125; : Will be replace with &lt;meta name=&quot;author&quot; content=&quot;&#123;&#123;META_AUTHOR&#125;&#125;&quot;&gt;<br/>
                   &#123;&#123;CONTENT&#125;&#125;<br/>
                   &#123;&#123;FOOTER&#125;&#125;
                   </CCallout>

@@ -222,8 +222,11 @@ class ListBase extends Component {
     await data.data.map((item, index) => {
       if(ids.length > 0) ids += ",";
       ids += item.id;
-      this.loadSyncStatus(item.id);
-      //console.log(ids, "<--", this.state.articleIds);
+
+      setTimeout(()=>{
+        this.loadSyncStatus(item.id);
+      }, 100*index);
+      console.log("sync view<--", index);
     });
 
     //Omitted this.loadSyncStatus(ids);

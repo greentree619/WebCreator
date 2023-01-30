@@ -10,6 +10,8 @@ import {
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { Outlet, Link } from 'react-router-dom'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default class List extends Component {
   static displayName = List.name
@@ -42,19 +44,42 @@ export default class List extends Component {
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}project/serpapi/` + _id + '/' + keyword + '/' + count,
     )
-    this.setState({
-      alarmVisible: false,
-      alertMsg: 'Unfortunately, scrapping faild.',
-      alertColor: 'danger',
-    })
+    // this.setState({
+    //   alarmVisible: false,
+    //   alertMsg: 'Unfortunately, scrapping faild.',
+    //   alertColor: 'danger',
+    // })
     if (response.status === 200) {
       //console.log('add success')
-      this.setState({
-        alertMsg: 'Completed to scrapping questions from google successfully.',
-        alertColor: 'success',
-      })
+      // this.setState({
+      //   alertMsg: 'Completed to scrapping questions from google successfully.',
+      //   alertColor: 'success',
+      // })
+      toast.success('Completed to scrapping questions from google successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    this.setState({ alarmVisible: true })
+    else
+    {
+      toast.error('Unfortunately, scrapping faild.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // this.setState({ alarmVisible: true })
   }
 
   async delete(_id) {
@@ -151,6 +176,18 @@ export default class List extends Component {
         >
           {state.alertMsg}
         </CAlert>
+        <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
         <table className="table">
           <thead>
             <tr>

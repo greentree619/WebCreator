@@ -434,6 +434,7 @@ namespace WebCreator.Controllers
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                     {
+                        { "MetaTitle", article.MetaTitle },
                         { "MetaAuthor", article.MetaAuthor },
                         { "MetaDescription", article.MetaDescription },
                         { "MetaKeywords", article.MetaKeywords },

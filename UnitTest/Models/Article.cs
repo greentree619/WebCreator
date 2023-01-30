@@ -19,6 +19,8 @@ namespace WebCreator.Models
         [FirestoreProperty]
         public String? Title { get; set; }
         [FirestoreProperty]
+        public String? MetaTitle { get; set; }
+        [FirestoreProperty]
         public String? MetaDescription { get; set; }
         [FirestoreProperty]
         public String? MetaKeywords { get; set; }

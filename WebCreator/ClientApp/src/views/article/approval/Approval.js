@@ -23,6 +23,9 @@ import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useDispatch, useSelector } from 'react-redux'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class ApprovalBase extends Component {
   static displayName = ApprovalBase.name
@@ -42,6 +45,12 @@ class ApprovalBase extends Component {
       alertColor: 'success',
       articleState: 0,
     }
+  }
+
+  savePageState = () => {
+    saveToLocalStorage({articles: this.state.articles, sync: this.state.sync, checkedItem: this.state.checkedItem
+                      , indexMap: this.state.indexMap, curPage: this.state.curPage
+                      , totalPage: this.state.totalPage, articleState: this.state.articleState})
   }
 
   componentDidMount() {
@@ -124,20 +133,43 @@ class ApprovalBase extends Component {
 
     console.log(this.state.projectInfo, this.state.projectInfo.projectid);
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/scrapArticleManual/${mode}/` + this.state.projectInfo.projectid + `/${articleIds}`, requestOptions)
-    this.setState({
-      alarmVisible: false,
-      alertMsg: 'Failed to scrapping from AF manually. Please check If AF Scheduleing is running. To use this feature must be to be off AF Scheduling',
-      alertColor: 'danger',
-    })
+    // this.setState({
+    //   alarmVisible: false,
+    //   alertMsg: 'Failed to scrapping from AF manually. Please check If AF Scheduleing is running. To use this feature must be to be off AF Scheduling',
+    //   alertColor: 'danger',
+    // })
     let ret = await response.json()
     if (response.status === 200 && ret) {
       //console.log('add success')
-      this.setState({
-        alertMsg: 'Started to scrapping from AF Successfully.',
-        alertColor: 'success',
-      })
+      // this.setState({
+      //   alertMsg: 'Started to scrapping from AF Successfully.',
+      //   alertColor: 'success',
+      // })
+      toast.success('Started to scrapping from AF Successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    this.setState({ alarmVisible: true })    
+    else
+    {
+      toast.error('Failed to scrapping from AF manually. Please check If AF Scheduleing is running. To use this feature must be to be off AF Scheduling', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // this.setState({ alarmVisible: true })    
   };
 
   async deleteArticle(_id) {
@@ -197,22 +229,45 @@ class ApprovalBase extends Component {
     }
 
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/UpdateBatchState/${this.state.projectInfo.projectid}/${this.state.projectInfo.domainName}/${this.state.projectInfo.domainIp}/${articleIds}/${articleState}`, requestOptions)
-    this.setState({
-      alarmVisible: false,
-      alertMsg: 'Failed to change State.',
-      alertColor: 'danger',
-      articles: articles,
-    })
+    // this.setState({
+    //   alarmVisible: false,
+    //   alertMsg: 'Failed to change State.',
+    //   alertColor: 'danger',
+    //   articles: articles,
+    // })
     let ret = await response.json()
     //console.log("scrapArticle", ret);
     if (response.status === 200 && ret) {
       //console.log('add success')
-      this.setState({
-        alertMsg: 'Changed State Successfully.',
-        alertColor: 'success',
-      })
+      // this.setState({
+      //   alertMsg: 'Changed State Successfully.',
+      //   alertColor: 'success',
+      // })
+      toast.success('Changed State Successfully.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
-    this.setState({ alarmVisible: true })
+    else
+    {
+      toast.error('Failed to change State.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
+    }
+    // this.setState({ alarmVisible: true })
   }
 
   onDelete()
@@ -295,6 +350,18 @@ class ApprovalBase extends Component {
         >
           {this.state.alertMsg}
         </CAlert>
+        <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
         <table className="table">
           <thead>
             <tr>
@@ -329,7 +396,7 @@ class ApprovalBase extends Component {
                                                             }>OpenAI</CBadge></>) ))}
                   </td>
                   <td>
-                    <Link to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
+                    <Link onClick={()=>this.savePageState()} to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
                       <CButton type="button">View</CButton>
                     </Link>
                     &nbsp;
@@ -424,6 +491,24 @@ class ApprovalBase extends Component {
   }
 
   async populateArticleData(pageNo, articleState) {
+    var store = loadFromLocalStorage();
+    if(store != undefined)
+    {
+      console.log(store)
+      this.setState({
+        articles: store.articles,
+        sync: store.sync,
+        checkedItem: store.checkedItem,
+        indexMap: store.indexMap,
+        curPage: store.curPage,
+        totalPage: store.totalPage,
+        loading: false,
+        articleState: store.articleState,
+      })
+      clearLocalStorage()
+      return
+    }
+
     this.setState({
       loading: true,
       checkedItem: {},

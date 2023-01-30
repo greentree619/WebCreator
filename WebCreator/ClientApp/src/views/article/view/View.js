@@ -17,6 +17,7 @@ import {
   CDropdownItem,
   CDropdownToggle,
   CDropdownMenu,
+  CFormCheck,
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -29,6 +30,7 @@ import 'katex/dist/katex.min.css'
 import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useDispatch, useSelector } from 'react-redux'
 
 const View = (props) => {
   const location = useLocation()
@@ -36,6 +38,7 @@ const View = (props) => {
   const [alertColor, setAlertColor] = useState('success')
   const [alertMsg, setAlertMsg] = useState('')
   const [title, setTitle] = useState('')
+  const [metaTitle, setMetaTitle] = useState('')
   const [article, setArticle] = useState({})
   const [content, setContent] = useState('')
   const [footer, setFooter] = useState('')
@@ -44,6 +47,8 @@ const View = (props) => {
   const [metaAuthor, setMetaAuthor] = useState('')
   const [pixabayURL, setPixabayURL] = useState('https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=480&min_height=600&per_page=100&page=1')
   const navigate = useNavigate()
+  const activeProject = useSelector((state) => state.activeProject)
+  console.log(activeProject)
 
   useEffect(() => {
     const getFetch = async () => {
@@ -53,6 +58,7 @@ const View = (props) => {
       const data = await response.json()
       //console.log(data)
       setTitle(data.data.title)
+      if (data.data.metaTitle != null) setMetaTitle(data.data.metaTitle)
       if (data.data.metaDescription != null) setMetaDescription(data.data.metaDescription)
       if (data.data.metaKeywords != null) setMetaKeywords(data.data.metaKeywords)
       if (data.data.metaAuthor != null) setMetaAuthor(data.data.metaAuthor)
@@ -80,6 +86,7 @@ const View = (props) => {
         metaKeywords: metaKeywords,
         metaAuthor: metaAuthor,
         content: content,
+        metaTitle: (metaTitle.length == 0 ? title : metaTitle),
         footer: footer,
         state: article.state,
       }),
@@ -168,6 +175,34 @@ const View = (props) => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
+            </div>
+            <div className="mb-3">
+              <CRow>
+                <CCol>
+                  <CFormLabel htmlFor="metaTitle">Meta Title</CFormLabel>
+                  <CFormInput
+                    type="text"
+                    id="metaTitle"
+                    aria-label="metaTitle"
+                    value={metaTitle}
+                    onChange={(e) => setMetaTitle(e.target.value)}
+                  />
+                </CCol>
+                <CCol>
+                  <CFormCheck id="useMetaTitle" className="pt-5" label="Use Mete Title Format with <Title>-<Brand Name>"
+                    onChange={(e) => {
+                      if( e.target.checked )
+                      {
+                        setMetaTitle(title + "-" + activeProject.contactInfo.brandname);
+                      }
+                      else
+                      {
+                        setMetaTitle('');
+                      }
+                    }}
+                  />
+                </CCol>
+              </CRow>
             </div>
             <div className="mb-3">
               <CRow>

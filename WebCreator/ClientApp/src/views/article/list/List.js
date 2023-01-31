@@ -371,11 +371,14 @@ class ListBase extends Component {
               {
                 return (<tr key={article.id}>
                   <td>{article.id}</td>
-                  <td>{article.title}{(article.articleId == null 
-                            || article.articleId != '1234567890')
-                            && (<>&nbsp;<CBadge color={
-                              (article.content == null || article.content.length == 0) ? "info" : "success"
-                            }>AF</CBadge></>)}</td>
+                  <td>{article.title}{((article.articleId == null || (article.articleId != '1234567890' && article.articleId != '55555'))
+                                                                                        && (<>&nbsp;<CBadge color={
+                                                            (article.content == null || article.content.length == 0) ? "info" : "success"
+                                                            }>AF</CBadge></>) 
+                                      || (article.articleId != null && article.articleId == '55555' && (<>&nbsp;<CBadge color={
+                                                            (article.content == null || article.content.length == 0) ? "info" : "success"
+                                                            }>OpenAI</CBadge></>) ))}
+                            </td>
                   <td>
                     <CButton
                       type="button"

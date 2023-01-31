@@ -131,6 +131,82 @@ namespace UnitTest.Lib
             }
         }
 
+        public async Task ScrappingOpenAIThreadAsync(String _id, String scheduleId)
+        {
+            {
+                CommonModule.SetDomainAFScrappingAsync(_id, true);
+                try
+                {
+                    Schedule schedule;
+                    CollectionReference scheduleCol = Config.FirebaseDB.Collection("Schedules");
+                    DocumentReference docRef = scheduleCol.Document(scheduleId);
+                    DocumentSnapshot scheduleSnapshot = await docRef.GetSnapshotAsync();
+
+                    CollectionReference col = Config.FirebaseDB.Collection("Articles");
+                    Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false).OrderBy("CreatedTime");
+                    QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
+
+                    Stack<Article> scrapArticles = new Stack<Article>();
+                    foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                    {
+                        var article = document.ConvertTo<Article>();
+                        article.Id = document.Id;
+                        scrapArticles.Push(article);
+                    }
+
+                    ArticleForge af = new ArticleForge();
+                    bool afRet = false;
+                    if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
+                    {
+                        schedule = scheduleSnapshot.ConvertTo<Schedule>();
+
+                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.afThreadList[_id]; i++)
+                        {
+                            Article scrapAF = scrapArticles.Pop();
+                            do
+                            {
+                                Thread.Sleep(10000);
+                                //{{In case start manual scrap, sleep untile complete
+                                while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
+                                //}}In case start manual scrap, sleep untile complete
+                                afRet = await CommonModule.ScrapArticleByOpenAIAsync(manualOpenAI, scrapAF.Title, scrapAF.Id);
+                            }
+                            while (!afRet && (bool)CommonModule.afThreadList[_id]);
+                        }
+
+                        while ((bool)CommonModule.afThreadList[_id])
+                        {
+                            Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+
+                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.afThreadList[_id]; i++)
+                            {
+                                Article scrapAF = scrapArticles.Pop();
+                                do
+                                {
+                                    Thread.Sleep(10000);
+                                    //{{In case start manual scrap, sleep untile complete
+                                    while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
+                                    //}}In case start manual scrap, sleep untile complete
+                                    afRet = await CommonModule.ScrapArticleByOpenAIAsync(manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                }
+                                while (!afRet && (bool)CommonModule.afThreadList[_id]);
+
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+                Console.WriteLine("OpenAI scrapping All done.");
+
+                CommonModule.SetDomainAFScrappingAsync(_id, false);
+                CommonModule.afThreadList[_id] = false;
+            }
+        }
+
         public async Task ScrappingManualThreadAsync(String mode, String _id, String articleIds)
         {
             try
@@ -173,6 +249,7 @@ namespace UnitTest.Lib
             }
 
             if(mode == "0") CommonModule.isManualAFScrapping = false;
+            else if (mode == "1") CommonModule.isManualOpenAIScrapping = false;
         }
 
         public async Task ManualArticlesSyncAsync(String domainId, String domainName, String ipAddr, String articleIds)

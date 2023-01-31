@@ -57,6 +57,7 @@ const AppBreadcrumb = () => {
   const breadcrumbs = getBreadcrumbs(currentLocation)
   const [isOnScrapping, setIsOnScrapping] = useState(false)
   const [isOnAFScrapping, setIsOnAFScrapping] = useState(false)
+  const [scrappingMode, setScrappingMode] = useState(0)
   const [isOnPublish, setIsOnPublish] = useState(false)
 
   async function loadScrappingStatus() {
@@ -75,12 +76,14 @@ const AppBreadcrumb = () => {
           setIsOnScrapping(ret.serpapi);
           setIsOnAFScrapping(ret.afapi);
           setIsOnPublish(ret.publish);
+          setScrappingMode(ret.scrappingScheduleMode);
         }
       }
       else {
         setIsOnScrapping(false);
         setIsOnAFScrapping(false);
         setIsOnPublish(false);
+        setScrappingMode(0);
       }
     } catch (e) {
       console.log(e);
@@ -148,7 +151,7 @@ const AppBreadcrumb = () => {
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink className={isSelctedTab("schedule_view")} href={'#/schedule/view/?tab=schedule_view&domainId=' + activeDomainId + '&isOnAFScrapping=' + isOnAFScrapping + '&isOnPublish=' + isOnPublish}>
+                      <CNavLink className={isSelctedTab("schedule_view")} href={'#/schedule/view/?tab=schedule_view&domainId=' + activeDomainId + '&isOnAFScrapping=' + isOnAFScrapping + '&scrappingMode=' +scrappingMode+ '&isOnPublish=' + isOnPublish}>
                         Schedule
                       </CNavLink>
                     </CNavItem>
@@ -188,7 +191,7 @@ const AppBreadcrumb = () => {
             &nbsp;
             <CBadge color={isOnScrapping ? "success" : "dark"} shape="rounded-pill">Query Scrap</CBadge>
             &nbsp;
-            <CBadge color={isOnAFScrapping ? "success" : "dark"} shape="rounded-pill">AF Schedule</CBadge>
+            <CBadge color={isOnAFScrapping ? "success" : "dark"} shape="rounded-pill">Scrapping</CBadge>
             &nbsp;
             <CBadge color={isOnPublish ? "success" : "dark"} shape="rounded-pill">Publish</CBadge>
           </CCol>

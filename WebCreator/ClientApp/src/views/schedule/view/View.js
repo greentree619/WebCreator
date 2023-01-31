@@ -17,6 +17,7 @@ import {
   CDropdownItem,
   CDropdownToggle,
   CDropdownMenu,
+  CFormSelect,
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -36,7 +37,8 @@ const View = (props) => {
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'),
                       isOnAFScrapping: new URLSearchParams(location.search).get('isOnAFScrapping'),
-                      isOnPublish: new URLSearchParams(location.search).get('isOnPublish'), }
+                      isOnPublish: new URLSearchParams(location.search).get('isOnPublish'),
+                      scrappingMode: new URLSearchParams(location.search).get('scrappingMode'), }
   }
 
   //console.log(location.state);
@@ -56,6 +58,7 @@ const View = (props) => {
   const [publishBetweenNumber, setPublishBetweenNumber] = useState(1)
   const [publishBetweenUnit, setPublishBetweenUnit] = useState(86400)//1 min as default
   const [publishBetweenUnitLabel, setPublishBetweenUnitLabel] = useState('Days(s)')
+  const [scrappingScheduleMode, setScrappingScheduleMode] = useState(0)
 
   const [scrapCommand, setScrapCommand] = useState((location.state.isOnAFScrapping == 'true' ? 'Stop Scrapping' : 'Start Scrapping'))
   const [publishCommand, setPublishCommand] = useState((location.state.isOnPublish == 'true' ? 'Stop Publish' : 'Start Publish'))
@@ -116,6 +119,7 @@ const View = (props) => {
     {
       console.log("useEffect--->" + location.state.projectid);
       setProjectId( location.state.projectid );
+      setScrappingScheduleMode( location.state.scrappingMode );
       console.log(projectId);
       if(location.state.projectid.length > 0){
         getScheduleInfo(location.state.projectid);
@@ -138,8 +142,10 @@ const View = (props) => {
   }
 
   const startScrapping = async (domainId) => {
+    location.state.isOnAFScrapping = (location.state.isOnAFScrapping == 'true' ? 'false' : 'true')
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}project/startaf/${domainId}/${location.state.scheduleId}`,
+      scrappingScheduleMode == 0 ? `${process.env.REACT_APP_SERVER_URL}project/startaf/${domainId}/${location.state.scheduleId}`
+                                 : `${process.env.REACT_APP_SERVER_URL}project/startOpenAI/${domainId}/${location.state.scheduleId}`,
     )
     // setAlarmVisible(false)
     // setAlertMsg('Unfortunately, scrapping faild.')
@@ -423,6 +429,14 @@ const View = (props) => {
                 noValidate
                 onSubmit={handleSubmit}
               >
+                <div className="mb-3">
+                <CFormLabel htmlFor="scrappingEngine">Scrapping Schedule Mode</CFormLabel>
+                  <CFormSelect id="scrappingEngine" value={scrappingScheduleMode} disabled={location.state.isOnAFScrapping == 'true'} 
+                  onChange={(obj) => setScrappingScheduleMode(obj.target.value)} size="sm" className="mb-3" aria-label="Small select example">
+                    <option value="0">Article Forege</option>
+                    <option value="1">OpenAI</option>
+                  </CFormSelect>
+                </div>
                 <div className="mb-3">
                   <CFormLabel htmlFor="exampleFormControlInput1">Scrapping Count for just now</CFormLabel>
                   <CFormInput

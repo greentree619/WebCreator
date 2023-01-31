@@ -26,9 +26,11 @@ namespace UnitTest.Lib
         public static Hashtable publishThreadList = new Hashtable();
         public static Hashtable refKeyCash = new Hashtable();
         public static Hashtable onThemeUpdateCash = new Hashtable();
+        public static Hashtable domainScrappingScheduleStatus = new Hashtable();
         public static ArticleForgeSetting afSetting = new ArticleForgeSetting();
         public static OpenAIAPISetting openAISetting = new OpenAIAPISetting();
         public static bool isManualAFScrapping = false;
+        public static bool isManualOpenAIScrapping = false;
         public static bool isManualSync = false;
         public static HistoryManagement historyLog = new HistoryManagement();
 

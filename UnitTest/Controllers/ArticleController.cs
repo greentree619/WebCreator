@@ -399,9 +399,10 @@ namespace WebCreator.Controllers
         public async Task<IActionResult> ScrapAFManualAsync(String mode, String domainId, String articleids)
         {
             bool ret = false;
-            if (mode == "0" && CommonModule.isManualAFScrapping == false || mode == "1")
+            if (mode == "0" && CommonModule.isManualAFScrapping == false || mode == "1" && CommonModule.isManualOpenAIScrapping == false)
             {
                 if(mode == "0") CommonModule.isManualAFScrapping = true;
+                else if (mode == "1") CommonModule.isManualOpenAIScrapping = true;
                 ret = true;
                 Task.Run(() => new SerpapiScrap().ScrappingManualThreadAsync(mode, domainId, articleids));
             }

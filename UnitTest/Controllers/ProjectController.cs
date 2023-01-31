@@ -32,6 +32,7 @@ using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
 using System.Text;
 using System.Net;
+using UnitTest.Models;
 
 namespace WebCreator.Controllers
 {
@@ -136,9 +137,11 @@ namespace WebCreator.Controllers
             bool isScrapping = (CommonModule.threadList[domainId] != null ? (bool)CommonModule.threadList[domainId] : false);
             bool isAFScrapping = (CommonModule.afThreadList[domainId] != null ? (bool)CommonModule.afThreadList[domainId] : false);
             bool isPublishing = (CommonModule.publishThreadList[domainId] != null ? (bool)CommonModule.publishThreadList[domainId] : false);
+            int scrappingScheduleMode = (CommonModule.domainScrappingScheduleStatus[domainId] != null ? 
+                ((ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[domainId]).mode : 0);
 
             //return list;
-            return Ok(new { serpapi=isScrapping, afapi= isAFScrapping, publish= isPublishing });
+            return Ok(new { serpapi=isScrapping, afapi= isAFScrapping, publish= isPublishing, scrappingScheduleMode = scrappingScheduleMode });
         }
 
         [HttpGet("allDownload/{domainId}/{domainName}")]
@@ -568,12 +571,50 @@ namespace WebCreator.Controllers
             if (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false)
             {
                 CommonModule.afThreadList[_id] = true;
+                if (CommonModule.domainScrappingScheduleStatus[_id] == null)
+                    CommonModule.domainScrappingScheduleStatus[_id] = new ScrappingScheduleStatus { isRunning = true, mode = 0 };
+                else {
+                    ScrappingScheduleStatus status = (ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[_id];
+                    status.isRunning = true;
+                    status.mode = 0;
+                }
                 Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(_id, sid));
                 ret = true;
             }
             else
             {
                 CommonModule.afThreadList[_id] = false;
+                ScrappingScheduleStatus status = (ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[_id];
+                status.isRunning = false;
+                ret = false;
+            }
+            return Ok(ret);
+        }
+
+        [HttpGet("startOpenAI/{_id}/{sid}")]
+        public ActionResult StartOpenAIapi(String _id, String sid)
+        {
+            bool ret = false;
+            if (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false)
+            {
+                CommonModule.afThreadList[_id] = true;
+                if (CommonModule.domainScrappingScheduleStatus[_id] == null)
+                    CommonModule.domainScrappingScheduleStatus[_id] = new ScrappingScheduleStatus { isRunning = true, mode = 1 };
+                else
+                {
+                    ScrappingScheduleStatus status = (ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[_id];
+                    status.isRunning = true;
+                    status.mode = 1;
+                }
+
+                Task.Run(() => new SerpapiScrap().ScrappingOpenAIThreadAsync(_id, sid));
+                ret = true;
+            }
+            else
+            {
+                CommonModule.afThreadList[_id] = false;
+                ScrappingScheduleStatus status = (ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[_id];
+                status.isRunning = false;
                 ret = false;
             }
             return Ok(ret);

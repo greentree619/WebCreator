@@ -398,8 +398,9 @@ namespace UnitTest.Lib
             return templateHtml;
         }
 
-        static public void GenerateArticleHtml(String fileName, Article article, String articleTemplate)
+        static public void GenerateArticleHtml(String fileName, String link, Article article, String articleTemplate)
         {
+            String canonialTag = $"<link rel=\"canonical\" href=\"{link}\"/>";
             using (StreamWriter writer = new StreamWriter(fileName))
             {
                 if (article.MetaTitle == null || article.MetaTitle.Length == 0) 
@@ -430,6 +431,8 @@ namespace UnitTest.Lib
                     }
 
                     writer.WriteLine($"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+                    writer.WriteLine(canonialTag);
+
                     writer.WriteLine("</head>");
                     writer.WriteLine("<body>");
                     writer.WriteLine(article.Content);
@@ -461,6 +464,14 @@ namespace UnitTest.Lib
                     articleTemplate = Regex.Replace(articleTemplate, @"([<]meta\s+name=""description""\s+[^<>]+[>])", metaDesc);
                     articleTemplate = Regex.Replace(articleTemplate, @"([<]meta\s+name=""keywords""\s+[^<>]+[>])", metaKeywd);
                     articleTemplate = Regex.Replace(articleTemplate, @"([<]meta\s+name=""author""\s+[^<>]+[>])", metaAuthor);
+
+                    //<link rel=\"canonical\" href=\"{link}\"/>
+                    articleTemplate = Regex.Replace(articleTemplate, @"([<]link\s+rel=""canonical""\s+[^<>]+[>])", canonialTag);
+                    Match m = Regex.Match(articleTemplate, @"[<]link\s+rel=""canonical""", RegexOptions.IgnoreCase);
+                    if (!m.Success)
+                    {
+                        articleTemplate = Regex.Replace(articleTemplate, @"([<][/]head[>])", "  " + canonialTag + "\n" + "</head>");
+                    }
 
                     articleTemplate = articleTemplate.Replace("{{TITLE}}", article.MetaTitle);
                     articleTemplate = articleTemplate.Replace("{{CONTENT}}", article.Content);
@@ -503,7 +514,7 @@ namespace UnitTest.Lib
                         //}}Stop When update theme
                         String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
                         String articleTemplate = GetArticleTemplate(domain);
-                        GenerateArticleHtml(curFolder + "\\" + title, article, articleTemplate);
+                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{domain}/{title}", article, articleTemplate);
 
                         //{{Update state
                         if (article.State != 3)
@@ -572,7 +583,7 @@ namespace UnitTest.Lib
                         while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
                         //}}Stop When update theme
                         String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                        GenerateArticleHtml(curFolder + "\\" + title, article, articleTemplate);
+                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{domain}/{title}", article, articleTemplate);
 
                         //{{Update state
                         if (article.State == 2)
@@ -641,7 +652,7 @@ namespace UnitTest.Lib
                         while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
                         //}}Stop When update theme
                         String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                        GenerateArticleHtml(curFolder + "\\" + title, article, articleTemplate);
+                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{domain}/{title}", article, articleTemplate);
                     }
                 }
 

@@ -15,6 +15,7 @@ using System.Web;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 using OpenAI_API;
+using UnitTest.Models;
 
 namespace UnitTest.Lib
 {
@@ -202,8 +203,7 @@ namespace UnitTest.Lib
         }
 
         public static String articleURL(String domain, String question) {
-            String filename = question.Replace("?", "");
-            filename = Uri.EscapeUriString(filename + ".html");
+            String filename = CommonModule.GetHtmlFileName("", question);
             return $"http://{domain}/{filename}";
         }
 
@@ -501,10 +501,9 @@ namespace UnitTest.Lib
                         //{{Stop When update theme
                         while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
                         //}}Stop When update theme
-                        String title = article.Title.Replace("?", "").Trim();
-                        title = title.Replace(" ", "-");
+                        String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
                         String articleTemplate = GetArticleTemplate(domain);
-                        GenerateArticleHtml(curFolder + "\\" + title + ".html", article, articleTemplate);
+                        GenerateArticleHtml(curFolder + "\\" + title, article, articleTemplate);
 
                         //{{Update state
                         if (article.State != 3)
@@ -519,9 +518,19 @@ namespace UnitTest.Lib
                     }
                 }
 
-                Query query = articlesCol.WhereEqualTo("ProjectId", domainid).WhereEqualTo("State", 3).OrderBy("Title");
+                CollectionReference col = Config.FirebaseDB.Collection("Projects");
+                QuerySnapshot snapshot2 = await col.GetSnapshotAsync();
+                Hashtable domainMap = new Hashtable();
+                foreach (DocumentSnapshot document in snapshot2.Documents)
+                {
+                    var proj = document.ConvertTo<Project>();
+                    domainMap[document.Id] = new DomainIpMap{ domainId = document.Id, domain= proj.Name, ip = proj.Ip };
+                }
+
+                Query query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 QuerySnapshot qSnapshot = await query.GetSnapshotAsync();
-                GenerateURLFile(qSnapshot, curFolder, "url.html", $"http://{domain}");
+                GenerateURLFile(qSnapshot, curFolder, "url.html", domainid, domainMap);
+                GenerateSiteMapFile(qSnapshot, curFolder, domainid, $"http://{domain}", domainMap);
             }
             catch (Exception ex)
             {
@@ -562,9 +571,8 @@ namespace UnitTest.Lib
                         //{{Stop When update theme
                         while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
                         //}}Stop When update theme
-                        String title = article.Title.Replace("?", "").Trim();
-                        title = title.Replace(" ", "-");
-                        GenerateArticleHtml(curFolder + "\\" + title + ".html", article, articleTemplate);
+                        String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
+                        GenerateArticleHtml(curFolder + "\\" + title, article, articleTemplate);
 
                         //{{Update state
                         if (article.State == 2)
@@ -576,10 +584,20 @@ namespace UnitTest.Lib
                     }
                 }
 
-                query = query.WhereEqualTo("State", 3).OrderBy("Title");
+                CollectionReference col = Config.FirebaseDB.Collection("Projects");
+                QuerySnapshot snapshot2 = await col.GetSnapshotAsync();
+                Hashtable domainMap = new Hashtable();
+                foreach (DocumentSnapshot document in snapshot2.Documents)
+                {
+                    var proj = document.ConvertTo<Project>();
+                    domainMap[document.Id] = new DomainIpMap { domainId = document.Id, domain = proj.Name, ip = proj.Ip };
+                }
+
+                query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 snapshot = await query.GetSnapshotAsync();
-                GenerateURLFile(snapshot, curFolder, "url.html", $"http://{domain}");
-                
+                GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap);
+                GenerateSiteMapFile(snapshot, curFolder, domainid, $"http://{domain}", domainMap);
+
                 if (articleUpdateStateIds.Length > 0)
                 {
                     await CommonModule.UpdateBatchState(articleUpdateStateIds, 3);
@@ -622,15 +640,24 @@ namespace UnitTest.Lib
                         //{{Stop When update theme
                         while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
                         //}}Stop When update theme
-                        String title = article.Title.Replace("?", "").Trim();
-                        title = title.Replace(" ", "-");
-                        GenerateArticleHtml(curFolder + "\\" + title + ".html", article, articleTemplate);
+                        String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
+                        GenerateArticleHtml(curFolder + "\\" + title, article, articleTemplate);
                     }
                 }
 
-                query = articlesCol.WhereEqualTo("ProjectId", domainid).WhereEqualTo("State", 3).OrderBy("Title");
+                CollectionReference col = Config.FirebaseDB.Collection("Projects");
+                QuerySnapshot snapshot2 = await col.GetSnapshotAsync();
+                Hashtable domainMap = new Hashtable();
+                foreach (DocumentSnapshot document in snapshot2.Documents)
+                {
+                    var proj = document.ConvertTo<Project>();
+                    domainMap[document.Id] = new DomainIpMap { domainId = document.Id, domain = proj.Name, ip = proj.Ip };
+                }
+
+                query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 snapshot = await query.GetSnapshotAsync();
-                GenerateURLFile(snapshot, curFolder, "url.html", $"http://{domain}");
+                GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap);
+                GenerateSiteMapFile(snapshot, curFolder, domainid, $"http://{domain}", domainMap);
             }
             catch (Exception ex)
             {
@@ -777,8 +804,9 @@ namespace UnitTest.Lib
             return tmpContent;
         }
 
-        static public void GenerateURLFile(QuerySnapshot snapshot, String folder, String fileName, String baseURL)
+        static public void GenerateURLFile(QuerySnapshot snapshot, String folder, String fileName, String selfDomainId, Hashtable domainMap)
         {
+            DomainIpMap selfdomain = (DomainIpMap)domainMap[selfDomainId];
             using (StreamWriter writer = new StreamWriter(folder + "//" + fileName))
             {
                 writer.WriteLine("<!DOCTYPE html>");
@@ -790,14 +818,97 @@ namespace UnitTest.Lib
                 foreach (DocumentSnapshot document in snapshot.Documents)
                 {
                     var article = document.ConvertTo<Article>();
+                    DomainIpMap domainInfo = (DomainIpMap)domainMap[article.ProjectId.ToString()];
+                    if ( !selfdomain.ip.Equals(domainInfo.ip) ) continue;
+
                     String orgTitle = article.Title;
-                    String titlelink = article.Title.Replace("?", "").Trim();
-                    titlelink = titlelink.Replace(" ", "-");
-                    titlelink += ".html";
+                    String titlelink = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
+                    String baseURL = $"http://{domainInfo.domain}";
                     writer.WriteLine($"<a href='{baseURL}/{titlelink}'>{orgTitle}</a><br/>");
                 }
                 writer.WriteLine("</body>");
                 writer.WriteLine("</html>");
+            }
+        }
+
+        static public String GetHtmlFileName(String metaTitle, String title)
+        {
+            if (metaTitle != null && metaTitle.Length > 0) title = metaTitle;
+            title = title.Replace("?", "").Trim();
+            title = title.Replace(" ", "-");
+            return title + ".html";
+        }
+
+        static public void GenerateSiteMapFile(QuerySnapshot snapshot, String folder, String selfDomainId, String baseURL, Hashtable domainMap)
+        {
+            DomainIpMap selfdomain = (DomainIpMap)domainMap[selfDomainId];
+            String updateDate = DateTime.Now.ToString("yyyy-MM-dd");
+            //robots.txt
+            using (StreamWriter writer = new StreamWriter(folder + "//robots.txt"))
+            {
+                foreach (DictionaryEntry diMapItem in domainMap)
+                {
+                    DomainIpMap diMap = (DomainIpMap)diMapItem.Value;
+                    if (!selfdomain.ip.Equals(diMap.ip)) continue;
+
+                    //Sitemap: http://www.example.com/sitemap-host1.xml
+                    writer.WriteLine($"Sitemap: {baseURL}/sitemap-{diMap.domain}.xml");
+
+                    //sitemap.xml or sitemap-host.xml
+                    using (StreamWriter writer2 = new StreamWriter(folder + $"//sitemap-{diMap.domain}.xml"))
+                    {
+                        writer2.WriteLine("<?xml version=\"1.0\" encoding=\"UTF - 8\"?>");
+                        writer2.WriteLine("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+                        foreach (DocumentSnapshot document in snapshot.Documents)
+                        {
+                            var article = document.ConvertTo<Article>();
+                            if (diMap.domainId != article.ProjectId) continue;
+                            String fileName = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
+                            writer2.WriteLine("   <url>");
+                            writer2.WriteLine($"      <loc>http://{diMap.domain}/{fileName}</loc>");
+                            writer2.WriteLine($"      <lastmod>{updateDate}</lastmod>");
+                            //always
+                            //hourly
+                            //daily
+                            //weekly
+                            //monthly
+                            //yearly
+                            //never
+                            writer2.WriteLine("      <changefreq>monthly</changefreq>");
+                            writer2.WriteLine("      <priority>0.5</priority>");
+                            writer2.WriteLine("   </url>");
+                        }
+                        writer2.WriteLine("</urlset>");
+                    }
+                }
+            }
+
+            String lastMod = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH:mm:ss.fffffffK");
+            int num = 1;
+            //siteindex.xml
+            using (StreamWriter writer = new StreamWriter(folder + "//siteindex.xml"))
+            {
+                writer.WriteLine("<?xml version=\"1.0\" encoding=\"UTF - 8\"?>");
+                writer.WriteLine("<sitemapindex  xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+                foreach (DictionaryEntry diMapItem in domainMap)
+                {
+                    DomainIpMap diMap = (DomainIpMap)diMapItem.Value;
+                    if (!selfdomain.ip.Equals(diMap.ip)) continue;
+
+                    String OriginalFileName = folder + $"//sitemap-{diMap.domain}.xml";
+                    String CompressedFileName = folder + $"//sitemap-{diMap.domain}.xml.gz";
+                    using FileStream originalFileStream = File.Open(OriginalFileName, FileMode.Open);
+                    using FileStream compressedFileStream = File.Create(CompressedFileName);
+                    using var compressor = new GZipStream(compressedFileStream, CompressionMode.Compress);
+                    originalFileStream.CopyTo(compressor);
+
+                    writer.WriteLine($"   <sitemap>");
+                    writer.WriteLine($"      <loc>http://{diMap.domain}/sitemap-{diMap.domain}.xml.gz</loc>");
+                    writer.WriteLine($"      <lastmod>{lastMod}</lastmod>");
+                    writer.WriteLine($"   </sitemap>");
+                    num++;
+                }
+                writer.WriteLine("</sitemapindex>");
             }
         }
     }

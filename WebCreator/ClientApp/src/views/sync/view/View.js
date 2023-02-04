@@ -51,7 +51,13 @@ class ListBase extends Component {
   getLink(title) {
     title = title.replace("?", "");
     title = title.replaceAll(" ", "-");
-    return `http://${this.state.projectInfo.projectDomain}/${title}.html`;
+
+    var url = `http://${this.state.projectInfo.projectDomain}/${title}.html`;
+
+    //http://www.traepiller123.info.s3-website.us-east-2.amazonaws.com 
+    if(this.state.projectInfo.domainIp == "0.0.0.0") url = `http://${this.state.projectInfo.projectDomain}.s3-website.us-east-2.amazonaws.com/${title}.html`;
+    
+    return url;
   }
 
   async loadSyncStatus(ids) {
@@ -61,7 +67,9 @@ class ListBase extends Component {
         headers: { 'Content-Type': 'application/json' },
       }
 
-      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/sync_status/${this.state.projectInfo.projectDomain}/${ids}`, requestOptions)
+      var isAWS = (this.state.projectInfo.domainIp == "0.0.0.0" ? 1 : 0)
+
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/sync_status/${this.state.projectInfo.projectDomain}/${ids}/${isAWS}`, requestOptions)
       let ret = await response.json()
       if (response.status === 200 && ret) {
         //console.log(ret);
@@ -244,7 +252,8 @@ const List = (props) => {
 
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
-    projectDomain: new URLSearchParams(location.search).get('domain') }
+    projectDomain: new URLSearchParams(location.search).get('domain'),
+    domainIp: new URLSearchParams(location.search).get('domainIp') }
   }
   return <ListBase location={location} {...props} />
 }

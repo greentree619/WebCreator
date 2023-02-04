@@ -36,14 +36,14 @@ namespace WebCreator.Controllers
         public async Task<IActionResult> BuildPages(string domainid, string domain)
         {
             //Task.Run(() => this.BuildPagesThreadAsync(domainid, domain));
-            await CommonModule.BuildPagesThreadAsync(domainid, domain);
+            await CommonModule.BuildPagesThreadAsync(domainid, domain, false/*FIXME*/);
             return Ok(true);
         }
 
         [HttpPost("{domainid}/{domain}/{articleId}")]
         public async Task<IActionResult> BuildArticlePage(string domainid, string domain, string articleId)
         {
-            await CommonModule.BuildArticlePageThreadAsync(domainid, domain, articleId);//Task.Run(() => this.BuildArticlePageThreadAsync(domainid, domain, articleId));
+            await CommonModule.BuildArticlePageThreadAsync(domainid, domain, articleId, false/*FIXME*/);//Task.Run(() => this.BuildArticlePageThreadAsync(domainid, domain, articleId));
             return Ok(true);
         }
 

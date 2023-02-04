@@ -205,6 +205,7 @@ const Add = (props) => {
   const [isOnPublish, setIsOnPublish] = useState(false)
 
   let ipAddressMap = [
+    { ip: 'AWS S3 Bucket', value: '0.0.0.0' },
     { ip: '3.14.14.86', value: '3.14.14.86' },
     { ip: '3.131.110.136', value: '3.131.110.136' },
     { ip: '3.142.69.221', value: '3.142.69.221' },
@@ -278,6 +279,8 @@ const Add = (props) => {
         theme: "colored",
       });
 
+      location.state.project.name = projectName
+      location.state.project.ip = ipAddress
       location.state.project.contactInfo.brandname = brandName
       location.state.project.contactInfo.streetAddress = streetAddress
       location.state.project.contactInfo.adrdressLocality = adrdressLocality
@@ -288,6 +291,8 @@ const Add = (props) => {
       location.state.project.contactInfo.website = website
       location.state.project.contactInfo.descriptionOfCompany = descriptionOfCompany
       location.state.project.contactInfo.openingHours = openingHours
+      dispatch({ type: 'set', activeDomainName: location.state.project.name })
+      dispatch({ type: 'set', activeDomainIp: location.state.project.ip })
       dispatch({ type: 'set', activeProject: location.state.project })
 
       if (simpleMode) navigate('/dashboard')
@@ -329,8 +334,8 @@ const Add = (props) => {
 
   const renderIpAddrItem = (ipaddr) => {
     return (
-      <CDropdownItem key={ipaddr} onClick={() => handleIpAddrClick(ipaddr)}>
-        {ipaddr}
+      <CDropdownItem key={ipaddr.value} onClick={() => handleIpAddrClick(ipaddr.value)}>
+        {ipaddr.ip}
       </CDropdownItem>
     )
   }
@@ -566,7 +571,7 @@ const Add = (props) => {
                           </CDropdownToggle>
                           <CDropdownMenu>
                             {ipAddressMap.map((ipAddr, index) => {
-                              return renderIpAddrItem(ipAddr.ip)
+                              return renderIpAddrItem(ipAddr)
                             })}
                           </CDropdownMenu>
                         </CDropdown>

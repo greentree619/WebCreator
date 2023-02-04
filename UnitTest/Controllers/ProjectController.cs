@@ -152,7 +152,7 @@ namespace WebCreator.Controllers
             String themeFolder = Directory.GetCurrentDirectory();
             themeFolder += $"\\Theme\\{domainName}\\theme";
 
-            await CommonModule.BuildPagesThreadAsync(domainId, domainName);
+            await CommonModule.BuildPagesThreadAsync(domainId, domainName, false/*FIXME*/);
             try
             {
                 FileSystem.CopyDirectory(themeFolder, curFolder, true);
@@ -366,6 +366,9 @@ namespace WebCreator.Controllers
                 }
 
                 Task.Run(() => new CloudFlareAPI().CreateDnsThreadAsync(project.Name, project.Ip));
+                
+                if(project.Ip.CompareTo("0.0.0.0") == 0)
+                    Task.Run(() => new CommonModule().CreateHostBucketThreadAsync(project.Name));
             }
             catch (Exception ex)
             {
@@ -431,6 +434,9 @@ namespace WebCreator.Controllers
                     { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                 };
                 await docRef.UpdateAsync(userUpdate);
+
+                if (projectInput.Ip.CompareTo("0.0.0.0") == 0)
+                    Task.Run(() => new CommonModule().CreateHostBucketThreadAsync(projectInput.Name));
                 addOK = true;
             }
             catch (Exception ex)

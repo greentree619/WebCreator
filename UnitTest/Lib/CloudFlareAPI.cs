@@ -46,6 +46,26 @@ namespace UnitTest.Lib
             }
         }
 
+        public void CreateDnsWithCName(String domain, String bucketEndpoint)
+        {
+            try
+            {
+                String[] domainInfo = domain.Split(".");
+                if (domainInfo.Length >= 2)
+                {
+                    String zone = domainInfo[domainInfo.Length - 2] + "." + domainInfo[domainInfo.Length - 1];
+                    CreateZone(zone);
+                    GetZoneID();
+                    CreateDns(zone, domain, bucketEndpoint, "CNAME");
+                    ListDns(zone, domain);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[CloudFlare] =========> " + e.Message);
+            }
+        }
+
         public async Task UpdateDnsThreadAsync(String domain, String newDomain, String ip)
         {
             try
@@ -392,7 +412,7 @@ namespace UnitTest.Lib
              -H "Content-Type: application/json" \
              --data '{"type":"A","name":"example.com","content":"127.0.0.1","ttl":3600,"priority":10,"proxied":false}'
          */
-        public bool CreateDns(String zone, String dns, String ip="127.0.0.1") {
+        public bool CreateDns(String zone, String dns, String content="127.0.0.1", String type="A") {
             bool result = true;
             if (zoneMap[zone] == null) return false;
 
@@ -409,9 +429,9 @@ namespace UnitTest.Lib
             //"name":"example.com","account":{"id":"01a7362d577a6c3019a474fd6f485823"},"type":"full"
             using (var streamWriter = new StreamWriter(request.GetRequestStream()))
             {
-                string json = string.Format("{{\"type\":\"A\",\"name\":\"{0}" +
-                    "\",\"content\":\"{1}" +
-                    "\",\"ttl\":3600,\"priority\":10,\"proxied\":false}}", dns, ip);
+                string json = string.Format("{{\"type\":\"{0}\",\"name\":\"{1}" +
+                    "\",\"content\":\"{2}" +
+                    "\",\"ttl\":3600,\"priority\":10,\"proxied\":false}}", type, dns, content);
                 streamWriter.Write(json);
                 streamWriter.Flush();
                 streamWriter.Close();

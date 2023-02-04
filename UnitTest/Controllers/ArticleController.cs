@@ -206,8 +206,8 @@ namespace WebCreator.Controllers
             return new OkObjectResult(scrapStatus);
         }
 
-        [HttpGet("sync_status/{domain}/{articleids}")]
-        public async Task<IActionResult> GetArticleSyncAsync(string domain, String articleids)
+        [HttpGet("sync_status/{domain}/{articleids}/{isAWS}")]
+        public async Task<IActionResult> GetArticleSyncAsync(string domain, String articleids, int isAWS)
         {
             string[] articleList = articleids.Split(',');
             Dictionary<string, bool> syncStatus = new Dictionary<string, bool>();
@@ -219,7 +219,7 @@ namespace WebCreator.Controllers
                 foreach (DocumentSnapshot document in projectsSnapshot.Documents)
                 {
                     var article = document.ConvertTo<Article>();
-                    String url = CommonModule.articleURL(domain, article.Title);
+                    String url = CommonModule.articleURL(domain, article.Title, isAWS);
                     syncStatus[document.Id] = CommonModule.RemoteFileExists(url);
                     Console.WriteLine($"url:{url} -> {syncStatus[document.Id].ToString()}");
                 }
@@ -448,7 +448,7 @@ namespace WebCreator.Controllers
                 if (article.State == 3)
                 {
                     CommonModule.isManualSync = true;
-                    await CommonModule.BuildArticlePageThreadAsync(domainId, domainName, article.Id);
+                    await CommonModule.BuildArticlePageThreadAsync(domainId, domainName, article.Id, CommonModule.isAWSHosting(ipAddr));
                     await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr);
                     CommonModule.isManualSync = false;
                 }

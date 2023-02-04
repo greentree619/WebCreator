@@ -303,7 +303,7 @@ namespace UnitTest.Lib
                                 while (CommonModule.isManualSync) Thread.Sleep(5000);
 
                                 //{{
-                                await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id);
+                                await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip));
                                 await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
                                 //}}
                             }
@@ -324,7 +324,7 @@ namespace UnitTest.Lib
                                     while (CommonModule.isManualSync) Thread.Sleep(5000);
 
                                     //{{
-                                    await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id);
+                                    await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip));
                                     await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
                                     //}}
                                 }
@@ -349,7 +349,7 @@ namespace UnitTest.Lib
         {
             try
             {
-                await CommonModule.BuildPagesThreadAsync(domainid, domainName, 3, false);
+                await CommonModule.BuildPagesThreadAsync(domainid, domainName, CommonModule.isAWSHosting(ipaddr), 3, false);
                 await CommonModule.SyncWithServerThreadAsync(domainid, domainName, ipaddr);
             }
             catch (Exception ex)

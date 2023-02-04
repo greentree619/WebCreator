@@ -145,6 +145,11 @@ catch (Exception ex)
 //Console.WriteLine(result.ToString());
 ////}}OpenAI Content Generate TEST
 
+////{{AWS Upload Test
+//new AWSUpload().start();
+//return;
+////}}AWS Upload Test
+
 //Refresh Article Forge Scrapping status.
 Task.Run(() => new CommonModule().UpdateArticleScrappingProgress());
 

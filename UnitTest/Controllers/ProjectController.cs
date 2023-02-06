@@ -144,15 +144,15 @@ namespace WebCreator.Controllers
             return Ok(new { serpapi=isScrapping, afapi= isAFScrapping, publish= isPublishing, scrappingScheduleMode = scrappingScheduleMode });
         }
 
-        [HttpGet("allDownload/{domainId}/{domainName}")]
-        public async Task<FileResult> AllDownload(String domainId, String domainName)
+        [HttpGet("allDownload/{domainId}/{domainName}/{domainIp}")]
+        public async Task<FileResult> AllDownload(String domainId, String domainName, String domainIp)
         {
             String curFolder = Directory.GetCurrentDirectory();
             curFolder += $"\\Build\\{domainName}";
             String themeFolder = Directory.GetCurrentDirectory();
             themeFolder += $"\\Theme\\{domainName}\\theme";
 
-            await CommonModule.BuildPagesThreadAsync(domainId, domainName, false/*FIXME*/);
+            await CommonModule.BuildPagesThreadAsync(domainId, domainName, CommonModule.isAWSHosting(domainIp));
             try
             {
                 FileSystem.CopyDirectory(themeFolder, curFolder, true);

@@ -32,18 +32,18 @@ namespace WebCreator.Controllers
             _logger = logger;
         }
 
-        [HttpPost("{domainid}/{domain}")]
-        public async Task<IActionResult> BuildPages(string domainid, string domain)
+        [HttpPost("{domainid}/{domain}/domainIp/{domainIp}")]
+        public async Task<IActionResult> BuildPages(string domainid, string domain, string domainIp)
         {
             //Task.Run(() => this.BuildPagesThreadAsync(domainid, domain));
-            await CommonModule.BuildPagesThreadAsync(domainid, domain, false/*FIXME*/);
+            await CommonModule.BuildPagesThreadAsync(domainid, domain, CommonModule.isAWSHosting(domainIp));
             return Ok(true);
         }
 
-        [HttpPost("{domainid}/{domain}/{articleId}")]
-        public async Task<IActionResult> BuildArticlePage(string domainid, string domain, string articleId)
+        [HttpPost("{domainid}/{domain}/{articleId}/{domainIp}")]
+        public async Task<IActionResult> BuildArticlePage(string domainid, string domain, string articleId, string domainIp)
         {
-            await CommonModule.BuildArticlePageThreadAsync(domainid, domain, articleId, false/*FIXME*/);//Task.Run(() => this.BuildArticlePageThreadAsync(domainid, domain, articleId));
+            await CommonModule.BuildArticlePageThreadAsync(domainid, domain, articleId, CommonModule.isAWSHosting(domainIp));//Task.Run(() => this.BuildArticlePageThreadAsync(domainid, domain, articleId));
             return Ok(true);
         }
 

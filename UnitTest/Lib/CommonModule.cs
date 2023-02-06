@@ -629,11 +629,11 @@ namespace UnitTest.Lib
             }
         }
 
-        static public async Task BuildPagesFromArtidleIdsAsync(String domainid, String domain, String articleIds)
+        static public async Task BuildPagesFromArtidleIdsAsync(String domainid, String domain, String articleIds, bool isAWS)
         {
             try
             {
-                String hostingDomain = CommonModule.GetDomain(domain, false/*FIXME*/);
+                String hostingDomain = CommonModule.GetDomain(domain, isAWS);
                 String[] aids = articleIds.Split(',');
                 String curFolder = Directory.GetCurrentDirectory();
                 curFolder += $"\\Build\\{domain}";
@@ -677,7 +677,7 @@ namespace UnitTest.Lib
 
                 query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 snapshot = await query.GetSnapshotAsync();
-                GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap, false/*FIXME*/);
+                GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap, isAWS);
                 GenerateSiteMapFile(snapshot, curFolder, domainid, $"http://{hostingDomain}", domainMap);
             }
             catch (Exception ex)
@@ -766,10 +766,17 @@ namespace UnitTest.Lib
 
                 if (File.Exists(curFolder))
                 {
-                    String cmd = $"pscp -i {exeFolder}\\searchsystem.ppk {curFolder} ubuntu@{ipaddr}:/home/ubuntu";
+                    if (!CommonModule.isAWSHosting(ipaddr))
+                    {
+                        String cmd = $"pscp -i {exeFolder}\\searchsystem.ppk {curFolder} ubuntu@{ipaddr}:/home/ubuntu";
 
-                    Console.WriteLine("SyncWithServerThreadAsync --> " + cmd);
-                    ExecuteCmd.ExecuteCommandAsync(cmd);
+                        Console.WriteLine("SyncWithServerThreadAsync --> " + cmd);
+                        ExecuteCmd.ExecuteCommandAsync(cmd);
+                    }
+                    else
+                    {
+                        new AWSUpload().start(domain, "theme.zip", $"{exeFolder}\\Theme\\{domain}\\");
+                    }
                 }
             }
             catch (Exception ex)

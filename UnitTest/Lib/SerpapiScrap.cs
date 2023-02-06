@@ -254,7 +254,7 @@ namespace UnitTest.Lib
 
         public async Task ManualArticlesSyncAsync(String domainId, String domainName, String ipAddr, String articleIds)
         {
-            await CommonModule.BuildPagesFromArtidleIdsAsync(domainId, domainName, articleIds);
+            await CommonModule.BuildPagesFromArtidleIdsAsync(domainId, domainName, articleIds, CommonModule.isAWSHosting(ipAddr));
             await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr);
             CommonModule.isManualSync = false;
         }

@@ -181,8 +181,8 @@ class ListBase extends Component {
     }
 
     const response = await fetch(
-      (articleId.length > 0 ? `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}/${articleId}` 
-                            : `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}`),
+      (articleId.length > 0 ? `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}/${articleId}/${this.state.projectInfo.domainIp}` 
+                            : `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}/domainIp/${this.state.projectInfo.domainIp}`),
       requestOptions,
     )
     this.setState({
@@ -256,7 +256,7 @@ class ListBase extends Component {
     await this.onSync(_id, domain, ip);
   }
 
-  async downloadAllArticles(_id, domain) {
+  async downloadAllArticles(_id, domain, ip) {
     //window.open(`${process.env.REACT_APP_SERVER_URL}project/allDownload/${_id}/${domain}`, '_blank');
     try {
       const requestOptions = {
@@ -265,7 +265,7 @@ class ListBase extends Component {
       }
 
       //console.log("progress status : ->");
-      fetch(`${process.env.REACT_APP_SERVER_URL}project/allDownload/${_id}/${domain}`, requestOptions).then(res => {
+      fetch(`${process.env.REACT_APP_SERVER_URL}project/allDownload/${_id}/${domain}/${ip}`, requestOptions).then(res => {
         return res.blob();
       }).then(blob => {
           const href = window.URL.createObjectURL(blob);
@@ -457,7 +457,8 @@ class ListBase extends Component {
                   <CButton
                     type="button"
                     onClick={() => this.downloadAllArticles(this.state.projectInfo.projectid,
-                                                    this.state.projectInfo.domainName
+                                                    this.state.projectInfo.domainName,
+                                                    this.state.projectInfo.domainIp
                                                     )}
                   >
                     Download

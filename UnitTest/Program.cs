@@ -199,7 +199,17 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
-builder.Services.Configure<FormOptions>(x => x.ValueCountLimit = 50000);
+builder.Services.Configure<FormOptions>(x => {
+    x.ValueCountLimit = 50000;
+    x.ValueLengthLimit = int.MaxValue;
+    x.MultipartBodyLengthLimit = int.MaxValue;
+    x.MultipartHeadersLengthLimit = int.MaxValue;
+});
+
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = int.MaxValue;
+});
 
 var app = builder.Build();
 

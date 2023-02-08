@@ -261,6 +261,8 @@ namespace WebCreator.Controllers
         }
         //}}
 
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
+        [DisableRequestSizeLimit]
         [HttpPost("themeUpload/{domainId}/{domainName}/{ipaddr}")]
         [DisableFormValueModelBinding]
         public async Task<IActionResult> themeUpload(String domainId, String domainName, String ipaddr)

@@ -136,17 +136,17 @@ const AppBreadcrumb = () => {
                 {activeDomainName.length > 0 && (
                   <>
                     <CNavItem className="px-1">
-                      <CNavLink className={isSelctedTab("project_keyword")} href={'#/project/keyword/?tab=project_keyword&domainId=' + activeZoneId + '&domainName=' + activeZoneName}>
+                      <CNavLink className={isSelctedTab("project_keyword")} href={'#/project/keyword/?tab=project_keyword&domainId=' + activeZoneId + '&domainName=' + activeDomainName}>
                         Keyword
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink className={isSelctedTab("cloudflare_dns")} href={'#/cloudflare/dns/?tab=cloudflare_dns&domainId=' + activeZoneId + '&domainName=' + activeZoneName}>
+                      <CNavLink className={isSelctedTab("cloudflare_dns")} href={'#/cloudflare/dns/?tab=cloudflare_dns&domainId=' + activeZoneId + '&domainName=' + activeDomainName}>
                         DNS Status
                       </CNavLink>
                     </CNavItem>
                     <CNavItem className="px-1">
-                      <CNavLink className={isSelctedTab("theme_article")} href={'#/theme/article/?tab=theme_article&domainId=' + activeDomainId + '&domainName=' + activeZoneName + '&domainIp=' + activeDomainIp}>
+                      <CNavLink className={isSelctedTab("theme_article")} href={'#/theme/article/?tab=theme_article&domainId=' + activeDomainId + '&domainName=' + activeDomainName + '&domainIp=' + activeDomainIp}>
                         Theme
                       </CNavLink>
                     </CNavItem>

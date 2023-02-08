@@ -746,7 +746,7 @@ namespace UnitTest.Lib
                     }
                     else
                     {
-                        new AWSUpload().start(domain, $"{domain}.zip", $"{tmpFolder}\\");
+                        await new AWSUpload().start(domain, $"{domain}.zip", $"{tmpFolder}\\");
                     }
                 }
             }
@@ -775,7 +775,7 @@ namespace UnitTest.Lib
                     }
                     else
                     {
-                        new AWSUpload().start(domain, "theme.zip", $"{exeFolder}\\Theme\\{domain}\\");
+                        await new AWSUpload().start(domain, "theme.zip", $"{exeFolder}\\Theme\\{domain}\\");
                     }
                 }
             }

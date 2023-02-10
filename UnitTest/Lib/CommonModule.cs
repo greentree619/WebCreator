@@ -1049,10 +1049,12 @@ namespace UnitTest.Lib
             string bucketLocation;
             var request = new GetBucketLocationRequest()
             {
-                BucketName = bucketName
+                BucketName = bucketName,
+
             };
             GetBucketLocationResponse response = await amazonS3Client.GetBucketLocationAsync(request);
             bucketLocation = response.Location.ToString();
+            if (bucketLocation.CompareTo("EU") == 0) bucketLocation = "eu-west-1";//Patch manually.
             return bucketLocation;
         }
 

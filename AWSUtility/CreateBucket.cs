@@ -7,7 +7,7 @@ namespace AWSUtility
 {
     public class CreateBucket
     {
-        static public async Task<bool> CreateBucketAsync(AmazonS3Client s3Client, string bucketName)
+        static public async Task<bool> CreateBucketAsync(AmazonS3Client s3Client, string bucketName, string region = "")
         {
             bool bret = false;
             try
@@ -21,11 +21,10 @@ namespace AWSUtility
                     };
 
                     PutBucketResponse putBucketResponse = await s3Client.PutBucketAsync(putBucketRequest);
+                    bret = true;
                 }
                 // Retrieve the bucket location.
                 string bucketLocation = await FindBucketLocationAsync(s3Client, bucketName);
-
-                bret = true;
             }
             catch (AmazonS3Exception e)
             {

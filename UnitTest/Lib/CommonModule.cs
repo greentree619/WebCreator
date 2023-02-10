@@ -19,6 +19,7 @@ using UnitTest.Models;
 using Amazon.S3;
 using Amazon;
 using AWSUtility;
+using Amazon.S3.Model;
 
 namespace UnitTest.Lib
 {
@@ -36,6 +37,7 @@ namespace UnitTest.Lib
         public static bool isManualOpenAIScrapping = false;
         public static bool isManualSync = false;
         public static HistoryManagement historyLog = new HistoryManagement();
+        public static AmazonS3Client amazonS3Client = new AmazonS3Client( Config.AWSAccessKey, Config.AWSSecretKey, RegionEndpoint.USEast2);
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -785,6 +787,25 @@ namespace UnitTest.Lib
             }
         }
 
+        static public async Task UploadDataToS3ThreadAsync(String domain)
+        {
+            try
+            {
+                String curFolder = Directory.GetCurrentDirectory();
+                String exeFolder = curFolder;
+                curFolder += $"\\Upload\\{domain}\\S3Data.zip";
+
+                if (File.Exists(curFolder))
+                {
+                    await new AWSUpload().start(domain, "S3Data.zip", $"{exeFolder}\\Upload\\{domain}\\");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         static public String PreAdjustForTitleImage(String content)
         {
             String tmpContent = content;
@@ -956,20 +977,29 @@ namespace UnitTest.Lib
             }
         }
 
-        public async Task CreateHostBucketThreadAsync(String domain)
+        public async Task<bool> CreateHostBucketThreadAsync(String domain, String region = "")
         {
-            var client = new AmazonS3Client("AKIA6GFGHJFKCHWFMUWX", "6YvagXUBnahKdBSWmOjvmr5o5crZbzoiGLRNkIum", RegionEndpoint.USEast2);
-            var success = await CreateBucket.CreateBucketAsync(client, (string)domain);
-            success = await CreateBucket.SetBucketPublicAsync(client, (string)domain);
-            success = await CreateBucket.AddWebsiteConfigurationAsync(client, (string)domain, "index.html", "error.html");
+            AmazonS3Client s3Client = CommonModule.amazonS3Client;
+            if (region.Length > 0)
+            {
+                s3Client = new AmazonS3Client("AKIA6GFGHJFKCHWFMUWX", "6YvagXUBnahKdBSWmOjvmr5o5crZbzoiGLRNkIum", RegionEndpoint.GetBySystemName(region));
+            }
+
+            var success = await CreateBucket.CreateBucketAsync(s3Client, (string)domain, region);
+
+            if( success )
+                success = await CreateBucket.SetBucketPublicAsync(s3Client, (string)domain);
+
             if (success)
-            {
-                Console.WriteLine($"Successfully created bucket: .\n");
-            }
-            else
-            {
-                Console.WriteLine($"Could not create bucket: .\n");
-            }
+                success = await CreateBucket.AddWebsiteConfigurationAsync(s3Client, (string)domain, "index.html", "error.html");
+            //if (success)
+            //{
+            //    Console.WriteLine($"Successfully created bucket: .\n");
+            //}
+            //else
+            //{
+            //    Console.WriteLine($"Could not create bucket: .\n");
+            //}
 
             //// Get the list of buckets accessible by the new user.
             //var response = await client.ListBucketsAsync();
@@ -979,6 +1009,7 @@ namespace UnitTest.Lib
             //Console.WriteLine("Listing S3 buckets:\n");
             //response.Buckets
             //    .ForEach(b => Console.WriteLine($"Bucket name: {b.BucketName}, created on: {b.CreationDate}"));
+            return success;
         }
 
         static public bool isAWSHosting(String ipAddr, String val = "0.0.0.0")
@@ -986,6 +1017,132 @@ namespace UnitTest.Lib
             if(ipAddr.CompareTo(val) == 0) return true;
 
             return false;
+        }
+
+        public static async Task<bool> DeleteBucketAsync(string bucketName, string region)
+        {
+            bool bret = false;
+            AmazonS3Client s3Client = CommonModule.amazonS3Client;
+            if (region.Length > 0)
+            {
+                s3Client = new AmazonS3Client("AKIA6GFGHJFKCHWFMUWX", "6YvagXUBnahKdBSWmOjvmr5o5crZbzoiGLRNkIum", RegionEndpoint.GetBySystemName(region));
+            }
+            try
+            {
+                var request = new DeleteBucketRequest
+                {
+                    BucketName = bucketName,
+                };
+
+                var response = await s3Client.DeleteBucketAsync(request);
+                bret = true;
+            }
+            catch (Exception e)
+            { 
+
+            }
+            return bret;            
+        }
+
+        static public async Task<string> FindBucketLocationAsync(String bucketName)
+        {
+            string bucketLocation;
+            var request = new GetBucketLocationRequest()
+            {
+                BucketName = bucketName
+            };
+            GetBucketLocationResponse response = await amazonS3Client.GetBucketLocationAsync(request);
+            bucketLocation = response.Location.ToString();
+            return bucketLocation;
+        }
+
+        public static async Task<bool> ListBucketContentsAsync(AmazonS3Client s3Client, string bucketName, List<Hashtable> list, int maxKeys = 20)
+        {
+            try
+            {
+                var request = new ListObjectsV2Request
+                {
+                    BucketName = bucketName,
+                    MaxKeys = maxKeys,
+                    Prefix = "",
+                    Delimiter = "",
+                };
+
+                ListObjectsV2Response response;
+
+                do
+                {
+                    response = await s3Client.ListObjectsV2Async(request);
+
+                    response.S3Objects
+                        .ForEach(obj => {
+                            //Console.WriteLine($"{obj.Key,-35}{obj.LastModified.ToShortDateString(),10}{obj.Size,10}")
+                            Hashtable objTbl = new Hashtable();
+                            objTbl["key"] = obj.Key;
+                            objTbl["date"] = obj.LastModified.ToShortDateString();
+                            objTbl["size"] = obj.Size;
+                            list.Add(objTbl);
+                            });
+
+                    // If the response is truncated, set the request ContinuationToken
+                    // from the NextContinuationToken property of the response.
+                    request.ContinuationToken = response.NextContinuationToken;
+                }
+                while (response.IsTruncated);
+
+                return true;
+            }
+            catch (AmazonS3Exception ex)
+            {
+                Console.WriteLine($"Error encountered on server. Message:'{ex.Message}' getting list of objects.");
+                return false;
+            }
+        }
+
+        public static async Task<bool> ListBucketObjectsAsync(AmazonS3Client s3Client, string bucketName)
+        {
+            ListObjectsRequest listObjectsRequest = new ListObjectsRequest{
+                BucketName = bucketName,
+                Prefix = "",
+                Delimiter = "/*/",
+            };
+
+            List<String> keys = new List<String>();
+
+            ListObjectsResponse response = await s3Client.ListObjectsAsync(listObjectsRequest);
+            response.S3Objects
+                        .ForEach(obj => Console.WriteLine($"{obj.Key,-35}{obj.LastModified.ToShortDateString(),10}{obj.Size,10}"));
+
+            return true;
+        }
+        public static bool IsMultipartContentType(string contentType)
+        {
+            return
+                !string.IsNullOrEmpty(contentType) &&
+                contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        public static string GetBoundary(string contentType)
+        {
+            var elements = contentType.Split(' ');
+            var element = elements.Where(entry => entry.StartsWith("boundary=")).First();
+            var boundary = element.Substring("boundary=".Length);
+            // Remove quotes
+            if (boundary.Length >= 2 && boundary[0] == '"' &&
+                boundary[boundary.Length - 1] == '"')
+            {
+                boundary = boundary.Substring(1, boundary.Length - 2);
+            }
+            return boundary;
+        }
+        public static string GetFileName(string contentDisposition)
+        {
+            return contentDisposition
+                .Split(';')
+                .SingleOrDefault(part => part.Contains("filename"))
+                .Split('=')
+                .Last()
+                .Trim('"');
         }
     }
 }

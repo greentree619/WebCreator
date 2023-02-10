@@ -13,6 +13,7 @@ import {
   cilSpeedometer,
   cilStar,
   cilWindow,
+  cilPaintBucket,
   cilNoteAdd,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
@@ -328,6 +329,12 @@ const _nav = [
     name: 'DNS Records',
     to: '/cloudflare/dns',
     icon: <CIcon icon={cilWindow} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'AWS S3 Bucket',
+    to: '/amazone/bucket',
+    icon: <CIcon icon={cilPaintBucket} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,

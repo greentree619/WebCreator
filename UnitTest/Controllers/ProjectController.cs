@@ -213,37 +213,6 @@ namespace WebCreator.Controllers
         }
 
         //{{
-        private static bool IsMultipartContentType(string contentType)
-        {
-            return
-                !string.IsNullOrEmpty(contentType) &&
-                contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
-        }
-
-        private static string GetBoundary(string contentType)
-        {
-            var elements = contentType.Split(' ');
-            var element = elements.Where(entry => entry.StartsWith("boundary=")).First();
-            var boundary = element.Substring("boundary=".Length);
-            // Remove quotes
-            if (boundary.Length >= 2 && boundary[0] == '"' &&
-                boundary[boundary.Length - 1] == '"')
-            {
-                boundary = boundary.Substring(1, boundary.Length - 2);
-            }
-            return boundary;
-        }
-
-        private string GetFileName(string contentDisposition)
-        {
-            return contentDisposition
-                .Split(';')
-                .SingleOrDefault(part => part.Contains("filename"))
-                .Split('=')
-                .Last()
-                .Trim('"');
-        }
-
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
         public class DisableFormValueModelBindingAttribute : Attribute, IResourceFilter
         {
@@ -280,9 +249,9 @@ namespace WebCreator.Controllers
                     Directory.CreateDirectory(curFolder);
                 }
 
-                if (IsMultipartContentType(Request.ContentType))
+                if (CommonModule.IsMultipartContentType(Request.ContentType))
                 {
-                    var boundary = GetBoundary(Request.ContentType);
+                    var boundary = CommonModule.GetBoundary(Request.ContentType);
                     var reader = new MultipartReader(boundary, Request.Body);
                     var section = await reader.ReadNextSectionAsync();
 
@@ -292,7 +261,7 @@ namespace WebCreator.Controllers
                         const int chunkSize = 1024;
                         var buffer = new byte[chunkSize];
                         var bytesRead = 0;
-                        var fileName = GetFileName(section.ContentDisposition);
+                        var fileName = CommonModule.GetFileName(section.ContentDisposition);
                         await CommonModule.historyLog.ThemeUploadAction(domainId, fileName);
 
                         using (var stream = new FileStream(curFolder + "/theme.zip", FileMode.Create))

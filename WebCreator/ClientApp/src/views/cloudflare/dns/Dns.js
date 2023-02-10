@@ -183,7 +183,7 @@ const Dns = (props) => {
   //console.log(location.state)
   if (location.state == null && location.search.length > 0) {
     location.state = { 
-      zoneId: new URLSearchParams(location.search).get('domainId'),
+      zoneId: new URLSearchParams(location.search).get('zoneId'),
       zoneName: new URLSearchParams(location.search).get('domainName'),
    }
   }

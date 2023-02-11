@@ -31,6 +31,8 @@ const context =  [
   "/s3Bucket",
   "/s3Bucket/contents",
   "/s3Bucket/upload",
+  "/s3Bucket/nameList",
+  "/s3Bucket/getRegion",
   "/buildsync",
   "/buildsync/sync",
   "/setting/afsetting",

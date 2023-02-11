@@ -17,6 +17,7 @@ import { useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Outlet, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
 
 class ListBase extends Component {
   static displayName = ListBase.name
@@ -69,7 +70,10 @@ class ListBase extends Component {
 
       var isAWS = (this.state.projectInfo.domainIp == "0.0.0.0" ? 1 : 0)
 
-      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/sync_status/${this.state.projectInfo.projectDomain}/${ids}/${isAWS}`, requestOptions)
+      var s3Host = loadFromLocalStorage('s3host')
+      var s3Name = s3Host.name == null ? "" : s3Host.name;
+      var s3Region = s3Host.region == null ? "" : s3Host.region;
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/sync_status/${this.state.projectInfo.projectDomain}/${ids}/${isAWS}?s3Name=${s3Name}&region=${s3Region}`, requestOptions)
       let ret = await response.json()
       if (response.status === 200 && ret) {
         //console.log(ret);

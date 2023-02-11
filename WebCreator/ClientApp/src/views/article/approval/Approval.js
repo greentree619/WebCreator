@@ -228,7 +228,10 @@ class ApprovalBase extends Component {
       headers: { 'Content-Type': 'application/json' },
     }
 
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/UpdateBatchState/${this.state.projectInfo.projectid}/${this.state.projectInfo.domainName}/${this.state.projectInfo.domainIp}/${articleIds}/${articleState}`, requestOptions)
+    var s3Host = loadFromLocalStorage('s3host')
+    var s3Name = s3Host.name == null ? "" : s3Host.name;
+    var s3Region = s3Host.region == null ? "" : s3Host.region;
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/UpdateBatchState/${this.state.projectInfo.projectid}/${this.state.projectInfo.domainName}/${this.state.projectInfo.domainIp}/${articleIds}/${articleState}?s3Name=${s3Name}&region=${s3Region}`, requestOptions)
     // this.setState({
     //   alarmVisible: false,
     //   alertMsg: 'Failed to change State.',
@@ -492,7 +495,7 @@ class ApprovalBase extends Component {
 
   async populateArticleData(pageNo, articleState) {
     var store = loadFromLocalStorage();
-    if(store != undefined)
+    if(store != null && store != undefined)
     {
       console.log(store)
       this.setState({

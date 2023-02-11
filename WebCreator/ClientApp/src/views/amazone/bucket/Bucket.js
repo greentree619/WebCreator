@@ -27,8 +27,9 @@ import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import { Col } from 'reactstrap'
 import { useDispatch, useSelector } from 'react-redux'
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import {globalRegionMap} from 'src/utility/common.js'
 
 const Bucket = (props) => {
   const location = useLocation()
@@ -40,25 +41,7 @@ const Bucket = (props) => {
   const [bucketName, setBucketName] = useState("")
   const [region, setRegion] = useState("")
 
-  let regionMap = [
-    { region: 'US East (N. Virginia)', value: 'us-east-1'},
-    { region: 'US East (Ohio)', value: 'us-east-2'},
-    { region: 'US West (N. California)', value: 'us-west-1'},
-    { region: 'US West (Oregon)', value: 'us-west-2'},
-    { region: 'Asia Pacific (Mumbai)', value: 'ap-south-1'},
-    { region: 'Asia Pacific (Osaka)', value: 'ap-northeast-3'},
-    { region: 'Asia Pacific (Seoul)', value: 'ap-northeast-2'},
-    { region: 'Asia Pacific (Singapore)', value: 'ap-southeast-1'},
-    { region: 'Asia Pacific (Sydney)', value: 'ap-southeast-2'},
-    { region: 'Asia Pacific (Tokyo)', value: 'ap-northeast-1'},
-    { region: 'Canada (Central)', value: 'ca-central-1'},
-    { region: 'Europe (Frankfurt)', value: 'eu-central-1'},
-    { region: 'Europe (Ireland)', value: 'eu-west-1'},
-    { region: 'Europe (London)', value: 'eu-west-2'},
-    { region: 'Europe (Paris)', value: 'eu-west-3'},
-    { region: 'Europe (Stockholm)', value: 'eu-north-1'},
-    { region: 'South America (São Paulo)', value: 'sa-east-1'},
-  ]
+  let regionMap = globalRegionMap
 
   useEffect(() => {
     populateData()

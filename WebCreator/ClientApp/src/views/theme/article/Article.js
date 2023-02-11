@@ -36,6 +36,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Outlet, Link } from 'react-router-dom';
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
 
 const Article = (props) => {
   const location = useLocation()
@@ -71,8 +72,11 @@ const Article = (props) => {
       body: data,
     }
 
+    var s3Host = loadFromLocalStorage('s3host')
+    var s3Name = s3Host.name == null ? "" : s3Host.name;
+    var s3Region = s3Host.region == null ? "" : s3Host.region;
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}project/themeUpload/${location.state.projectid}/${location.state.domainName}/${location.state.domainIp}`,
+      `${process.env.REACT_APP_SERVER_URL}project/themeUpload/${location.state.projectid}/${location.state.domainName}/${location.state.domainIp}?s3Name=${s3Name}&region=${s3Region}`,
       requestOptions,
     )
 

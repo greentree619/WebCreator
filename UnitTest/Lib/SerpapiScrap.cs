@@ -252,9 +252,9 @@ namespace UnitTest.Lib
             else if (mode == "1") CommonModule.isManualOpenAIScrapping = false;
         }
 
-        public async Task ManualArticlesSyncAsync(String domainId, String domainName, String ipAddr, String articleIds)
+        public async Task ManualArticlesSyncAsync(String domainId, String domainName, String ipAddr, String s3Name, String region, String articleIds)
         {
-            await CommonModule.BuildPagesFromArtidleIdsAsync(domainId, domainName, articleIds, CommonModule.isAWSHosting(ipAddr));
+            await CommonModule.BuildPagesFromArtidleIdsAsync(domainId, domainName, articleIds, CommonModule.isAWSHosting(ipAddr), s3Name, region);
             await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr);
             CommonModule.isManualSync = false;
         }
@@ -303,7 +303,7 @@ namespace UnitTest.Lib
                                 while (CommonModule.isManualSync) Thread.Sleep(5000);
 
                                 //{{
-                                await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip));
+                                await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
                                 await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
                                 //}}
                             }
@@ -324,7 +324,7 @@ namespace UnitTest.Lib
                                     while (CommonModule.isManualSync) Thread.Sleep(5000);
 
                                     //{{
-                                    await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip));
+                                    await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
                                     await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
                                     //}}
                                 }
@@ -345,11 +345,11 @@ namespace UnitTest.Lib
         }
 
         //_id: domain id
-        public async Task UpdateArticleThemeThreadAsync(String domainid, String domainName, String ipaddr)
+        public async Task UpdateArticleThemeThreadAsync(String domainid, String domainName, String ipaddr, String s3Name, String region)
         {
             try
             {
-                await CommonModule.BuildPagesThreadAsync(domainid, domainName, CommonModule.isAWSHosting(ipaddr), 3, false);
+                await CommonModule.BuildPagesThreadAsync(domainid, domainName, CommonModule.isAWSHosting(ipaddr), s3Name, region, 3, false);
                 await CommonModule.SyncWithServerThreadAsync(domainid, domainName, ipaddr);
             }
             catch (Exception ex)

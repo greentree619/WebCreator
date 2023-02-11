@@ -11,5 +11,7 @@ namespace UnitTest.Models
         public String domainId;
         public String domain;
         public String ip;
+        public String s3Name;
+        public String s3Region;
     }
 }

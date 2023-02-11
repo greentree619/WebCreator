@@ -100,6 +100,7 @@ const Dashboard = () => {
   async function getAllProject() {
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/1/100`)
     const data = await response.json()
+    console.log(data.data)
     setProjects(data.data)
   }
 

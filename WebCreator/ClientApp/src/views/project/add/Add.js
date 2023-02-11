@@ -19,6 +19,7 @@ import {
   CDropdownMenu,
   CContainer,
   CSpinner,
+  CFormSelect
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -27,6 +28,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Outlet, Link } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {saveToLocalStorage, globalRegionMap, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
 
 const Add = (props) => {
   let languageMap = [
@@ -153,7 +155,13 @@ const Add = (props) => {
     location.state != null && !simpleMode ? location.state.project.name : '',
   )
   const [ipAddress, setIpAddress] = useState(
-    location.state != null && !simpleMode ? location.state.project.ip : '127.0.0.1',
+    location.state != null && !simpleMode ? location.state.project.ip : '0.0.0.0',
+  )
+  const [s3BucketName, setS3BucketName] = useState(
+    location.state != null && !simpleMode ? location.state.project.s3BucketName : '',
+  )
+  const [s3BucketRegion, setS3BucketRegion] = useState(
+    location.state != null && !simpleMode ? location.state.project.s3BucketRegion : '',
   )
   const [searchKeyword, setSearchKeyword] = useState(
     location.state != null && !simpleMode ? location.state.project.keyword : '',
@@ -196,6 +204,7 @@ const Add = (props) => {
   const [alertColor, setAlertColor] = useState('success')
   const [alertMsg, setAlertMsg] = useState('')
   const [mode, setMode] = useState('ADD')
+  const [s3BucketList, setS3BucketList] = useState([])
   const [language, setLanguage] = useState(
     location.state && !simpleMode ? location.state.project.languageString : 'Engllish',
   )
@@ -203,6 +212,7 @@ const Add = (props) => {
   const [isOnScrapping, setIsOnScrapping] = useState(false)
   const [isOnAFScrapping, setIsOnAFScrapping] = useState(false)
   const [isOnPublish, setIsOnPublish] = useState(false)
+  const [disabledUpdate, setDisabledUpdate] = useState(false)
 
   let ipAddressMap = [
     { ip: 'AWS S3 Bucket', value: '0.0.0.0' },
@@ -241,6 +251,8 @@ const Add = (props) => {
         id: location.state && !simpleMode ? location.state.project.id : '-1',
         name: projectName,
         ip: ipAddress,
+        s3BucketName: s3BucketName,
+        s3BucketRegion: s3BucketRegion,
         keyword: searchKeyword,
         quesionscount: questionsCount,
         language: languageValue,
@@ -281,6 +293,8 @@ const Add = (props) => {
 
       location.state.project.name = projectName
       location.state.project.ip = ipAddress
+      location.state.project.s3BucketName = s3BucketName
+      location.state.project.s3BucketRegion = s3BucketRegion
       location.state.project.contactInfo.brandname = brandName
       location.state.project.contactInfo.streetAddress = streetAddress
       location.state.project.contactInfo.adrdressLocality = adrdressLocality
@@ -294,6 +308,7 @@ const Add = (props) => {
       dispatch({ type: 'set', activeDomainName: location.state.project.name })
       dispatch({ type: 'set', activeDomainIp: location.state.project.ip })
       dispatch({ type: 'set', activeProject: location.state.project })
+      saveToLocalStorage({name: location.state.project.s3BucketName, region: location.state.project.s3BucketRegion}, 's3host')
 
       if (simpleMode) navigate('/dashboard')
     }
@@ -436,6 +451,9 @@ const Add = (props) => {
     //    }
     //  }
     //  var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
+    
+    populateBucketNameList()
+
     console.log("location.search.length = " + location.search.length)
     dispatch({ type: 'set', activeTab: "project_add" })
     if (location.search.length == 0
@@ -446,6 +464,9 @@ const Add = (props) => {
         dispatch({ type: 'set', activeDomainId: location.state.project.id })
         dispatch({ type: 'set', activeProject: location.state.project })
         dispatch({ type: 'set', activeDomainIp: location.state.project.ip })
+        saveToLocalStorage({name: location.state.project.s3BucketName, region: location.state.project.s3BucketRegion}, 's3host')
+        // var s3Host = loadFromLocalStorage('s3host')
+        // console.log('s3Host=>', s3Host)
       } else {
         dispatch({ type: 'set', activeDomainName: '', activeProject: {}, activeDomainId: '' })
       }
@@ -459,6 +480,14 @@ const Add = (props) => {
     }
   }, [])
 
+  const populateBucketNameList = async () => {
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}s3Bucket/nameList`)    
+    const data = await response.json()
+    if (response.status === 200) {
+      setS3BucketList(data.result);
+    }
+  }
+
   const readKeyFile = async (e) => {
     e.preventDefault()
     const reader = new FileReader()
@@ -471,6 +500,17 @@ const Add = (props) => {
       setSearchKeyword(tmpKeyword);
     };
     reader.readAsText(e.target.files[0])
+  }
+
+  const onChangedBucketName = async ( name ) => {
+    setS3BucketName(name)
+    setDisabledUpdate(true)
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}s3Bucket/getRegion/${name}`)
+    const data = await response.json()
+    if (response.status === 200) {
+      setS3BucketRegion(data.result)
+    }
+    setDisabledUpdate(false)
   }
 
   return (
@@ -490,36 +530,6 @@ const Add = (props) => {
       <CContainer className="px-4">
         <CRow xs={{ gutterX: 5 }}>
           <CCol>
-            {/* <CContainer>
-              <CRow xs={{ cols: 2 }}>
-                <CCol className="border border-secondary text-center">
-                  SerpAPI Scrapping
-                </CCol>
-                <CCol className="border border-secondary text-center">
-                  Article Forge Scrapping
-                </CCol>
-                <CCol className="border border-secondary text-center">
-                  {isOnScrapping ? (
-                    <>
-                      <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
-                      Scrapping...
-                    </>
-                  ) : 'Stopped'
-                }
-                  
-                </CCol>
-                <CCol className="border border-secondary text-center">
-                  {isOnAFScrapping ? (
-                    <>
-                      <CSpinner component="span" size="sm" variant="grow" aria-hidden="true" />
-                      Scrapping...
-                    </>
-                  ) : 'Stopped'
-                  }
-                </CCol>
-              </CRow>
-            </CContainer>
-            <br/> */}
             <CCard className="mb-4">
               <CCardHeader>New/Update Domain</CCardHeader>
               <CCardBody>
@@ -555,27 +565,47 @@ const Add = (props) => {
                       <div className={simpleMode ? 'd-none' : 'mb-3'}>
                         <CFormLabel htmlFor="exampleFormControlInput1">IP Address</CFormLabel>
                         &nbsp;
-                        <CDropdown
-                          id="axes-dd"
-                          className="float-right mr-0"
-                          size="sm"
-                          disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                        >
-                          <CDropdownToggle
-                            id="axes-ddt"
-                            color="secondary"
-                            size="sm"
-                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                          >
-                            {ipAddress}
-                          </CDropdownToggle>
-                          <CDropdownMenu>
-                            {ipAddressMap.map((ipAddr, index) => {
-                              return renderIpAddrItem(ipAddr)
-                            })}
-                          </CDropdownMenu>
-                        </CDropdown>
+                        <CFormSelect id="ipSelect" value={ipAddress} 
+                          onChange={(obj) => handleIpAddrClick(obj.target.value)} size="sm" 
+                          className="mb-3" aria-label="Small select example"
+                          disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}>
+                          {
+                            ipAddressMap.map((ipAddr, index) => {
+                                return (<option key={index} value={ipAddr.value}>{ipAddr.ip}</option>)
+                              })
+                          }
+                        </CFormSelect>
                       </div>
+                      {ipAddress === "0.0.0.0" && (
+                        <div className={simpleMode ? 'd-none' : 'mb-3'}>
+                          <CRow>
+                            <CCol className='mb-8'>
+                              <CFormSelect id="bucketSelect" value={s3BucketName} 
+                                onChange={(obj) => onChangedBucketName(obj.target.value)} 
+                                size="sm" className="mb-3" aria-label="Small select example"
+                                disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}>
+                                {
+                                  s3BucketList.map((bucketItem, index) => {
+                                      return (<option key={index} value={bucketItem.name}>{bucketItem.name}</option>)
+                                    })
+                                }
+                              </CFormSelect>
+                            </CCol>
+                            <CCol className='mb-4'>
+                              <CFormSelect id="regionSelect" value={s3BucketRegion} 
+                                onChange={(obj) => setS3BucketRegion(obj.target.value)} 
+                                size="sm" className="mb-3" aria-label="Small select example"
+                                disabled={true}>
+                                {
+                                  globalRegionMap.map((regionItem, index) => {
+                                      return (<option key={index} value={regionItem.value}>{regionItem.region}</option>)
+                                    })
+                                }
+                              </CFormSelect>
+                            </CCol>
+                          </CRow>
+                        </div>
+                      )}
                       <div className={simpleMode ? 'd-none' : 'd-none'}>
                         <CFormLabel htmlFor="exampleFormControlInput1">
                           Search Keyword(can use multiple keywords using &apos;;&apos;)
@@ -636,28 +666,28 @@ const Add = (props) => {
                           </CDropdownMenu>
                         </CDropdown>
                       </div>
-                      <CRow className="mb-3 py-0">
+                      <CRow className={simpleMode ? 'd-none' : 'mb-3 py-0'}>
                         <CFormLabel htmlFor="Brandname" className="col-sm-4 col-form-label">Brand Name</CFormLabel>
                         <CCol sm={8}>
                           <CFormInput type="text" id="Brandname" value={brandName} onChange={(e) => inputChangeHandler(setBrandName, e)}
                             disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
                         </CCol>
                       </CRow>
-                      <CRow className="mb-3 py-0">
+                      <CRow className={simpleMode ? 'd-none' : 'mb-3 py-0'}>
                         <CFormLabel htmlFor="StreetAddress" className="col-sm-4 col-form-label">Street Address</CFormLabel>
                         <CCol sm={8}>
                           <CFormInput type="text" id="StreetAddress" value={streetAddress} onChange={(e) => inputChangeHandler(setStreetAddress, e)}
                             disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
                         </CCol>
                       </CRow>
-                      <CRow className="mb-3 py-0">
+                      <CRow className={simpleMode ? 'd-none' : 'mb-3 py-0'}>
                         <CFormLabel htmlFor="AdrdressLocality" className="col-sm-4 col-form-label">Adrdress Locality</CFormLabel>
                         <CCol sm={8}>
                           <CFormInput type="text" id="AdrdressLocality" value={adrdressLocality} onChange={(e) => inputChangeHandler(setAddressLocality, e)}
                             disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
                         </CCol>
                       </CRow>
-                      <CRow className="mb-3 py-0">
+                      <CRow className={simpleMode ? 'd-none' : 'mb-3 py-0'}>
                         <CFormLabel htmlFor="AddressRegion" className="col-sm-4 col-form-label">Address Region</CFormLabel>
                         <CCol sm={8}>
                           <CFormInput type="text" id="AddressRegion" value={addressRegion} onChange={(e) => inputChangeHandler(setAddressRegion, e)}
@@ -665,7 +695,7 @@ const Add = (props) => {
                         </CCol>
                       </CRow>
                     </CCol>
-                    <CCol>
+                    <CCol className={simpleMode ? 'd-none' : ''}>
                       <CRow className="mb-3 py-3">
                         &nbsp;
                       </CRow>
@@ -745,7 +775,7 @@ const Add = (props) => {
                       </>
                     )}
                     &nbsp;
-                    <CButton type="submit">{ActionMode}</CButton>
+                    <CButton type="submit" disabled={disabledUpdate}>{ActionMode}</CButton>
                   </div>
                 </CForm>
               </CCardBody>

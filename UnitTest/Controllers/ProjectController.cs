@@ -145,14 +145,14 @@ namespace WebCreator.Controllers
         }
 
         [HttpGet("allDownload/{domainId}/{domainName}/{domainIp}")]
-        public async Task<FileResult> AllDownload(String domainId, String domainName, String domainIp)
+        public async Task<FileResult> AllDownload(String domainId, String domainName, String domainIp, String? s3Name="", String? region="")
         {
             String curFolder = Directory.GetCurrentDirectory();
             curFolder += $"\\Build\\{domainName}";
             String themeFolder = Directory.GetCurrentDirectory();
             themeFolder += $"\\Theme\\{domainName}\\theme";
 
-            await CommonModule.BuildPagesThreadAsync(domainId, domainName, CommonModule.isAWSHosting(domainIp));
+            await CommonModule.BuildPagesThreadAsync(domainId, domainName, CommonModule.isAWSHosting(domainIp), s3Name, region);
             try
             {
                 FileSystem.CopyDirectory(themeFolder, curFolder, true);
@@ -234,7 +234,7 @@ namespace WebCreator.Controllers
         [DisableRequestSizeLimit]
         [HttpPost("themeUpload/{domainId}/{domainName}/{ipaddr}")]
         [DisableFormValueModelBinding]
-        public async Task<IActionResult> themeUpload(String domainId, String domainName, String ipaddr)
+        public async Task<IActionResult> themeUpload(String domainId, String domainName, String ipaddr, String? s3Name="", String? region="")
         {
             try
             {
@@ -294,7 +294,7 @@ namespace WebCreator.Controllers
                     CommonModule.onThemeUpdateCash[domainId] = false;
 
                     await CommonModule.SyncThemeWithServerThreadAsync(domainName, ipaddr);//Task.Run(() => this.SyncWithServerThreadAsync(domainid, domain, ipaddr));
-                    Task.Run(() => new SerpapiScrap().UpdateArticleThemeThreadAsync(domainId, domainName, ipaddr));//Only for online article
+                    Task.Run(() => new SerpapiScrap().UpdateArticleThemeThreadAsync(domainId, domainName, ipaddr, s3Name, region));//Only for online article
                 }
             }
             catch (Exception ex)
@@ -313,6 +313,8 @@ namespace WebCreator.Controllers
                 Keyword = projectInput.Keyword,
                 QuesionsCount = projectInput.QuesionsCount,
                 Language = projectInput.Language,
+                S3BucketName = (projectInput.S3BucketName == null ? "" : projectInput.S3BucketName),
+                S3BucketRegion = (projectInput.S3BucketRegion == null ? "" : projectInput.S3BucketRegion),
                 Ip = projectInput.Ip,
                 OnScrapping = false,
                 OnAFScrapping = false,
@@ -373,6 +375,8 @@ namespace WebCreator.Controllers
                 Id = projectInput.Id,
                 Name = projectInput.Name,
                 Ip = projectInput.Ip,
+                S3BucketName = (projectInput.S3BucketName == null ? "" : projectInput.S3BucketName),
+                S3BucketRegion = (projectInput.S3BucketRegion == null ? "" : projectInput.S3BucketRegion),
                 Keyword = projectInput.Keyword,
                 QuesionsCount = projectInput.QuesionsCount,
                 Language = projectInput.Language,
@@ -397,6 +401,8 @@ namespace WebCreator.Controllers
                 {
                     { "Name", projectInput.Name },
                     { "Ip", projectInput.Ip },
+                    { "S3BucketName", project.S3BucketName },
+                    { "S3BucketRegion", project.S3BucketRegion },
                     { "Keyword", projectInput.Keyword },
                     { "QuesionsCount", projectInput.QuesionsCount },
                     { "Language", projectInput.Language },

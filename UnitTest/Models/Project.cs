@@ -50,6 +50,12 @@ namespace WebCreator.Models
         [FirestoreProperty]
         public String Ip { get; set; }//Ip address
         [FirestoreProperty]
+        public String S3BucketName { get; set; }//If Ip is 0.0.0.0, use to host from AWS S3. So, keep S3BucketDomain in this case.
+                                                //for example: {domain}.s3-website.{region}.amazonaws.com
+        [FirestoreProperty]
+        public String S3BucketRegion { get; set; }//If Ip is 0.0.0.0, use to host from AWS S3. So, keep S3BucketDomain in this case.
+                                                //for example: {domain}.s3-website.{region}.amazonaws.com
+        [FirestoreProperty]
         public String Keyword { get; set; }
         [FirestoreProperty]
         public int QuesionsCount { get; set; }

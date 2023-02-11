@@ -37,7 +37,7 @@ namespace UnitTest.Lib
         public static bool isManualOpenAIScrapping = false;
         public static bool isManualSync = false;
         public static HistoryManagement historyLog = new HistoryManagement();
-        public static AmazonS3Client amazonS3Client = new AmazonS3Client( Config.AWSAccessKey, Config.AWSSecretKey, RegionEndpoint.USEast2);
+        public static AmazonS3Client amazonS3Client = new AmazonS3Client( Config.AWSAccessKey, Config.AWSSecretKey, RegionEndpoint.USEast2);//us-east-2
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -209,11 +209,12 @@ namespace UnitTest.Lib
             return status;
         }
 
-        public static String articleURL(String domain, String question, int isAWS) {
+        public static String articleURL(String domain, String question) {
             String filename = CommonModule.GetHtmlFileName("", question);
 
-            if( isAWS == 0 ) return $"http://{domain}/{filename}";
-            else return $"http://{domain}.s3-website.us-east-2.amazonaws.com/{filename}";
+            return $"http://{domain}/{filename}";
+            //if ( isAWS == 0 ) return $"http://{domain}/{filename}";
+            //else return $"http://{domain}.s3-website.us-east-2.amazonaws.com/{filename}";
         }
 
         public static bool RemoteFileExists(string url)
@@ -493,11 +494,11 @@ namespace UnitTest.Lib
             }
         }
 
-        static public async Task BuildArticlePageThreadAsync(String domainid, String domain, String articleId, bool isAWSHost)
+        static public async Task BuildArticlePageThreadAsync(String domainid, String domain, String articleId, bool isAWSHost, String s3Name, String region)
         {
             try
             {
-                String hostingDomain = CommonModule.GetDomain(domain, isAWSHost);
+                String hostingDomain = CommonModule.GetDomain(domain, isAWSHost, s3Name, region);
                 String curFolder = Directory.GetCurrentDirectory();
                 curFolder += $"\\Build\\{domain}";
                 if (!Directory.Exists(curFolder))
@@ -545,12 +546,17 @@ namespace UnitTest.Lib
                 foreach (DocumentSnapshot document in snapshot2.Documents)
                 {
                     var proj = document.ConvertTo<Project>();
-                    domainMap[document.Id] = new DomainIpMap{ domainId = document.Id, domain= proj.Name, ip = proj.Ip };
+                    domainMap[document.Id] = new DomainIpMap{ domainId = document.Id
+                                                    , domain= proj.Name
+                                                    , ip = proj.Ip
+                                                    , s3Name = proj.S3BucketName
+                                                    , s3Region = proj.S3BucketRegion
+                    };
                 }
 
                 Query query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 QuerySnapshot qSnapshot = await query.GetSnapshotAsync();
-                GenerateURLFile(qSnapshot, curFolder, "url.html", domainid, domainMap, isAWSHost);
+                GenerateURLFile(qSnapshot, curFolder, "url.html", domainid, domainMap, isAWSHost, s3Name, region);
                 GenerateSiteMapFile(qSnapshot, curFolder, domainid, $"http://{hostingDomain}", domainMap);
             }
             catch (Exception ex)
@@ -559,11 +565,11 @@ namespace UnitTest.Lib
             }
         }
 
-        static public async Task BuildPagesThreadAsync(String domainid, String domain, bool isAWSHost, int defaultState =2, bool force = true)
+        static public async Task BuildPagesThreadAsync(String domainid, String domain, bool isAWSHost, String s3Name, String region, int defaultState =2, bool force = true)
         {
             try
             {
-                String hostingDomain = CommonModule.GetDomain(domain, isAWSHost);
+                String hostingDomain = CommonModule.GetDomain(domain, isAWSHost, s3Name, region);
                 String curFolder = Directory.GetCurrentDirectory();
                 curFolder += $"\\Build\\{domain}";
                 if (!Directory.Exists(curFolder))
@@ -612,12 +618,13 @@ namespace UnitTest.Lib
                 foreach (DocumentSnapshot document in snapshot2.Documents)
                 {
                     var proj = document.ConvertTo<Project>();
-                    domainMap[document.Id] = new DomainIpMap { domainId = document.Id, domain = proj.Name, ip = proj.Ip };
+                    domainMap[document.Id] = new DomainIpMap { domainId = document.Id, domain = proj.Name, ip = proj.Ip,
+                        s3Name = proj.S3BucketName,s3Region = proj.S3BucketRegion};
                 }
 
                 query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 snapshot = await query.GetSnapshotAsync();
-                GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap, isAWSHost);
+                GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap, isAWSHost, s3Name, region);
                 GenerateSiteMapFile(snapshot, curFolder, domainid, $"http://{hostingDomain}", domainMap);
 
                 if (articleUpdateStateIds.Length > 0)
@@ -631,11 +638,11 @@ namespace UnitTest.Lib
             }
         }
 
-        static public async Task BuildPagesFromArtidleIdsAsync(String domainid, String domain, String articleIds, bool isAWS)
+        static public async Task BuildPagesFromArtidleIdsAsync(String domainid, String domain, String articleIds, bool isAWS, String s3Name, String region)
         {
             try
             {
-                String hostingDomain = CommonModule.GetDomain(domain, isAWS);
+                String hostingDomain = CommonModule.GetDomain(domain, isAWS, s3Name, region);
                 String[] aids = articleIds.Split(',');
                 String curFolder = Directory.GetCurrentDirectory();
                 curFolder += $"\\Build\\{domain}";
@@ -674,12 +681,13 @@ namespace UnitTest.Lib
                 foreach (DocumentSnapshot document in snapshot2.Documents)
                 {
                     var proj = document.ConvertTo<Project>();
-                    domainMap[document.Id] = new DomainIpMap { domainId = document.Id, domain = proj.Name, ip = proj.Ip };
+                    domainMap[document.Id] = new DomainIpMap { domainId = document.Id, domain = proj.Name, ip = proj.Ip
+                    , s3Name = proj.S3BucketName, s3Region = proj.S3BucketRegion};
                 }
 
                 query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 snapshot = await query.GetSnapshotAsync();
-                GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap, isAWS);
+                GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap, isAWS, s3Name, region);
                 GenerateSiteMapFile(snapshot, curFolder, domainid, $"http://{hostingDomain}", domainMap);
             }
             catch (Exception ex)
@@ -860,7 +868,7 @@ namespace UnitTest.Lib
             return tmpContent;
         }
 
-        static public void GenerateURLFile(QuerySnapshot snapshot, String folder, String fileName, String selfDomainId, Hashtable domainMap, bool isAWSHost)
+        static public void GenerateURLFile(QuerySnapshot snapshot, String folder, String fileName, String selfDomainId, Hashtable domainMap, bool isAWSHost, String s3Name, String region)
         {
             DomainIpMap selfdomain = (DomainIpMap)domainMap[selfDomainId];
             using (StreamWriter writer = new StreamWriter(folder + "//" + fileName))
@@ -879,7 +887,7 @@ namespace UnitTest.Lib
 
                     String orgTitle = article.Title;
                     String titlelink = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                    String hostingDomain = CommonModule.GetDomain(domainInfo.domain, isAWSHost);
+                    String hostingDomain = CommonModule.GetDomain(domainInfo.domain, isAWSHost, s3Name, region);
                     String baseURL = $"http://{hostingDomain}";
                     writer.WriteLine($"<a href='{baseURL}/{titlelink}'>{orgTitle}</a><br/>");
                 }
@@ -896,10 +904,16 @@ namespace UnitTest.Lib
             return title + ".html";
         }
 
-        static public String GetDomain(String domain, bool isAWSHost)
+        static public String GetDomain(String domain, bool isAWSHost, String s3Name, String s3Region= "us-east-2")
         {
-            if ( !isAWSHost ) return domain;
-            else return $"{domain}.s3-website.us-east-2.amazonaws.com";
+            
+            if (!isAWSHost) return domain;
+            else
+            {
+                if (s3Name == null || s3Name.Length == 0) s3Name = domain;
+                if (s3Region == null || s3Region.Length == 0) s3Region = "us-east-2";
+                return $"{s3Name}.s3-website.{s3Region}.amazonaws.com";
+            }
         }
 
         static public void GenerateSiteMapFile(QuerySnapshot snapshot, String folder, String selfDomainId, String baseURL, Hashtable domainMap)
@@ -927,7 +941,7 @@ namespace UnitTest.Lib
                             var article = document.ConvertTo<Article>();
                             if (diMap.domainId != article.ProjectId) continue;
                             String fileName = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                            String hostingDomain = GetDomain(diMap.domain, CommonModule.isAWSHosting(diMap.ip));
+                            String hostingDomain = GetDomain(diMap.domain, CommonModule.isAWSHosting(diMap.ip), diMap.s3Name, diMap.s3Region);
                             writer2.WriteLine("   <url>");
                             writer2.WriteLine($"      <loc>http://{hostingDomain}/{fileName}</loc>");
                             writer2.WriteLine($"      <lastmod>{updateDate}</lastmod>");
@@ -965,7 +979,7 @@ namespace UnitTest.Lib
                     using FileStream compressedFileStream = File.Create(CompressedFileName);
                     using var compressor = new GZipStream(compressedFileStream, CompressionMode.Compress);
                     originalFileStream.CopyTo(compressor);
-                    String hostingDomain = CommonModule.GetDomain(diMap.domain, CommonModule.isAWSHosting(diMap.ip));
+                    String hostingDomain = CommonModule.GetDomain(diMap.domain, CommonModule.isAWSHosting(diMap.ip), diMap.s3Name, diMap.s3Region);
 
                     writer.WriteLine($"   <sitemap>");
                     writer.WriteLine($"      <loc>http://{hostingDomain}/sitemap-{diMap.domain}.xml.gz</loc>");

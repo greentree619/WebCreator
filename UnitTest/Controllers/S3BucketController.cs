@@ -64,6 +64,43 @@ namespace UnitTest.Controllers
             return Ok(new { result = list });
         }
 
+        [HttpGet("nameList")]
+        public async Task<IActionResult> GetBucketNameListAsync()
+        {
+            var list = new List<Hashtable>();
+            try
+            {
+                // Get the list of buckets accessible by the new user.
+
+                var response = await CommonModule.amazonS3Client.ListBucketsAsync();
+                int index = 0;
+                response.Buckets
+                    .ForEach(b =>
+                    {
+                        index++;
+                        var bucket = new Hashtable();
+                        bucket["index"] = index;
+                        bucket["name"] = b.BucketName;
+                        bucket["createDate"] = b.CreationDate;
+                        list.Add(bucket);
+                        //Console.WriteLine($"Bucket name: {b.BucketName}, created on: {b.CreationDate}");
+                    });
+            }
+            catch (AmazonS3Exception ex)
+            {
+                // Something else went wrong. Display the error message.
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+            return Ok(new { result = list });
+        }
+
+        [HttpGet("getRegion/{bucketName}")]
+        public async Task<IActionResult> GetBucketRegionSync(String bucketName)
+        {
+            String region = await CommonModule.FindBucketLocationAsync(bucketName);
+            return Ok(new { result = region });
+        }
+
         [HttpGet("contents/{bucketName}/{region}")]
         public async Task<IActionResult> GetBucketContentAsync(string bucketName, String region)
         {

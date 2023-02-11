@@ -180,9 +180,12 @@ class ListBase extends Component {
       body: JSON.stringify({}),
     }
 
+    var s3Host = loadFromLocalStorage('s3host')
+    var s3Name = s3Host.name == null ? "" : s3Host.name;
+    var s3Region = s3Host.region == null ? "" : s3Host.region;
     const response = await fetch(
-      (articleId.length > 0 ? `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}/${articleId}/${this.state.projectInfo.domainIp}` 
-                            : `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}/domainIp/${this.state.projectInfo.domainIp}`),
+      (articleId.length > 0 ? `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}/${articleId}/${this.state.projectInfo.domainIp}?s3Name=${s3Name}&region=${s3Region}` 
+                            : `${process.env.REACT_APP_SERVER_URL}buildsync/${_id}/${domain}/domainIp/${this.state.projectInfo.domainIp}?s3Name=${s3Name}&region=${s3Region}`),
       requestOptions,
     )
     this.setState({
@@ -265,7 +268,10 @@ class ListBase extends Component {
       }
 
       //console.log("progress status : ->");
-      fetch(`${process.env.REACT_APP_SERVER_URL}project/allDownload/${_id}/${domain}/${ip}`, requestOptions).then(res => {
+      var s3Host = loadFromLocalStorage('s3host')
+      var s3Name = s3Host.name == null ? "" : s3Host.name;
+      var s3Region = s3Host.region == null ? "" : s3Host.region;
+      fetch(`${process.env.REACT_APP_SERVER_URL}project/allDownload/${_id}/${domain}/${ip}?s3Name=${s3Name}&region=${s3Region}`, requestOptions).then(res => {
         return res.blob();
       }).then(blob => {
           const href = window.URL.createObjectURL(blob);
@@ -476,7 +482,7 @@ class ListBase extends Component {
 
   async populateArticleData(pageNo) {
     var store = loadFromLocalStorage();
-    if(store != undefined)
+    if(store != null && store != undefined)
     {
       console.log(store)
       this.setState({

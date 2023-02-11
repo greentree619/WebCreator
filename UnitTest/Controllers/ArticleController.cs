@@ -207,19 +207,20 @@ namespace WebCreator.Controllers
         }
 
         [HttpGet("sync_status/{domain}/{articleids}/{isAWS}")]
-        public async Task<IActionResult> GetArticleSyncAsync(string domain, String articleids, int isAWS)
+        public async Task<IActionResult> GetArticleSyncAsync(string domain, String articleids, int isAWS,String? s3Name="", String? region="")
         {
             string[] articleList = articleids.Split(',');
             Dictionary<string, bool> syncStatus = new Dictionary<string, bool>();
             try
             {
+                String hostDomain = CommonModule.GetDomain(domain, (isAWS == 1), s3Name, region);
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 Query query = articlesCol.WhereIn(FieldPath.DocumentId, articleList);
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
                 foreach (DocumentSnapshot document in projectsSnapshot.Documents)
                 {
                     var article = document.ConvertTo<Article>();
-                    String url = CommonModule.articleURL(domain, article.Title, isAWS);
+                    String url = CommonModule.articleURL(hostDomain, article.Title);
                     syncStatus[document.Id] = CommonModule.RemoteFileExists(url);
                     Console.WriteLine($"url:{url} -> {syncStatus[document.Id].ToString()}");
                 }
@@ -370,7 +371,8 @@ namespace WebCreator.Controllers
         /// <param name="state">0: Unknow, 1: unapproval, 2: approval, 3:online, 4:delete</param>
         /// <returns></returns>
         [HttpPut("UpdateBatchState/{domainId}/{domainName}/{ipAddr}/{articleids}/{state}")]
-        public async Task<IActionResult> UpdateBatchStateAsync(String domainId, String domainName, String ipAddr, String articleids, Int32 state)
+        public async Task<IActionResult> UpdateBatchStateAsync(String domainId, String domainName, String ipAddr
+                                                            , String articleids, Int32 state, String? s3Name="", String? region="")
         {
             bool ret = false;
             if (state == 1 || state == 2 || state == 4 || 
@@ -379,7 +381,7 @@ namespace WebCreator.Controllers
                 if(state == 3)
                 {
                     CommonModule.isManualSync = true;
-                    Task.Run(() => new SerpapiScrap().ManualArticlesSyncAsync(domainId, domainName, ipAddr, articleids));
+                    Task.Run(() => new SerpapiScrap().ManualArticlesSyncAsync(domainId, domainName, ipAddr, s3Name, region, articleids));
                 }
 
                 ret = await CommonModule.UpdateBatchState(articleids, state);
@@ -426,7 +428,7 @@ namespace WebCreator.Controllers
         }
 
         [HttpPut("update_content/{domainId}/{domainName}/{ipAddr}")]
-        public async Task<IActionResult> UpdateContentAsync(string domainId, string domainName, string ipAddr, [FromBody] Article article)
+        public async Task<IActionResult> UpdateContentAsync(string domainId, string domainName, string ipAddr, [FromBody] Article article, String? s3Name="", String? region="")
         {
             try 
             {
@@ -448,7 +450,7 @@ namespace WebCreator.Controllers
                 if (article.State == 3)
                 {
                     CommonModule.isManualSync = true;
-                    await CommonModule.BuildArticlePageThreadAsync(domainId, domainName, article.Id, CommonModule.isAWSHosting(ipAddr));
+                    await CommonModule.BuildArticlePageThreadAsync(domainId, domainName, article.Id, CommonModule.isAWSHosting(ipAddr), s3Name, region);
                     await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr);
                     CommonModule.isManualSync = false;
                 }

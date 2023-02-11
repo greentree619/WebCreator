@@ -33,17 +33,17 @@ namespace WebCreator.Controllers
         }
 
         [HttpPost("{domainid}/{domain}/domainIp/{domainIp}")]
-        public async Task<IActionResult> BuildPages(string domainid, string domain, string domainIp)
+        public async Task<IActionResult> BuildPages(string domainid, string domain, string domainIp, String? s3Name="", String? region="")
         {
             //Task.Run(() => this.BuildPagesThreadAsync(domainid, domain));
-            await CommonModule.BuildPagesThreadAsync(domainid, domain, CommonModule.isAWSHosting(domainIp));
+            await CommonModule.BuildPagesThreadAsync(domainid, domain, CommonModule.isAWSHosting(domainIp), s3Name, region);
             return Ok(true);
         }
 
         [HttpPost("{domainid}/{domain}/{articleId}/{domainIp}")]
-        public async Task<IActionResult> BuildArticlePage(string domainid, string domain, string articleId, string domainIp)
+        public async Task<IActionResult> BuildArticlePage(string domainid, string domain, string articleId, string domainIp, String? s3Name="", String? region="")
         {
-            await CommonModule.BuildArticlePageThreadAsync(domainid, domain, articleId, CommonModule.isAWSHosting(domainIp));//Task.Run(() => this.BuildArticlePageThreadAsync(domainid, domain, articleId));
+            await CommonModule.BuildArticlePageThreadAsync(domainid, domain, articleId, CommonModule.isAWSHosting(domainIp), s3Name, region);//Task.Run(() => this.BuildArticlePageThreadAsync(domainid, domain, articleId));
             return Ok(true);
         }
 

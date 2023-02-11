@@ -31,6 +31,7 @@ import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
 
 const View = (props) => {
   const location = useLocation()
@@ -94,7 +95,10 @@ const View = (props) => {
 
     console.log(location.state.projectInfo);
 
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/update_content/${location.state.projectInfo.projectid}/${location.state.projectInfo.domainName}/${location.state.projectInfo.domainIp}`, requestOptions)
+    var s3Host = loadFromLocalStorage('s3host')
+    var s3Name = s3Host.name == null ? "" : s3Host.name;
+    var s3Region = s3Host.region == null ? "" : s3Host.region;
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/update_content/${location.state.projectInfo.projectid}/${location.state.projectInfo.domainName}/${location.state.projectInfo.domainIp}?s3Name=${s3Name}&region=${s3Region}`, requestOptions)
     // setAlertColor('danger')
     // setAlertMsg('Faild to update content unfortunatley.')
     let ret = await response.json()

@@ -696,7 +696,7 @@ namespace UnitTest.Lib
             }
         }
 
-        static public async Task SyncWithServerThreadAsync(String domainid, String domain, String ipaddr)
+        static public async Task SyncWithServerThreadAsync(String domainid, String domain, String ipaddr, String s3Name)
         {
             try
             {
@@ -756,7 +756,7 @@ namespace UnitTest.Lib
                     }
                     else
                     {
-                        await new AWSUpload().start(domain, $"{domain}.zip", $"{tmpFolder}\\");
+                        await new AWSUpload().start(s3Name, $"{domain}.zip", $"{tmpFolder}\\");
                     }
                 }
             }

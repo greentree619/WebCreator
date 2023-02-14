@@ -211,8 +211,11 @@ class ListBase extends Component {
       body: JSON.stringify({}),
     }
 
+    var s3Host = loadFromLocalStorage('s3host')
+    var s3Name = s3Host.name == null ? "" : s3Host.name;
+    var s3Region = s3Host.region == null ? "" : s3Host.region;
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}buildsync/sync/${_id}/${domain}/${ip}`,
+      `${process.env.REACT_APP_SERVER_URL}buildsync/sync/${_id}/${domain}/${ip}?s3Name=${s3Name}&region=${s3Region}`,
       requestOptions,
     )
     // this.setState({

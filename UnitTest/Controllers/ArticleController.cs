@@ -451,7 +451,7 @@ namespace WebCreator.Controllers
                 {
                     CommonModule.isManualSync = true;
                     await CommonModule.BuildArticlePageThreadAsync(domainId, domainName, article.Id, CommonModule.isAWSHosting(ipAddr), s3Name, region);
-                    await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr);
+                    await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr, s3Name);
                     CommonModule.isManualSync = false;
                 }
             }

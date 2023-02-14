@@ -69,9 +69,9 @@ namespace WebCreator.Controllers
         }
 
         [HttpPost("sync/{domainid}/{domain}/{ipaddr}")]
-        public async Task<IActionResult> SyncWithServer(string domainid, string domain, string ipaddr)
+        public async Task<IActionResult> SyncWithServer(string domainid, string domain, string ipaddr, String? s3Name = "", String? region = "")
         {
-            await CommonModule.SyncWithServerThreadAsync(domainid, domain, ipaddr);//Task.Run(() => this.SyncWithServerThreadAsync(domainid, domain, ipaddr));
+            await CommonModule.SyncWithServerThreadAsync(domainid, domain, ipaddr, s3Name);//Task.Run(() => this.SyncWithServerThreadAsync(domainid, domain, ipaddr));
             return Ok(true);
         }
     }

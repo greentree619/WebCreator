@@ -23,8 +23,19 @@ import {
 import CIcon from '@coreui/icons-react'
 
 import avatar8 from './../../assets/images/avatars/8.jpg'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import useToken from '../App/useToken'
 
 const AppHeaderDropdown = () => {
+  const { token, setToken } = useToken()
+  //const navigate = useNavigate()
+
+  const lockAccount = () => {
+    setToken('')
+    console.log('lockAccount')
+    window.location.href = '/';
+  }
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0" caret={false}>
@@ -84,7 +95,7 @@ const AppHeaderDropdown = () => {
           </CBadge>
         </CDropdownItem>
         <CDropdownDivider />
-        <CDropdownItem href="#">
+        <CDropdownItem href="#" onClick={() => lockAccount()}>
           <CIcon icon={cilLockLocked} className="me-2" />
           Lock Account
         </CDropdownItem>

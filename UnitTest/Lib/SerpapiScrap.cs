@@ -255,7 +255,7 @@ namespace UnitTest.Lib
         public async Task ManualArticlesSyncAsync(String domainId, String domainName, String ipAddr, String s3Name, String region, String articleIds)
         {
             await CommonModule.BuildPagesFromArtidleIdsAsync(domainId, domainName, articleIds, CommonModule.isAWSHosting(ipAddr), s3Name, region);
-            await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr);
+            await CommonModule.SyncWithServerThreadAsync(domainId, domainName, ipAddr, s3Name);
             CommonModule.isManualSync = false;
         }
 
@@ -304,7 +304,7 @@ namespace UnitTest.Lib
 
                                 //{{
                                 await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
-                                await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
+                                await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip, projInfo.S3BucketName);
                                 //}}
                             }
                             while ((bool)CommonModule.publishThreadList[_id]);
@@ -325,7 +325,7 @@ namespace UnitTest.Lib
 
                                     //{{
                                     await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
-                                    await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip);
+                                    await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip, projInfo.S3BucketName);
                                     //}}
                                 }
                                 while ((bool)CommonModule.publishThreadList[_id]);
@@ -350,7 +350,7 @@ namespace UnitTest.Lib
             try
             {
                 await CommonModule.BuildPagesThreadAsync(domainid, domainName, CommonModule.isAWSHosting(ipaddr), s3Name, region, 3, false);
-                await CommonModule.SyncWithServerThreadAsync(domainid, domainName, ipaddr);
+                await CommonModule.SyncWithServerThreadAsync(domainid, domainName, ipaddr, s3Name);
             }
             catch (Exception ex)
             {

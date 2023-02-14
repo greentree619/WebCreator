@@ -1,6 +1,7 @@
-import React, { Component, Suspense } from 'react'
+import React, { Component, Suspense, useState } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import './scss/style.scss'
+import useToken from './components/App/useToken'
 
 const loading = (
   <div className="pt-3 text-center">
@@ -17,9 +18,27 @@ const Register = React.lazy(() => import('./views/pages/register/Register'))
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 
-class App extends Component {
-  render() {
-    return (
+// function setToken(userToken) {
+//   sessionStorage.setItem('token', JSON.stringify(userToken))
+// }
+
+// function getToken() {
+//   const tokenString = sessionStorage.getItem('token');
+//   const userToken = JSON.parse(tokenString);
+//   return userToken?.token
+// }
+
+const App = (props) => {
+  const { token, setToken } = useToken()
+
+  console.log("App=>", token)
+
+  if(!token || token.length == 0 || token != "1234567890") {
+    return <Login setToken={setToken} />
+  }
+
+  return (
+    <>
       <HashRouter>
         <Suspense fallback={loading}>
           <Routes>
@@ -31,8 +50,8 @@ class App extends Component {
           </Routes>
         </Suspense>
       </HashRouter>
-    )
-  }
+    </>
+  )
 }
 
 export default App

@@ -55,8 +55,13 @@ class ListBase extends Component {
 
     var url = `http://${this.state.projectInfo.projectDomain}/${title}.html`;
 
-    //http://www.traepiller123.info.s3-website.us-east-2.amazonaws.com 
-    if(this.state.projectInfo.domainIp == "0.0.0.0") url = `http://${this.state.projectInfo.projectDomain}.s3-website.us-east-2.amazonaws.com/${title}.html`;
+    //http://www.traepiller123.info.s3-website.us-east-2.amazonaws.com
+    if(this.state.projectInfo.domainIp == "0.0.0.0"){
+      var s3Host = loadFromLocalStorage('s3host')
+      var s3Name = (s3Host.name == null || s3Host.name.length == 0) ? this.state.projectInfo.projectDomain : s3Host.name;
+      var s3Region = s3Host.region == null ? "us-east-2" : s3Host.region;
+      url = `http://${s3Name}.s3-website.${s3Region}.amazonaws.com/${title}.html`
+    }
     
     return url;
   }

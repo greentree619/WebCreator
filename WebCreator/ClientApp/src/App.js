@@ -33,7 +33,8 @@ const App = (props) => {
 
   console.log("App=>", token)
 
-  if(!token || token.length == 0 || token != "1234567890") {
+  if((!token || token.length == 0 || token != "1234567890")
+      && process.env.REACT_APP_HIDE_COREMENU != "false") {
     return <Login setToken={setToken} />
   }
 

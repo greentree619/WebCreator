@@ -466,6 +466,7 @@ namespace UnitTest.Lib
                     {// auto fill
                         metaDescContent = PickupMetaDescription(article.Content);
                     }
+                    metaDescContent = metaDescContent.Trim().Replace("\n", "").Replace("\r", "");
 
                     String metaDesc = $"<meta name=\"description\" content=\"{metaDescContent}\">";
                     String metaKeywd = $"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">";
@@ -483,7 +484,10 @@ namespace UnitTest.Lib
                         articleTemplate = Regex.Replace(articleTemplate, @"([<][/]head[>])", "  " + canonialTag + "\n" + "</head>");
                     }
 
-                    articleTemplate = articleTemplate.Replace("{{TITLE}}", article.MetaTitle);
+                    //Auto replace for title
+                    articleTemplate = Regex.Replace(articleTemplate, @"[<]title[>]([^<>]+)[<][/]title[>]", "<title>" + article.MetaTitle + "</title>");
+
+                    articleTemplate = articleTemplate.Replace("{{TITLE}}", "<title>" + article.MetaTitle + "</title>");
                     articleTemplate = articleTemplate.Replace("{{CONTENT}}", article.Content);
                     articleTemplate = articleTemplate.Replace("{{FOOTER}}", article.Footer);
                     articleTemplate = articleTemplate.Replace("{{META_DESC}}", metaDesc);
@@ -871,6 +875,7 @@ namespace UnitTest.Lib
         static public void GenerateURLFile(QuerySnapshot snapshot, String folder, String fileName, String selfDomainId, Hashtable domainMap, bool isAWSHost, String s3Name, String region)
         {
             DomainIpMap selfdomain = (DomainIpMap)domainMap[selfDomainId];
+            String selfHostingDomain = CommonModule.GetDomain(selfdomain.domain, CommonModule.isAWSHosting( selfdomain.ip ), s3Name, region);
             using (StreamWriter writer = new StreamWriter(folder + "//" + fileName))
             {
                 writer.WriteLine("<!DOCTYPE html>");
@@ -883,11 +888,12 @@ namespace UnitTest.Lib
                 {
                     var article = document.ConvertTo<Article>();
                     DomainIpMap domainInfo = (DomainIpMap)domainMap[article.ProjectId.ToString()];
-                    if ( !selfdomain.ip.Equals(domainInfo.ip) ) continue;
+                    String hostingDomain = CommonModule.GetDomain(domainInfo.domain, isAWSHost, s3Name, region);
+                    if ( !selfdomain.ip.Equals(domainInfo.ip) 
+                        || !selfHostingDomain.Equals(hostingDomain) ) continue;
 
                     String orgTitle = article.Title;
                     String titlelink = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                    String hostingDomain = CommonModule.GetDomain(domainInfo.domain, isAWSHost, s3Name, region);
                     String baseURL = $"http://{hostingDomain}";
                     writer.WriteLine($"<a href='{baseURL}/{titlelink}'>{orgTitle}</a><br/>");
                 }
@@ -902,6 +908,14 @@ namespace UnitTest.Lib
             title = title.Replace("?", "").Trim();
             title = title.Replace(" ", "-");
             return title + ".html";
+        }
+
+        static public String GetDomain(DomainIpMap diMap)
+        {   
+            return GetDomain(diMap.domain
+                , CommonModule.isAWSHosting(diMap.ip)
+                , diMap.s3Name
+                , diMap.s3Region);
         }
 
         static public String GetDomain(String domain, bool isAWSHost, String s3Name, String s3Region= "us-east-2")
@@ -919,6 +933,7 @@ namespace UnitTest.Lib
         static public void GenerateSiteMapFile(QuerySnapshot snapshot, String folder, String selfDomainId, String baseURL, Hashtable domainMap)
         {
             DomainIpMap selfdomain = (DomainIpMap)domainMap[selfDomainId];
+            String selfHostingDomain = CommonModule.GetDomain(selfdomain);
             String updateDate = DateTime.Now.ToString("yyyy-MM-dd");
             //robots.txt
             using (StreamWriter writer = new StreamWriter(folder + "//robots.txt"))
@@ -926,7 +941,9 @@ namespace UnitTest.Lib
                 foreach (DictionaryEntry diMapItem in domainMap)
                 {
                     DomainIpMap diMap = (DomainIpMap)diMapItem.Value;
-                    if (!selfdomain.ip.Equals(diMap.ip)) continue;
+                    String hostingDomain = CommonModule.GetDomain(diMap);
+                    if ( !selfdomain.ip.Equals(diMap.ip)
+                        || !selfHostingDomain.Equals(hostingDomain) ) continue;
 
                     //Sitemap: http://www.example.com/sitemap-host1.xml
                     writer.WriteLine($"Sitemap: {baseURL}/sitemap-{diMap.domain}.xml");
@@ -934,14 +951,13 @@ namespace UnitTest.Lib
                     //sitemap.xml or sitemap-host.xml
                     using (StreamWriter writer2 = new StreamWriter(folder + $"//sitemap-{diMap.domain}.xml"))
                     {
-                        writer2.WriteLine("<?xml version=\"1.0\" encoding=\"UTF - 8\"?>");
+                        writer2.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                         writer2.WriteLine("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
                         foreach (DocumentSnapshot document in snapshot.Documents)
                         {
                             var article = document.ConvertTo<Article>();
                             if (diMap.domainId != article.ProjectId) continue;
                             String fileName = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                            String hostingDomain = GetDomain(diMap.domain, CommonModule.isAWSHosting(diMap.ip), diMap.s3Name, diMap.s3Region);
                             writer2.WriteLine("   <url>");
                             writer2.WriteLine($"      <loc>http://{hostingDomain}/{fileName}</loc>");
                             writer2.WriteLine($"      <lastmod>{updateDate}</lastmod>");
@@ -966,12 +982,15 @@ namespace UnitTest.Lib
             //siteindex.xml
             using (StreamWriter writer = new StreamWriter(folder + "//siteindex.xml"))
             {
-                writer.WriteLine("<?xml version=\"1.0\" encoding=\"UTF - 8\"?>");
+                writer.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                 writer.WriteLine("<sitemapindex  xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
                 foreach (DictionaryEntry diMapItem in domainMap)
                 {
                     DomainIpMap diMap = (DomainIpMap)diMapItem.Value;
-                    if (!selfdomain.ip.Equals(diMap.ip)) continue;
+                    String hostingDomain = CommonModule.GetDomain(diMap);
+
+                    if ( !selfdomain.ip.Equals(diMap.ip)
+                        || !selfHostingDomain.Equals(hostingDomain) ) continue;
 
                     String OriginalFileName = folder + $"//sitemap-{diMap.domain}.xml";
                     String CompressedFileName = folder + $"//sitemap-{diMap.domain}.xml.gz";
@@ -979,7 +998,6 @@ namespace UnitTest.Lib
                     using FileStream compressedFileStream = File.Create(CompressedFileName);
                     using var compressor = new GZipStream(compressedFileStream, CompressionMode.Compress);
                     originalFileStream.CopyTo(compressor);
-                    String hostingDomain = CommonModule.GetDomain(diMap.domain, CommonModule.isAWSHosting(diMap.ip), diMap.s3Name, diMap.s3Region);
 
                     writer.WriteLine($"   <sitemap>");
                     writer.WriteLine($"      <loc>http://{hostingDomain}/sitemap-{diMap.domain}.xml.gz</loc>");

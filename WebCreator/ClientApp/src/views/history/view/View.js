@@ -119,7 +119,7 @@ const View = (props) => {
   const populateHistoryData = async (pageNo) => {
     setloading(true)
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}log/${location.state.projectId}/${location.state.category}/${pageNo}/25`
+      `${process.env.REACT_APP_SERVER_URL}log/${location.state.projectId}/${location.state.category}/${pageNo}/200`
     )
     const data = await response.json()
     if (response.status === 200 && data)

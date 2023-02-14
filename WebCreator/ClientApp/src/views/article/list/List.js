@@ -503,7 +503,7 @@ class ListBase extends Component {
       `${process.env.REACT_APP_SERVER_URL}article/` +
         (projectId != '' ? projectId + '/0/' : '') +
         pageNo +
-        '/25',
+        '/200',
     )
     const data = await response.json()
     this.setState({

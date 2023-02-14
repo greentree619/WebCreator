@@ -149,7 +149,7 @@ export default class Zone extends Component {
   }
 
   async populateData(pageNo) {
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}dns/` + pageNo + '/25')
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}dns/` + pageNo + '/200')
     const data = await response.json()
     this.setState({
       listData: data.result,

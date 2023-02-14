@@ -343,6 +343,55 @@ class ApprovalBase extends Component {
       )
     }
 
+    const helperBar = (id, len) => {
+      if(len <= 0) return (<></>)
+      else return (
+        <>
+          <tr>
+            <td colSpan={4}>
+              <table>
+                <tr>
+                  <td>
+                    <CFormCheck id={"checkAll" + id} label="Chceck All | Selected" 
+                      onChange={(e) => {
+                        var checkedItem = this.state.checkedItem
+                        Object.keys(this.state.checkedItem).map((item)=>{
+                          checkedItem[item].checked = e.target.checked
+                          //console.log(item)
+                        })
+                        this.setState({
+                          checkedItem: checkedItem,
+                        })  
+                        //console.log(e.target.checked, this.state.checkedItem[article.id])
+                      }}
+                    />
+                  </td>
+                  <td className='px-2'>
+                    <CButton onClick={() => this.setArticleState(2)}>Approval</CButton>
+                  </td>
+                  <td className='px-2'>
+                    <CButton onClick={() => this.setArticleState(1)}>UnApproval</CButton>
+                  </td>
+                  <td className='px-2'>
+                    <CButton onClick={() => this.setArticleState(3)}>Online</CButton>
+                  </td>
+                  <td className='px-2'>
+                    <CButton onClick={() => this.scrapFromAPI(0)}>Scrap From AF</CButton>
+                  </td>
+                  <td className='px-2'>
+                    <CButton onClick={() => this.scrapFromAPI(1)}>Scrap From OpenAI</CButton>
+                  </td>
+                  <td className='px-2'>
+                    <CButton onClick={() => this.deleteBatchArticleConfirm()}>Delete</CButton>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </>
+      )
+    }
+
     return (
       <>
         <CAlert
@@ -375,6 +424,7 @@ class ApprovalBase extends Component {
             </tr>
           </thead>
           <tbody>
+            {helperBar("up", articles.length)}
             {articles.map((article) => {
               //if (article.content != null && article.content.length > 0)
               {
@@ -413,49 +463,7 @@ class ApprovalBase extends Component {
                 </tr>)
               }
             })}
-            {articles.length > 0 && (
-            <tr>
-              <td colSpan={4}>
-                <table>
-                  <tr>
-                    <td>
-                      <CFormCheck id="checkAll" label="Chceck All | Selected" 
-                        onChange={(e) => {
-                          var checkedItem = this.state.checkedItem
-                          Object.keys(this.state.checkedItem).map((item)=>{
-                            checkedItem[item].checked = e.target.checked
-                            //console.log(item)
-                          })
-                          this.setState({
-                            checkedItem: checkedItem,
-                          })  
-                          //console.log(e.target.checked, this.state.checkedItem[article.id])
-                        }}
-                      />
-                    </td>
-                    <td className='px-2'>
-                      <CButton onClick={() => this.setArticleState(2)}>Approval</CButton>
-                    </td>
-                    <td className='px-2'>
-                      <CButton onClick={() => this.setArticleState(1)}>UnApproval</CButton>
-                    </td>
-                    <td className='px-2'>
-                      <CButton onClick={() => this.setArticleState(3)}>Online</CButton>
-                    </td>
-                    <td className='px-2'>
-                      <CButton onClick={() => this.scrapFromAPI(0)}>Scrap From AF</CButton>
-                    </td>
-                    <td className='px-2'>
-                      <CButton onClick={() => this.scrapFromAPI(1)}>Scrap From OpenAI</CButton>
-                    </td>
-                    <td className='px-2'>
-                      <CButton onClick={() => this.deleteBatchArticleConfirm()}>Delete</CButton>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            )}
+            {helperBar("down", articles.length)}
           </tbody>
         </table>
         {pagination}
@@ -522,7 +530,7 @@ class ApprovalBase extends Component {
       `${process.env.REACT_APP_SERVER_URL}article/` +
         (projectId != '' ? projectId + '/' + articleState + '/' : '') +
         pageNo +
-        '/25',
+        '/200',
     )
     const data = await response.json()
     await data.data.map((item, index) => {

@@ -224,7 +224,7 @@ class ListBase extends Component {
       `${process.env.REACT_APP_SERVER_URL}article/valid/` +
         (projectId != '' ? projectId + '/' : '') +
         pageNo +
-        '/25',
+        '/200',
     )
     const data = await response.json()
     this.setState({

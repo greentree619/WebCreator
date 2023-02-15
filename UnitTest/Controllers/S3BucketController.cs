@@ -173,6 +173,23 @@ namespace UnitTest.Controllers
             return Ok(new { result = bret });
         }
 
+        [HttpPost("empty/{bucketName}/{region}")]
+        public async Task<IActionResult> EmptyBucketAsync(String bucketName, String region)
+        {
+            bool bret = false;
+            try
+            {
+                bret = await CommonModule.EmptyBucketAsync(bucketName, region);
+            }
+            catch (AmazonS3Exception ex)
+            {
+                // Something else went wrong. Display the error message.
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return Ok(new { result = bret });
+        }
+
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
         [DisableRequestSizeLimit]
         [HttpPost("Upload/{domainId}/{domainName}")]

@@ -29,7 +29,10 @@ import { Col } from 'reactstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import {globalRegionMap} from 'src/utility/common.js'
+import {globalRegionMap, alertConfirmOption} from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'; 
 
 const Bucket = (props) => {
   const location = useLocation()
@@ -40,7 +43,7 @@ const Bucket = (props) => {
   const [allBuckets, setAllBuckets] = useState([])
   const [bucketName, setBucketName] = useState("")
   const [region, setRegion] = useState("")
-
+  
   let regionMap = globalRegionMap
 
   useEffect(() => {
@@ -48,6 +51,14 @@ const Bucket = (props) => {
   }, [])
 
   const populateData = async () => {
+    var store = loadFromLocalStorage('s3Buckets');
+    if(store != null && store != undefined)
+    {
+      console.log(store)
+      setAllBuckets(store.allBuckets)
+      clearLocalStorage('s3Buckets')
+      return
+    }
     setLoading(true);
     setCheckedItem({});
     const response = await fetch(
@@ -79,29 +90,28 @@ const Bucket = (props) => {
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}s3Bucket/${bucketName}/${reg}`, requestOptions)
     let ret = await response.json()
     if (response.status === 200 && ret.result) {
-      toast.success(`Deleted bucket-${bucketName} successfully.`, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success(`Deleted bucket-${bucketName} successfully.`, alertConfirmOption);
     }
     else
     {
-      toast.error(`Can\'t delete bucket -${bucketName}, unfortunatley. Maybe bucket can conaints some files.`, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error(`Can\'t delete bucket -${bucketName}, unfortunatley. Maybe bucket can conaints some files.`, alertConfirmOption);
+    }
+  }
+
+  const emptyBucket = async (bucketName, reg) => {
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }
+
+    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}s3Bucket/empty/${bucketName}/${reg}`, requestOptions)
+    let ret = await response.json()
+    if (response.status === 200 && ret.result) {
+      toast.success(`was empty bucket-${bucketName} successfully.`, alertConfirmOption);
+    }
+    else
+    {
+      toast.error(`Can\'t empty bucket -${bucketName}, unfortunatley. Maybe bucket can conaints some files.`, alertConfirmOption);
     }
   }
 
@@ -139,6 +149,44 @@ const Bucket = (props) => {
         });
     }
   }
+
+  const onContent = () => {
+    saveToLocalStorage({allBuckets: allBuckets}, 's3Buckets')
+  }
+
+  const deleteBucketConfirm = (bucketName, reg) => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to delete this bucket.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => deleteBucket(bucketName, reg)
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  };
+
+  const emptyBucketConfirm = (bucketName, reg) => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to empty this bucket.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => emptyBucket(bucketName, reg)
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  };
 
   return (
     <>
@@ -226,12 +274,19 @@ const Bucket = (props) => {
                                 <td>{bucket.createDate}</td>
                                 <td>
                                   <Link to={`/amazone/contents`} state={{ domainId:'1234567890', domain:bucket.name, region: bucket.region }}>
-                                    <CButton type="button">Content</CButton>
+                                    <CButton type="button" onClick={() => onContent()}>Content</CButton>
                                   </Link>
                                   &nbsp;
                                   <CButton
                                     type="button"
-                                    onClick={() => deleteBucket(bucket.name, bucket.region)}
+                                    onClick={() => emptyBucketConfirm(bucket.name, bucket.region)}
+                                  >
+                                    Empty
+                                  </CButton>
+                                  &nbsp;
+                                  <CButton
+                                    type="button"
+                                    onClick={() => deleteBucketConfirm(bucket.name, bucket.region)}
                                   >
                                     Delete
                                   </CButton>

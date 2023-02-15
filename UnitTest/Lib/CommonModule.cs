@@ -1014,7 +1014,7 @@ namespace UnitTest.Lib
             AmazonS3Client s3Client = CommonModule.amazonS3Client;
             if (region.Length > 0)
             {
-                s3Client = new AmazonS3Client("AKIA6GFGHJFKCHWFMUWX", "6YvagXUBnahKdBSWmOjvmr5o5crZbzoiGLRNkIum", RegionEndpoint.GetBySystemName(region));
+                s3Client = new AmazonS3Client(Config.AWSAccessKey, Config.AWSSecretKey, RegionEndpoint.GetBySystemName(region));
             }
 
             var success = await CreateBucket.CreateBucketAsync(s3Client, (string)domain, region);
@@ -1057,7 +1057,7 @@ namespace UnitTest.Lib
             AmazonS3Client s3Client = CommonModule.amazonS3Client;
             if (region.Length > 0)
             {
-                s3Client = new AmazonS3Client("AKIA6GFGHJFKCHWFMUWX", "6YvagXUBnahKdBSWmOjvmr5o5crZbzoiGLRNkIum", RegionEndpoint.GetBySystemName(region));
+                s3Client = new AmazonS3Client(Config.AWSAccessKey, Config.AWSSecretKey, RegionEndpoint.GetBySystemName(region));
             }
             try
             {
@@ -1074,6 +1074,71 @@ namespace UnitTest.Lib
 
             }
             return bret;            
+        }
+
+        public static async Task<bool> EmptyBucketAsync(string bucketName, string region)
+        {
+            bool bret = false;
+            AmazonS3Client s3Client = CommonModule.amazonS3Client;
+            if (region.Length > 0)
+            {
+                s3Client = new AmazonS3Client(Config.AWSAccessKey, Config.AWSSecretKey, RegionEndpoint.GetBySystemName(region));
+            }
+            var keysAndVersions = await GetAllKeysAsync(s3Client, bucketName);
+
+            DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest
+            {
+                BucketName = bucketName,
+                Objects = keysAndVersions // This includes the object keys and null version IDs.
+            };
+            try
+            {
+                if (keysAndVersions.Count > 0)
+                {
+                    DeleteObjectsResponse response = await s3Client.DeleteObjectsAsync(multiObjectDeleteRequest);
+                    //Console.WriteLine("Successfully deleted all the {0} items", response.DeletedObjects.Count);
+                }
+                bret = true;
+            }
+            catch (DeleteObjectsException e)
+            {
+                //PrintDeletionErrorStatus(e);
+            }
+
+            return bret;
+        }
+
+        static async Task<List<KeyVersion>> GetAllKeysAsync(AmazonS3Client s3Client, string bucketName)
+        {
+            List<KeyVersion> keys = new List<KeyVersion>();
+            var request = new ListObjectsV2Request
+            {
+                BucketName = bucketName,
+                MaxKeys = 100,
+                Prefix = "",
+                Delimiter = "",
+            };
+
+            ListObjectsV2Response response;
+            do
+            {
+                response = await s3Client.ListObjectsV2Async(request);
+                response.S3Objects
+                    .ForEach(obj => {
+                        //Console.WriteLine($"{obj.Key,-35}{obj.LastModified.ToShortDateString(),10}{obj.Size,10}")
+                        KeyVersion keyVersion = new KeyVersion
+                        {
+                            Key = obj.Key,
+                            // For non-versioned bucket operations, we only need object key.
+                            // VersionId = response.VersionId
+                        };
+                        keys.Add(keyVersion);
+                    });
+                request.ContinuationToken = response.NextContinuationToken;
+            }
+            while (response.IsTruncated);
+
+            return keys;
         }
 
         static public async Task<string> FindBucketLocationAsync(String bucketName)

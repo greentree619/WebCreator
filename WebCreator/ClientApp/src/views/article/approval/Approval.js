@@ -256,6 +256,10 @@ class ApprovalBase extends Component {
         progress: undefined,
         theme: "colored",
         });
+
+      this.setState({
+        articles: articles,
+      })
     }
     else
     {
@@ -440,7 +444,7 @@ class ApprovalBase extends Component {
                         // console.log(e.target.checked, this.state.checkedItem[article.id])
                       }}/>
                   </td>
-                  <td>{article.title}{((article.articleId == null || (article.articleId != '1234567890' && article.articleId != '55555'))
+                  <td>{article.title}{((article.articleId != null && article.articleId != '1234567890' && article.articleId != '55555')
                                                                                         && (<>&nbsp;<CBadge color={
                                                             (article.content == null || article.content.length == 0) ? "info" : "success"
                                                             }>AF</CBadge></>) 

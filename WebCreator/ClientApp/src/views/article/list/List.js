@@ -12,6 +12,7 @@ import {
   CRow,
   CCol,
   CBadge,
+  CFormInput,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
@@ -40,6 +41,7 @@ class ListBase extends Component {
       alarmVisible: false,
       alertMsg: '',
       alertColor: 'success',
+      searchKeyword: '',
     }
   }
 
@@ -84,31 +86,21 @@ class ListBase extends Component {
     this.populateArticleData(this.state.curPage + 1)
   }
 
-  async scrapArticle(_id, title) {
+  //mode - 0: AF, 1: OpenAI
+  async scrapArticle(_id, title, mode) {
     title = title.replaceAll('?', ';')
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}article/scrap/` + _id + '/' + title + '?lang='+this.state.projectInfo.project.language,
+      `${process.env.REACT_APP_SERVER_URL}article/scrap/` + _id + '/' + title + '/' + mode + '?lang='+this.state.projectInfo.project.language,
     )
-    // this.setState({
-    //   alarmVisible: false,
-    //   alertMsg: 'Unfortunately, scrapping faild.',
-    //   alertColor: 'danger',
-    // })
     let ret = await response.json()
     console.log("scrapArticle", ret);
     if (response.status === 200 && ret) {
-      //console.log('add success')
-      // this.setState({
-      //   alertMsg: 'Started to scrapping article from Article Forge successfully.',
-      //   alertColor: 'success',
-      // })
-      toast.success('Started to scrapping article from Article Forge successfully.', alertConfirmOption);
+      toast.success('Started to scrapping article from ' + (mode == 0 ? "AF" : "OpenAI") + ' successfully.', alertConfirmOption);
     }
     else
     {
       toast.error('Unfortunately, scrapping faild.', alertConfirmOption);
     }
-    // this.setState({ alarmVisible: true })
   }
 
   deleteArticleConfirm = (_id) => {
@@ -255,6 +247,23 @@ class ListBase extends Component {
     }
   }
 
+  onChangeKeyword = (keyword) => {
+    this.setState({
+      searchKeyword: keyword
+    })
+  }
+
+  onSearch = (keyCode) => {
+    if(keyCode == 13)
+    {
+      //console.log("keyCode=>", keyCode)
+      this.setState({
+        loading: true,
+      })
+      this.populateArticleData(1)
+    }
+  }
+
   renderArticlesTable = (articles) => {
     let pageButtonCount = 3
     let pagination = <p></p>
@@ -353,11 +362,18 @@ class ListBase extends Component {
                                                             }>OpenAI</CBadge></>) ))}
                   </td>
                   <td>
+                  <CButton
+                      type="button"
+                      onClick={() => this.scrapArticle(article.id, article.title, 0)}
+                    >
+                      AF-Scrap
+                    </CButton>
+                    &nbsp;
                     <CButton
                       type="button"
-                      onClick={() => this.scrapArticle(article.id, article.title)}
+                      onClick={() => this.scrapArticle(article.id, article.title, 1)}
                     >
-                      Scrap
+                      OpenAI-Scrap
                     </CButton>
                     &nbsp;
                     <CButton
@@ -411,31 +427,41 @@ class ListBase extends Component {
               <CCol className="align-self-start">All Articles</CCol>
               {this.state.projectInfo != null && this.state.projectInfo.projectid != null && (
                 <>
-                <CCol className="align-self-end" xs="auto">
-                  <Link to={`/article/add`} state={{ projectId: this.state.projectInfo.projectid }}>
-                    <CButton type="button">New Article</CButton>
-                  </Link>
-                  &nbsp;
-                  <CButton
-                    type="button"
-                    onClick={() => this.syncArticle(this.state.projectInfo.projectid,
-                                                    this.state.projectInfo.domainName,
-                                                    this.state.projectInfo.domainIp,
-                                                    ""
-                                                    )}
-                  >
-                    All Sync
-                  </CButton>
-                  &nbsp;
-                  <CButton
-                    type="button"
-                    onClick={() => this.downloadAllArticles(this.state.projectInfo.projectid,
-                                                    this.state.projectInfo.domainName,
-                                                    this.state.projectInfo.domainIp
-                                                    )}
-                  >
-                    Download
-                  </CButton>
+                  <CCol className="align-self-end col-5">
+                    <CFormInput
+                      type="text"
+                      id="searchKeyword"
+                      aria-label="keyword"
+                      value={this.state.searchKeyword}
+                      onChange={(e) => this.onChangeKeyword(e.target.value)}
+                      onKeyDown={(e) => this.onSearch(e.keyCode)}
+                    />
+                  </CCol>
+                  <CCol className="align-self-end" xs="auto">
+                    <Link to={`/article/add`} state={{ projectId: this.state.projectInfo.projectid }}>
+                      <CButton type="button">New Article</CButton>
+                    </Link>
+                    &nbsp;
+                    <CButton
+                      type="button"
+                      onClick={() => this.syncArticle(this.state.projectInfo.projectid,
+                                                      this.state.projectInfo.domainName,
+                                                      this.state.projectInfo.domainIp,
+                                                      ""
+                                                      )}
+                    >
+                      All Sync
+                    </CButton>
+                    &nbsp;
+                    <CButton
+                      type="button"
+                      onClick={() => this.downloadAllArticles(this.state.projectInfo.projectid,
+                                                      this.state.projectInfo.domainName,
+                                                      this.state.projectInfo.domainIp
+                                                      )}
+                    >
+                      Download
+                    </CButton>
                   </CCol>
                   </>)
               }
@@ -467,7 +493,7 @@ class ListBase extends Component {
       `${process.env.REACT_APP_SERVER_URL}article/` +
         (projectId != '' ? projectId + '/0/' : '') +
         pageNo +
-        '/200',
+        '/200?keyword='+this.state.searchKeyword,
     )
     const data = await response.json()
     this.setState({

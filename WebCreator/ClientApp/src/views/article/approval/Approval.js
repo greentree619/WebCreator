@@ -15,6 +15,7 @@ import {
   CFormCheck,
   CLink,
   CBadge,
+  CFormInput,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
@@ -44,6 +45,7 @@ class ApprovalBase extends Component {
       alertMsg: '',
       alertColor: 'success',
       articleState: 0,
+      searchKeyword: '',
     }
   }
 
@@ -260,6 +262,23 @@ class ApprovalBase extends Component {
     return (articleState)
   }
 
+  onChangeKeyword = (keyword) => {
+    this.setState({
+      searchKeyword: keyword
+    })
+  }
+
+  onSearch = (keyCode) => {
+    if(keyCode == 13)
+    {
+      //console.log("keyCode=>", keyCode)
+      this.setState({
+        loading: true,
+      })
+      this.populateArticleData(1, this.state.articleState)
+    }
+  }
+
   renderArticlesTable = (articles) => {
     let pageButtonCount = 3
     let pagination = <p></p>
@@ -454,6 +473,17 @@ class ApprovalBase extends Component {
           <CContainer>
             <CRow>
               <CCol className="align-self-start">Article List</CCol>
+              <CCol className="align-self-end col-5">
+                <CFormInput
+                  type="text"
+                  id="searchKeyword"
+                  aria-label="keyword"
+                  value={this.state.searchKeyword}
+                  onChange={(e) => this.onChangeKeyword(e.target.value)}
+                  onKeyDown={(e) => this.onSearch(e.keyCode)}
+                  size="sm" className="mb-3"
+                />
+              </CCol>
               <CCol className="align-self-end" xs="auto">
                 <CFormSelect id="articleState" value={this.state.articleState} onChange={(obj) => this.viewArticleByState(obj.target.value)} size="sm" className="mb-3" aria-label="Small select example">
                   <option value="0">All Pages</option>
@@ -499,7 +529,7 @@ class ApprovalBase extends Component {
       `${process.env.REACT_APP_SERVER_URL}article/` +
         (projectId != '' ? projectId + '/' + articleState + '/' : '') +
         pageNo +
-        '/200',
+        '/200?keyword='+this.state.searchKeyword,
     )
     const data = await response.json()
     await data.data.map((item, index) => {

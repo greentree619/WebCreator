@@ -84,13 +84,13 @@ namespace WebCreator.Controllers
             {// Online on server
                 query = query.WhereEqualTo("State", 3);
             }
-            
+
             if (sortByCreateTime) query = query.OrderByDescending("CreatedTime");
             return query;
         }
 
         [HttpGet("{domainid}/{state}/{page}/{count}")]
-        public async Task<IActionResult> GetAsync(String domainid, int state, int page = 1, int count = 5)
+        public async Task<IActionResult> GetAsync(String domainid, int state, int page = 1, int count = 5, String? keyword = "")
         {
             if (page < 0) page = 1;
             if (count < 0) count = 5;
@@ -104,6 +104,16 @@ namespace WebCreator.Controllers
                 
                 QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
                 total = (int)Math.Ceiling((double)totalSnapshot.Count / count);
+                if (keyword != null && keyword.Length > 0)
+                {
+                    int tmpTotal = 0;
+                    foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                    {
+                        var article = document.ConvertTo<Article>();
+                        if (article.Title.IndexOf(keyword) >= 0) tmpTotal++;
+                        total = (int)Math.Ceiling((double)tmpTotal / count);
+                    }
+                }
 
                 query = articlesCol.WhereEqualTo("ProjectId", domainid);
                 query = filterByState(query, state, true);
@@ -115,7 +125,12 @@ namespace WebCreator.Controllers
                 {
                     var article = document.ConvertTo<Article>();
                     article.Id = document.Id;
-                    list.Add(article);
+                    if (keyword != null && keyword.Length > 0)
+                    {
+                        if( article.Title.IndexOf(keyword) >= 0 )
+                            list.Add(article);
+                    }
+                    else list.Add(article);
                 }
             }
             catch (Exception ex)
@@ -312,12 +327,23 @@ namespace WebCreator.Controllers
             return Ok(new { id = articleid, data = article });
         }
 
-        [HttpGet("scrap/{articleid}/{question}")]
-        public async Task<IActionResult> ScrapAsync(String articleid, String question, String? lang = "EN")
+        [HttpGet("scrap/{articleid}/{question}/{mode}")]
+        public async Task<IActionResult> ScrapAsync(String articleid, String question, int mode, String? lang = "EN")
         {
             question = question.Replace(";", "?");
 
-            bool ret = await CommonModule.ScrapArticleAsync(af, question, articleid, lang);
+            bool ret = false;// await CommonModule.ScrapArticleAsync(af, question, articleid, lang);
+
+            switch (mode)
+            {
+                case 0://AF
+                    ret = await CommonModule.ScrapArticleAsync(af, question, articleid, lang);
+                    break;
+                case 1://OpenAI
+                    ret = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, question, articleid);
+                    break;
+            }
+
             return Ok(ret);
         }
 
@@ -406,8 +432,9 @@ namespace WebCreator.Controllers
             {
                 if(mode == "0") CommonModule.isManualAFScrapping = true;
                 else if (mode == "1") CommonModule.isManualOpenAIScrapping = true;
-                ret = true;
                 Task.Run(() => new SerpapiScrap().ScrappingManualThreadAsync(mode, domainId, articleids));
+
+                ret = true;
             }
             return Ok(ret);
         }

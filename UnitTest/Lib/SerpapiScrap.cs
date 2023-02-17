@@ -16,7 +16,6 @@ namespace UnitTest.Lib
     internal class SerpapiScrap
     {
         ArticleForge manualAF = new ArticleForge();
-        OpenAIAPI manualOpenAI = new OpenAIAPI(Config.OpenAIKey);
         public SerpapiScrap()
         {
         }
@@ -170,7 +169,7 @@ namespace UnitTest.Lib
                                 //{{In case start manual scrap, sleep untile complete
                                 while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
                                 //}}In case start manual scrap, sleep untile complete
-                                afRet = await CommonModule.ScrapArticleByOpenAIAsync(manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
                             }
                             while (!afRet && (bool)CommonModule.afThreadList[_id]);
                         }
@@ -188,7 +187,7 @@ namespace UnitTest.Lib
                                     //{{In case start manual scrap, sleep untile complete
                                     while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
                                     //}}In case start manual scrap, sleep untile complete
-                                    afRet = await CommonModule.ScrapArticleByOpenAIAsync(manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                    afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
                                 }
                                 while (!afRet && (bool)CommonModule.afThreadList[_id]);
 
@@ -238,7 +237,7 @@ namespace UnitTest.Lib
                                 afRet = await CommonModule.ScrapArticleAsync(manualAF, scrapAF.Title, scrapAF.Id, lang);
                                 break;
                             case "1"://OpenAI
-                                afRet = await CommonModule.ScrapArticleByOpenAIAsync(manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
                                 break;
                         }
                     }

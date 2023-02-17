@@ -41,6 +41,7 @@ namespace UnitTest.Lib
         public static AmazonS3Client amazonS3Client = new AmazonS3Client( Config.AWSAccessKey, Config.AWSSecretKey, RegionEndpoint.USEast2);//us-east-2
         public static DeepLTranslate deepLTranslate = new DeepLTranslate();
         public static String baseLanguage = "EN";
+        public static OpenAIAPI manualOpenAI = new OpenAIAPI(Config.OpenAIKey);
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -453,9 +454,11 @@ namespace UnitTest.Lib
             return templateHtml;
         }
 
-        static public void GenerateArticleHtml(String fileName, String link, Article article, String articleTemplate)
+        static public void GenerateArticleHtml(String fileName, String link, Article article, String articleTemplate, String lang)
         {
+            lang = lang.ToLower();
             String canonialTag = $"<link rel=\"canonical\" href=\"{link}\"/>";
+            String metaUtf8 = "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
             using (StreamWriter writer = new StreamWriter(fileName))
             {
                 if (article.MetaTitle == null || article.MetaTitle.Length == 0) 
@@ -464,8 +467,9 @@ namespace UnitTest.Lib
                 if (articleTemplate.Length == 0)
                 {
                     writer.WriteLine("<!DOCTYPE html>");
-                    writer.WriteLine("<html>");
+                    writer.WriteLine($"<html lang=\"{lang}\">");
                     writer.WriteLine("<head>");
+                    writer.WriteLine(metaUtf8);
                     writer.WriteLine($"<title>{article.MetaTitle}</title>");
 
                     String metaDesc = article.MetaDescription;
@@ -511,7 +515,12 @@ namespace UnitTest.Lib
                     {// auto fill
                         metaDescContent = PickupMetaDescription(article.Content);
                     }
-                    metaDescContent = metaDescContent.Trim().Replace("\n", "").Replace("\r", "");
+
+                    String htmlLang = $"<html lang=\"{lang}\">";
+                    articleTemplate = Regex.Replace(articleTemplate, @"([<]html[^<>]+[>])", htmlLang);
+
+                    String htmlUtf8Meta = $"<head>\n  " + metaUtf8;
+                    articleTemplate = Regex.Replace(articleTemplate, @"([<]head[>])", htmlUtf8Meta);
 
                     String metaDesc = $"<meta name=\"description\" content=\"{metaDescContent}\">";
                     String metaKeywd = $"<meta name=\"keywords\" content=\"{article.MetaKeywords}\">";
@@ -547,6 +556,7 @@ namespace UnitTest.Lib
         {
             try
             {
+                String lang = CommonModule.project2LanguageMap[domainid].ToString();
                 String hostingDomain = CommonModule.GetDomain(domain, isAWSHost, s3Name, region);
                 String curFolder = Directory.GetCurrentDirectory();
                 curFolder += $"\\Build\\{domain}";
@@ -574,7 +584,7 @@ namespace UnitTest.Lib
                         //}}Stop When update theme
                         String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
                         String articleTemplate = GetArticleTemplate(domain);
-                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{hostingDomain}/{title}", article, articleTemplate);
+                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{hostingDomain}/{title}", article, articleTemplate, lang);
 
                         //{{Update state
                         if (article.State != 3)
@@ -618,6 +628,7 @@ namespace UnitTest.Lib
         {
             try
             {
+                String lang = CommonModule.project2LanguageMap[domainid].ToString();
                 String hostingDomain = CommonModule.GetDomain(domain, isAWSHost, s3Name, region);
                 String curFolder = Directory.GetCurrentDirectory();
                 curFolder += $"\\Build\\{domain}";
@@ -649,7 +660,7 @@ namespace UnitTest.Lib
                         while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
                         //}}Stop When update theme
                         String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{hostingDomain}/{title}", article, articleTemplate);
+                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{hostingDomain}/{title}", article, articleTemplate, lang);
 
                         //{{Update state
                         if (article.State == 2)
@@ -691,6 +702,7 @@ namespace UnitTest.Lib
         {
             try
             {
+                String lang = CommonModule.project2LanguageMap[domainid].ToString();
                 String hostingDomain = CommonModule.GetDomain(domain, isAWS, s3Name, region);
                 String[] aids = articleIds.Split(',');
                 String curFolder = Directory.GetCurrentDirectory();
@@ -720,7 +732,7 @@ namespace UnitTest.Lib
                         while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
                         //}}Stop When update theme
                         String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{hostingDomain}/{title}", article, articleTemplate);
+                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{hostingDomain}/{title}", article, articleTemplate, lang);
                     }
                 }
 
@@ -914,17 +926,19 @@ namespace UnitTest.Lib
                 }
             }
 
+            tmpContent = tmpContent.Trim().Replace("\n", "").Replace("\r", "");
             return tmpContent;
         }
 
         static public void GenerateURLFile(QuerySnapshot snapshot, String folder, String fileName, String selfDomainId, Hashtable domainMap, bool isAWSHost, String s3Name, String region)
         {
             DomainIpMap selfdomain = (DomainIpMap)domainMap[selfDomainId];
+            String lang = CommonModule.project2LanguageMap[selfDomainId].ToString().ToLower();
             String selfHostingDomain = CommonModule.GetDomain(selfdomain.domain, CommonModule.isAWSHosting( selfdomain.ip ), s3Name, region);
             using (StreamWriter writer = new StreamWriter(folder + "//" + fileName))
             {
                 writer.WriteLine("<!DOCTYPE html>");
-                writer.WriteLine("<html>");
+                writer.WriteLine($"<html lang=\"{lang}\">");
                 writer.WriteLine("<head>");
                 writer.WriteLine($"<title>Online URLs</title>");
                 writer.WriteLine("</head>");

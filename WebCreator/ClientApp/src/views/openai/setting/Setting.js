@@ -28,6 +28,7 @@ import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { alertConfirmOption } from 'src/utility/common'
 
 const Setting = (props) => {
   const location = useLocation()
@@ -103,29 +104,11 @@ const Setting = (props) => {
     if (response.status === 200 && ret) {
       // setAlertMsg('Updated OpenAI API Setting successfully.')
       // setAlertColor('success')
-      toast.success('Updated OpenAI API Setting successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Updated OpenAI API Setting successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Faild to update OpenAI API Setting unfortunatley.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Faild to update OpenAI API Setting unfortunatley.', alertConfirmOption);
     }
     // setAlarmVisible(true)
   }

@@ -361,21 +361,27 @@ namespace UnitTest.Lib
          * @param int $ref_key ref ID in ArticleForge
          * @return string article text
          */
-        public String getApiArticleResult(String ref_key)
+        public async Task<String> getApiArticleResult(String ref_key, String language)
         {
+            String content = "";
             if (ref_key == "")
             {
                 setErrorMessage("Parameter 'ref_key' is required");
-                return "";
+                content = "";
             }
 
             var result = execute("get_api_article_result", JObject.Parse("{\"ref_key\": " + ref_key + "}"));
             if (isStatusSuccess(result))
             {
-                return result["article"].ToString();
+                content = result["article"].ToString();
             }
 
-            return "";
+            if (language.ToUpper().CompareTo(CommonModule.baseLanguage) != 0)
+            {
+                content = await CommonModule.deepLTranslate.Translate(content, language.ToUpper());
+            }
+
+            return content;
         }
 
         /**

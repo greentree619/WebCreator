@@ -29,6 +29,7 @@ import 'katex/dist/katex.min.css'
 import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { alertConfirmOption } from 'src/utility/common'
 
 const Add = (props) => {
   const location = useLocation()
@@ -82,29 +83,11 @@ const Add = (props) => {
     if (response.status === 200 && ret) {
       // setAlertMsg('Article content is added successfully.')
       // setAlertColor('success')
-      toast.success('Article content is added successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Article content is added successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Faild to add article unfortunatley.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Faild to add article unfortunatley.', alertConfirmOption);
     }
     // setAlarmVisible(true)
   }

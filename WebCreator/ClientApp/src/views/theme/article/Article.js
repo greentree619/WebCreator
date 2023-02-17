@@ -36,7 +36,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Outlet, Link } from 'react-router-dom';
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption } from 'src/utility/common.js'
 
 const Article = (props) => {
   const location = useLocation()
@@ -86,29 +86,11 @@ const Article = (props) => {
     if (response.status === 200 && ret) {
       // setAlertColor('success');
       // setAlertMsg('Zip file was created successfully.');
-      toast.success('Zip file was created successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Zip file was created successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Theme upload is failed, unfortunatley.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Theme upload is failed, unfortunatley.', alertConfirmOption);
     }
     // setAlarmVisible(true);
   }

@@ -20,7 +20,7 @@ import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useDispatch, useSelector } from 'react-redux'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption } from 'src/utility/common.js'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -87,7 +87,7 @@ class ListBase extends Component {
   async scrapArticle(_id, title) {
     title = title.replaceAll('?', ';')
     const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}article/scrap/` + _id + '/' + title,
+      `${process.env.REACT_APP_SERVER_URL}article/scrap/` + _id + '/' + title + '?lang='+this.state.projectInfo.project.language,
     )
     // this.setState({
     //   alarmVisible: false,
@@ -102,29 +102,11 @@ class ListBase extends Component {
       //   alertMsg: 'Started to scrapping article from Article Forge successfully.',
       //   alertColor: 'success',
       // })
-      toast.success('Started to scrapping article from Article Forge successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Started to scrapping article from Article Forge successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Unfortunately, scrapping faild.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Unfortunately, scrapping faild.', alertConfirmOption);
     }
     // this.setState({ alarmVisible: true })
   }
@@ -228,29 +210,11 @@ class ListBase extends Component {
       //   alertColor: 'success',
       //   alertMsg: 'Sync action compeleted, successfully.',
       // })
-      toast.success('Sync action compeleted, successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Sync action compeleted, successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Sync action failed, unfortunatley.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Sync action failed, unfortunatley.', alertConfirmOption);
     }
     // this.setState({
     //   alarmVisible: true,
@@ -584,12 +548,14 @@ ListBase.propTypes = {
 const List = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
+  const activeProject = useSelector((state) => state.activeProject)
   dispatch({ type: 'set', activeTab: 'article_list' })
-
+  
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
     domainName: new URLSearchParams(location.search).get('domainName'), 
-    domainIp: new URLSearchParams(location.search).get('domainIp') }
+    domainIp: new URLSearchParams(location.search).get('domainIp'),
+    project: activeProject }
   }
   //console.log(location.state)
   //console.log(location.search)

@@ -150,8 +150,15 @@ catch (Exception ex)
 //return;
 ////}}AWS Upload Test
 
-//Refresh Article Forge Scrapping status.
-Task.Run(() => new CommonModule().UpdateArticleScrappingProgress());
+var commonModule = new CommonModule();
+try
+{
+    Task.Run(() => commonModule.InitProject2LanguageMapAsync());
+}
+catch (Exception e) {
+    Console.WriteLine("Failed initialize for project to language map.");
+    return;
+}
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);

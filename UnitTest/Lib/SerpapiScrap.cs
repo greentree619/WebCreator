@@ -56,6 +56,7 @@ namespace UnitTest.Lib
         
         public async Task ScrappingAFThreadAsync(String _id, String scheduleId)
         {
+            String lang = CommonModule.project2LanguageMap[_id].ToString();
             //Omitted JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(_id);
             //Omitted             bool isScrapping = (bool)scrapStatus["afapi"];
             //Omitted if (!isScrapping)
@@ -94,7 +95,7 @@ namespace UnitTest.Lib
                                 //{{In case start manual scrap, sleep untile complete
                                 while( CommonModule.isManualAFScrapping ) Thread.Sleep(5000);
                                 //}}In case start manual scrap, sleep untile complete
-                                afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                                afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
                             }
                             while (!afRet && (bool)CommonModule.afThreadList[_id]);
                         }
@@ -111,7 +112,7 @@ namespace UnitTest.Lib
                                     //{{In case start manual scrap, sleep untile complete
                                     while (CommonModule.isManualAFScrapping) Thread.Sleep(5000);
                                     //}}In case start manual scrap, sleep untile complete
-                                    afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id);
+                                    afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
                                 }
                                 while ( !afRet && (bool)CommonModule.afThreadList[_id]);
                                 
@@ -211,6 +212,7 @@ namespace UnitTest.Lib
         {
             try
             {
+                String lang = CommonModule.project2LanguageMap[_id].ToString();
                 CollectionReference col = Config.FirebaseDB.Collection("Articles");
                 Query query = col.WhereIn(FieldPath.DocumentId, articleIds.Split(','));
                 QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
@@ -233,7 +235,7 @@ namespace UnitTest.Lib
                         {
                             case "0"://AF
                                 Thread.Sleep(10000);
-                                afRet = await CommonModule.ScrapArticleAsync(manualAF, scrapAF.Title, scrapAF.Id);
+                                afRet = await CommonModule.ScrapArticleAsync(manualAF, scrapAF.Title, scrapAF.Id, lang);
                                 break;
                             case "1"://OpenAI
                                 afRet = await CommonModule.ScrapArticleByOpenAIAsync(manualOpenAI, scrapAF.Title, scrapAF.Id);

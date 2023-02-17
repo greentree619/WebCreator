@@ -23,7 +23,7 @@ import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useDispatch, useSelector } from 'react-redux'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption } from 'src/utility/common.js'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -145,29 +145,12 @@ class ApprovalBase extends Component {
       //   alertMsg: 'Started to scrapping from AF Successfully.',
       //   alertColor: 'success',
       // })
-      toast.success('Started to scrapping from AF Successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Started to scrapping from '+ (mode==0 ? "AF" : "OpenAI") +' Successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Failed to scrapping from AF manually. Please check If AF Scheduleing is running. To use this feature must be to be off AF Scheduling', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Failed to scrapping from '+ (mode==0 ? "AF" : "OpenAI") +' manually. Please check If Scheduleing is running. To use this feature must be to be off Scheduling'
+      , alertConfirmOption);
     }
     // this.setState({ alarmVisible: true })    
   };
@@ -246,16 +229,7 @@ class ApprovalBase extends Component {
       //   alertMsg: 'Changed State Successfully.',
       //   alertColor: 'success',
       // })
-      toast.success('Changed State Successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Changed State Successfully.', alertConfirmOption);
 
       this.setState({
         articles: articles,
@@ -263,16 +237,7 @@ class ApprovalBase extends Component {
     }
     else
     {
-      toast.error('Failed to change State.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Failed to change State.', alertConfirmOption);
     }
     // this.setState({ alarmVisible: true })
   }

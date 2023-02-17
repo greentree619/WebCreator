@@ -28,6 +28,7 @@ namespace UnitTest.Lib
         public static Hashtable threadList = new Hashtable();
         public static Hashtable afThreadList = new Hashtable();
         public static Hashtable publishThreadList = new Hashtable();
+        public static Hashtable project2LanguageMap = new Hashtable();
         public static Hashtable refKeyCash = new Hashtable();
         public static Hashtable onThemeUpdateCash = new Hashtable();
         public static Hashtable domainScrappingScheduleStatus = new Hashtable();
@@ -38,6 +39,8 @@ namespace UnitTest.Lib
         public static bool isManualSync = false;
         public static HistoryManagement historyLog = new HistoryManagement();
         public static AmazonS3Client amazonS3Client = new AmazonS3Client( Config.AWSAccessKey, Config.AWSSecretKey, RegionEndpoint.USEast2);//us-east-2
+        public static DeepLTranslate deepLTranslate = new DeepLTranslate();
+        public static String baseLanguage = "EN";
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -128,10 +131,15 @@ namespace UnitTest.Lib
             return res;
         }
 
-        public static async Task<bool> ScrapArticleAsync(ArticleForge af, String question, String articleid) {
+        public static async Task<bool> ScrapArticleAsync(ArticleForge af, String question, String articleid, String language) {
             bool status = false;
             try
             {
+                if (language.ToUpper().CompareTo(CommonModule.baseLanguage) != 0)
+                {
+                    question = await deepLTranslate.Translate(question);
+                }
+
                 dynamic jsonObjectParam = new JObject();
                 jsonObjectParam.keyword = question;
                 //jsonObjectParam.sub_keywords = "subkeyword1,subkeyword2,subkeyword3";
@@ -177,6 +185,17 @@ namespace UnitTest.Lib
             bool status = false;
             try
             {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                DocumentReference docRef = articlesCol.Document(articleid);
+                DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
+                var article = articleSnapshot.ConvertTo<Article>();
+
+                if (CommonModule.project2LanguageMap[article.ProjectId].ToString()
+                    .CompareTo(CommonModule.baseLanguage) != 0)
+                {
+                    question = await CommonModule.deepLTranslate.Translate(question);
+                }
+
                 var result = await openAI.Completions.CreateCompletionAsync(
                     new CompletionRequest(CommonModule.openAISetting.GetPrompt(question)
                     , model: CommonModule.openAISetting.setInf.Model
@@ -187,14 +206,19 @@ namespace UnitTest.Lib
                     , presencePenalty: CommonModule.openAISetting.setInf.PresencePenalty
                     , frequencyPenalty: CommonModule.openAISetting.setInf.FrequencyPenalty));
 
-                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-                DocumentReference docRef = articlesCol.Document(articleid);
+                String content = result.ToString();
+                if (CommonModule.project2LanguageMap[article.ProjectId].ToString()
+                    .CompareTo(CommonModule.baseLanguage) != 0)
+                {
+                    content = await CommonModule.deepLTranslate.Translate(content
+                        , CommonModule.project2LanguageMap[article.ProjectId].ToString());
+                }
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                     {
                         { "ArticleId", "55555" },
                         { "Progress", 100 },
-                        { "Content", result.ToString() },
+                        { "Content", content },
                         { "IsScrapping", false },
                         { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                     };
@@ -239,6 +263,27 @@ namespace UnitTest.Lib
             return code;
         }
 
+        public async Task InitProject2LanguageMapAsync()
+        {
+            try
+            {
+                CollectionReference col = Config.FirebaseDB.Collection("Projects");
+                QuerySnapshot projectsSnapshot = await col.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot document in projectsSnapshot.Documents)
+                {
+                    var project = document.ConvertTo<Project>();
+                    project2LanguageMap[document.Id] = project.Language.ToUpper();
+                }
+
+                Task.Run(() => UpdateArticleScrappingProgress());//Refresh Article Forge Scrapping status.
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
         public async Task UpdateArticleScrappingProgress() {
             try
             {
@@ -266,7 +311,7 @@ namespace UnitTest.Lib
                         Dictionary<string, object> update = new Dictionary<string, object>();
                         if (prog == 100)
                         {
-                            article.Content = af.getApiArticleResult(article.ArticleId);
+                            article.Content = await af.getApiArticleResult(article.ArticleId, project2LanguageMap[article.ProjectId].ToString());
                             update["Content"] = article.Content;
                             update["IsScrapping"] = false;
                             update["Progress"] = 100;
@@ -823,7 +868,7 @@ namespace UnitTest.Lib
             String tmpContent = content;
             Regex regex = new Regex("([{][^{}]+[}])");
 
-            while (tmpContent.Contains("|"))
+            while (tmpContent != null && tmpContent.Contains("|"))
             {
                 string[] subContents = regex.Split(tmpContent);
                 tmpContent = "";

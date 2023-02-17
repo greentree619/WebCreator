@@ -12,6 +12,7 @@ import { DocsLink } from 'src/components'
 import { Outlet, Link } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { alertConfirmOption } from 'src/utility/common'
 
 export default class List extends Component {
   static displayName = List.name
@@ -55,29 +56,11 @@ export default class List extends Component {
       //   alertMsg: 'Completed to scrapping questions from google successfully.',
       //   alertColor: 'success',
       // })
-      toast.success('Completed to scrapping questions from google successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Completed to scrapping questions from google successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Unfortunately, scrapping faild.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Unfortunately, scrapping faild.', alertConfirmOption);
     }
     // this.setState({ alarmVisible: true })
   }

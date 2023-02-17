@@ -289,7 +289,8 @@ namespace WebCreator.Controllers
                     article.Progress = prog;
                     if (prog == 100)
                     {
-                        article.Content = af.getApiArticleResult(article.ArticleId);
+                        article.Content = await af.getApiArticleResult(article.ArticleId
+                            , CommonModule.project2LanguageMap[article.ProjectId].ToString());
                         Dictionary<string, object> update = new Dictionary<string, object>()
                         {
                             { "Content", article.Content },
@@ -312,11 +313,11 @@ namespace WebCreator.Controllers
         }
 
         [HttpGet("scrap/{articleid}/{question}")]
-        public async Task<IActionResult> ScrapAsync(String articleid, String question)
+        public async Task<IActionResult> ScrapAsync(String articleid, String question, String? lang = "EN")
         {
             question = question.Replace(";", "?");
 
-            bool ret = await CommonModule.ScrapArticleAsync(af, question, articleid);
+            bool ret = await CommonModule.ScrapArticleAsync(af, question, articleid, lang);
             return Ok(ret);
         }
 

@@ -334,6 +334,7 @@ namespace WebCreator.Controllers
                 if (projectsSnapshot.Documents.Count == 0) {
                     DocumentReference docRef = await projectsCol.AddAsync(project);
 
+                    CommonModule.project2LanguageMap[docRef.Id] = project.Language;
                     await addDefaultSchedule(docRef.Id);
                     addOK = true;
                 }
@@ -411,6 +412,7 @@ namespace WebCreator.Controllers
                     { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                 };
                 await docRef.UpdateAsync(userUpdate);
+                CommonModule.project2LanguageMap[docRef.Id] = projectInput.Language;
 
                 if (projectInput.Ip.CompareTo("0.0.0.0") == 0)
                     Task.Run(() => new CommonModule().CreateHostBucketThreadAsync(projectInput.Name));
@@ -532,7 +534,7 @@ namespace WebCreator.Controllers
         //[Route("serpapi")]
         //[HttpPost]
         //}}
-        public ActionResult serpapi(String _id, String keyword, Int32 count)
+        public ActionResult SerpAPI(String _id, String keyword, Int32 count)
         {
             if (CommonModule.threadList[_id] == null || (bool)CommonModule.threadList[_id] == false)
             {
@@ -551,6 +553,7 @@ namespace WebCreator.Controllers
         public ActionResult StartAFapi(String _id, String sid)
         {
             bool ret = false;
+            String lang = CommonModule.project2LanguageMap[_id].ToString();
             if (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false)
             {
                 CommonModule.afThreadList[_id] = true;

@@ -29,6 +29,7 @@ import { Col } from 'reactstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { alertConfirmOption } from 'src/utility/common'
 
 const Contents = (props) => {
   const location = useLocation()
@@ -94,29 +95,11 @@ const Contents = (props) => {
     if (response.status === 200 && ret) {
       // setAlertColor('success');
       // setAlertMsg('Zip file was created successfully.');
-      toast.success('Zip file was Upload successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Zip file was Upload successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Zip file upload is failed, unfortunatley.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Zip file upload is failed, unfortunatley.', alertConfirmOption);
     }
     // setAlarmVisible(true);
   }

@@ -28,6 +28,7 @@ import { Col } from 'reactstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { alertConfirmOption } from 'src/utility/common'
 
 const View = (props) => {
   const location = useLocation()
@@ -158,46 +159,19 @@ const View = (props) => {
         setScrapCommand('Stop Scrapping')
         // setAlertMsg('Article Forge Scrapping Schedule started successfully.')
         // setAlertColor('success')
-        toast.success('Article Forge Scrapping Schedule started successfully.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          });
+        toast.success('Article Forge Scrapping Schedule started successfully.', alertConfirmOption);
       }
       else
       {
         setScrapCommand('Start Scrapping')
         // setAlertMsg('Article Forge Scrapping Schedule stopped.')
         // setAlertColor('success')
-        toast.success('Article Forge Scrapping Schedule stopped.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          });
+        toast.success('Article Forge Scrapping Schedule stopped.', alertConfirmOption);
       }
     }
     else
     {
-      toast.error('Unfortunately, scrapping faild.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Unfortunately, scrapping faild.', alertConfirmOption);
     }
     // setAlarmVisible(true)
 
@@ -219,46 +193,19 @@ const View = (props) => {
         setPublishCommand('Stop Publish')
         // setAlertMsg('Publish Schedule started successfully.')
         // setAlertColor('success')
-        toast.success('Publish Schedule started successfully.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          });
+        toast.success('Publish Schedule started successfully.', alertConfirmOption);
       }
       else
       {
         setPublishCommand('Start Publish')
         // setAlertMsg('Publish Schedule stopped.')
         // setAlertColor('success')
-        toast.success('Publish Schedule stopped.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          });
+        toast.success('Publish Schedule stopped.', alertConfirmOption);
       }
     }
     else
     {
-      toast.error('Unfortunately, Publish Schedule faild.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Unfortunately, Publish Schedule faild.', alertConfirmOption);
     }
     // setAlarmVisible(true)
 
@@ -308,29 +255,11 @@ const View = (props) => {
     if (response.status === 200 && ret) {
       // setAlertMsg('Updated AF schedule successfully.')
       // setAlertColor('success')
-      toast.success('Updated AF schedule successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Updated AF schedule successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Faild to update AF schedule unfortunatley.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Faild to update AF schedule unfortunatley.', alertConfirmOption);
     }
     // setAlarmVisible(true)
   }
@@ -370,29 +299,11 @@ const View = (props) => {
     if (response.status === 200 && ret) {
       // setAlertMsg('Updated publish schedule successfully.')
       // setAlertColor('success')
-      toast.success('Updated publish schedule successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Updated publish schedule successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Faild to update publish schedule unfortunatley.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Faild to update publish schedule unfortunatley.', alertConfirmOption);
     }
     // setAlarmVisible(true)
   }

@@ -31,7 +31,7 @@ import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption } from 'src/utility/common.js'
 
 const View = (props) => {
   const location = useLocation()
@@ -105,29 +105,11 @@ const View = (props) => {
     if (response.status === 200 && ret) {
       // setAlertMsg('Article content is updated successfully.')
       // setAlertColor('success')
-      toast.success('Article content is updated successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Article content is updated successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Faild to update content unfortunatley.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Faild to update content unfortunatley.', alertConfirmOption);
     }
     // setAlarmVisible(true)
   }

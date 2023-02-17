@@ -30,7 +30,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import {globalRegionMap, alertConfirmOption} from 'src/utility/common.js'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage } from 'src/utility/common.js'
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css'; 
 
@@ -124,29 +124,11 @@ const Bucket = (props) => {
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}s3Bucket/${bucketName}/${region}`, requestOptions)
     let ret = await response.json()
     if (response.status === 200 && ret.result) {
-      toast.success('Created new bucket successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Created new bucket successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Can\'t create new bucket, unfortunatley. Maybe bucket name is duplicated.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Can\'t create new bucket, unfortunatley. Maybe bucket name is duplicated.', alertConfirmOption);
     }
   }
 

@@ -33,6 +33,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Outlet, Link } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {saveToLocalStorage, globalRegionMap, loadFromLocalStorage, clearLocalStorage, alertConfirmOption } from 'src/utility/common'
 
 const Keyword = (props) => {
   const location = useLocation()
@@ -95,6 +96,10 @@ const Keyword = (props) => {
   }
 
   async function updateProject() {
+    var s3Host = loadFromLocalStorage('s3host')
+    var s3Name = (s3Host.name == null || s3Host.name.length == 0) ? this.state.projectInfo.projectDomain : s3Host.name;
+    var s3Region = s3Host.region == null ? "us-east-2" : s3Host.region;
+
     const requestOptions = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -102,6 +107,8 @@ const Keyword = (props) => {
         id: location.state ? location.state.project.id : '-1',
         name: location.state.project.name,
         ip: location.state.project.ip,
+        s3BucketName: s3Name,
+        s3BucketRegion: s3Region,
         keyword: searchKeyword,
         quesionscount: questionsCount,
         contactInfo: location.state.project.contactInfo,
@@ -124,29 +131,11 @@ const Keyword = (props) => {
       dispatch({ type: 'set', activeProject: location.state.project })
       console.log(location.state.project, "after update")
 
-      toast.success('Updated scrap information successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Updated scrap information successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Faild to update unfortunatley.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Faild to update unfortunatley.', alertConfirmOption);
     }
     // setAlarmVisible(true)
   }
@@ -164,29 +153,11 @@ const Keyword = (props) => {
       //console.log('add success')
       // setAlertMsg('Completed to scrapping questions from google successfully.')
       // setAlertColor('success')
-      toast.success('Completed to scrapping questions from google successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Completed to scrapping questions from google successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Unfortunately, scrapping faild.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Unfortunately, scrapping faild.', alertConfirmOption);
     }
     // setAlarmVisible(true)
   }
@@ -206,29 +177,11 @@ const Keyword = (props) => {
       //console.log('add success')
       // setAlertMsg('Completed to add manual article successfully.')
       // setAlertColor('success')
-      toast.success('Completed to add manual article successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Completed to add manual article successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Unfortunately, To adding manual article faild.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Unfortunately, To adding manual article faild.', alertConfirmOption);
     }
     // setAlarmVisible(true)
   }
@@ -248,29 +201,11 @@ const Keyword = (props) => {
       //console.log('add success')
       // setAlertMsg('Completed to add manual article from file successfully.')
       // setAlertColor('success')
-      toast.success('Completed to add manual article from file successfully.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.success('Completed to add manual article from file successfully.', alertConfirmOption);
     }
     else
     {
-      toast.error('Unfortunately, To adding manual article faild.', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      toast.error('Unfortunately, To adding manual article faild.', alertConfirmOption);
     }
     // setAlarmVisible(true)
   }

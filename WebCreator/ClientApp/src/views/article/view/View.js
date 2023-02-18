@@ -35,6 +35,8 @@ import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfir
 
 const View = (props) => {
   const location = useLocation()
+  const navigate = useNavigate()
+  const activeProject = useSelector((state) => state.activeProject)
   const [alarmVisible, setAlarmVisible] = useState(false)
   const [alertColor, setAlertColor] = useState('success')
   const [alertMsg, setAlertMsg] = useState('')
@@ -47,8 +49,8 @@ const View = (props) => {
   const [metaKeywords, setMetaKeywords] = useState('')
   const [metaAuthor, setMetaAuthor] = useState('')
   const [pixabayURL, setPixabayURL] = useState('https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=480&min_height=600&per_page=100&page=1')
-  const navigate = useNavigate()
-  const activeProject = useSelector((state) => state.activeProject)
+  const [useTitleByBrandname, setUseTitleByBrandname] = useState(activeProject.contactInfo.useTitleByBrandname)
+  
   console.log(activeProject)
 
   useEffect(() => {
@@ -63,8 +65,14 @@ const View = (props) => {
       if (data.data.metaDescription != null) setMetaDescription(data.data.metaDescription)
       if (data.data.metaKeywords != null) setMetaKeywords(data.data.metaKeywords)
       if (data.data.metaAuthor != null) setMetaAuthor(data.data.metaAuthor)
-      if (data.data.content != null) setContent(data.data.content)      
+      if (data.data.content != null) setContent(data.data.content)
       if (data.data.footer != null) setFooter(data.data.footer)
+
+      if( useTitleByBrandname )
+      {
+        setMetaTitle(data.data.title + "-" + activeProject.contactInfo.brandname);
+      }
+
       setArticle(data.data)
     }
     getFetch()
@@ -175,8 +183,12 @@ const View = (props) => {
                   />
                 </CCol>
                 <CCol>
-                  <CFormCheck id="useMetaTitle" className="pt-5" label="Use Mete Title Format with <Title>-<Brand Name>"
+                  <CFormCheck id="useMetaTitle" 
+                    checked={useTitleByBrandname}
+                    className="pt-5" 
+                    label="Use Mete Title Format with <Title>-<Brand Name>"
                     onChange={(e) => {
+                      setUseTitleByBrandname(e.target.checked)
                       if( e.target.checked )
                       {
                         setMetaTitle(title + "-" + activeProject.contactInfo.brandname);

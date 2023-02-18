@@ -8,6 +8,7 @@ namespace WebCreator.Models
         public _ContactInfo()
         {
             Brandname = "";
+            UseTitleByBrandname = false;
             StreetAddress = "";
             AdrdressLocality = "";
             AddressRegion = "";
@@ -21,6 +22,8 @@ namespace WebCreator.Models
 
         [FirestoreProperty]
         public String Brandname { get; set; }//: Organic Wine Online
+        [FirestoreProperty]
+        public bool UseTitleByBrandname { get; set; }//: Organic Wine Online
         [FirestoreProperty]
         public String StreetAddress { get; set; }//: 000 W Anywhere Street
         [FirestoreProperty]

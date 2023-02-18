@@ -19,7 +19,8 @@ import {
   CDropdownMenu,
   CContainer,
   CSpinner,
-  CFormSelect
+  CFormSelect,
+  CFormCheck
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -75,6 +76,9 @@ const Add = (props) => {
   )
   const [brandName, setBrandName] = useState(
     location.state != null && !simpleMode ? location.state.project.contactInfo.brandname : '',
+  )
+  const [useTitleByBrandname, setUseTitleByBrandname] = useState(
+    location.state != null && !simpleMode ? location.state.project.contactInfo.useTitleByBrandname : false,
   )
   const [streetAddress, setStreetAddress] = useState(
     location.state != null && !simpleMode ? location.state.project.contactInfo.streetAddress : '',
@@ -158,9 +162,9 @@ const Add = (props) => {
       quesionscount: questionsCount,
       language: languageValue,
       languageString: language,
-      contactInfo:{
-        brandName: brandName,
+      contactInfo:{        
         brandname: brandName,
+        useTitleByBrandname: useTitleByBrandname,
         streetAddress: streetAddress,
         adrdressLocality: adrdressLocality,
         addressRegion: addressRegion,
@@ -540,9 +544,17 @@ const Add = (props) => {
                       </div>
                       <CRow className={simpleMode ? 'd-none' : 'mb-3 py-0'}>
                         <CFormLabel htmlFor="Brandname" className="col-sm-4 col-form-label">Brand Name</CFormLabel>
-                        <CCol sm={8}>
+                        <CCol sm={8} className={"d-flex align-items-center"}>
                           <CFormInput type="text" id="Brandname" value={brandName} onChange={(e) => inputChangeHandler(setBrandName, e)}
                             disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                        <CCol className={"d-flex justify-content-end"}>
+                            <CFormCheck id="useMetaTitle" 
+                              checked={useTitleByBrandname} 
+                              onChange={() => setUseTitleByBrandname(!useTitleByBrandname)}
+                              label="Use Title Format with 'Title-Brand Name'"
+                              disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                            />
                         </CCol>
                       </CRow>
                       <CRow className={simpleMode ? 'd-none' : 'mb-3 py-0'}>

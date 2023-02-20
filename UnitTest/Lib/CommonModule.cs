@@ -184,10 +184,12 @@ namespace UnitTest.Lib
         public static async Task<bool> ScrapArticleByOpenAIAsync(OpenAIAPI openAI, String question, String articleid)
         {
             bool status = false;
+            String orgLangQuetion = question;
+            String articleContent = "";
+            CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+            DocumentReference docRef = articlesCol.Document(articleid);
             try
-            {
-                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-                DocumentReference docRef = articlesCol.Document(articleid);
+            {   
                 DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
                 var article = articleSnapshot.ConvertTo<Article>();
 
@@ -195,6 +197,12 @@ namespace UnitTest.Lib
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
                     question = await CommonModule.deepLTranslate.Translate(question);
+                }
+
+                String ret = CommonModule.GetImageFromOpenAI(question);
+                if (ret.Length > 0)
+                {
+                    articleContent = $"<img src=\"{ret}\" alt=\"{orgLangQuetion}\" width=\"1024\" height=\"1024\">";
                 }
 
                 var result = await openAI.Completions.CreateCompletionAsync(
@@ -214,22 +222,23 @@ namespace UnitTest.Lib
                     content = await CommonModule.deepLTranslate.Translate(content
                         , CommonModule.project2LanguageMap[article.ProjectId].ToString());
                 }
-
-                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
-                    {
-                        { "ArticleId", "55555" },
-                        { "Progress", 100 },
-                        { "Content", content },
-                        { "IsScrapping", false },
-                        { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
-                    };
-                await docRef.UpdateAsync(userUpdate);
+                articleContent += "<br>" + content;
                 status = true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+
+            Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+            {
+                { "ArticleId", "55555" },
+                { "Progress", 100 },
+                { "Content", articleContent },
+                { "IsScrapping", false },
+                { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
+            };
+            await docRef.UpdateAsync(userUpdate);
 
             return status;
         }
@@ -1301,6 +1310,41 @@ namespace UnitTest.Lib
                 .Split('=')
                 .Last()
                 .Trim('"');
+        }
+
+        public static String GetImageFromOpenAI(String question)
+        {
+            String ret = "";
+            HttpWebRequest request = WebRequest.CreateHttp("https://api.openai.com/v1/images/generations");
+            request.Method = "Post";
+            request.ContentType = "application/json";
+            request.Headers.Add("Authorization", "Bearer " + Config.OpenAIKey);
+
+            string json = $"{{\"prompt\": \"{question}\",\"n\": 1,\"size\": \"1024x1024\"}}";
+            using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+            {
+                streamWriter.Write(json);
+                streamWriter.Flush();
+                streamWriter.Close();
+            }
+
+            try
+            {
+                string sResult = "";
+                using (WebResponse response = request.GetResponse())
+                using (var streamReader = new StreamReader(response.GetResponseStream()))
+                    sResult = (streamReader.ReadToEnd());
+                dynamic jResult = JsonConvert.DeserializeObject(sResult);
+                JArray imgUrls = (JArray)jResult.data;
+                if (imgUrls.Count > 0)
+                {
+                    ret = imgUrls[0]["url"].ToString();
+                }
+            }
+            catch (WebException e)
+            { }
+
+            return ret;
         }
     }
 }

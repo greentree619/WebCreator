@@ -53,14 +53,18 @@ class ListBase extends Component {
     title = title.replace("?", "");
     title = title.replaceAll(" ", "-");
 
-    var url = `http://${this.state.projectInfo.projectDomain}/${title}.html`;
+    var httpPrefix = "http"
+    if( this.state.projectInfo.activeProject.useHttps != null 
+        && this.state.projectInfo.activeProject.useHttps ) httpPrefix = "https"
+
+    var url = `${httpPrefix}://${this.state.projectInfo.projectDomain}/${title}.html`;
 
     //http://www.traepiller123.info.s3-website.us-east-2.amazonaws.com
     if(this.state.projectInfo.domainIp == "0.0.0.0"){
       var s3Host = loadFromLocalStorage('s3host')
       var s3Name = (s3Host.name == null || s3Host.name.length == 0) ? this.state.projectInfo.projectDomain : s3Host.name;
       var s3Region = s3Host.region == null ? "us-east-2" : s3Host.region;
-      url = `http://${s3Name}.s3-website.${s3Region}.amazonaws.com/${title}.html`
+      url = `${httpPrefix}://${s3Name}.s3.${s3Region}.amazonaws.com/${title}.html`
     }
     
     return url;
@@ -257,12 +261,14 @@ ListBase.propTypes = {
 const List = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
+  const activeProject = useSelector((state) => state.activeProject)
   dispatch({ type: 'set', activeTab: 'sync_view' })
 
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
     projectDomain: new URLSearchParams(location.search).get('domain'),
-    domainIp: new URLSearchParams(location.search).get('domainIp') }
+    domainIp: new URLSearchParams(location.search).get('domainIp'),
+    activeProject: activeProject }
   }
   return <ListBase location={location} {...props} />
 }

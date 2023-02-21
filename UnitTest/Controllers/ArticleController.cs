@@ -235,7 +235,7 @@ namespace WebCreator.Controllers
                 foreach (DocumentSnapshot document in projectsSnapshot.Documents)
                 {
                     var article = document.ConvertTo<Article>();
-                    String url = CommonModule.articleURL(hostDomain, article.Title);
+                    String url = CommonModule.articleURL(hostDomain, article.Title, (bool)CommonModule.project2UseHttpsMap[article.ProjectId]);
                     syncStatus[document.Id] = CommonModule.RemoteFileExists(url);
                     Console.WriteLine($"url:{url} -> {syncStatus[document.Id].ToString()}");
                 }

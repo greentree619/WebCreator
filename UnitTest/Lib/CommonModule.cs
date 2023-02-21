@@ -29,6 +29,7 @@ namespace UnitTest.Lib
         public static Hashtable afThreadList = new Hashtable();
         public static Hashtable publishThreadList = new Hashtable();
         public static Hashtable project2LanguageMap = new Hashtable();
+        public static Hashtable project2UseHttpsMap = new Hashtable();
         public static Hashtable refKeyCash = new Hashtable();
         public static Hashtable onThemeUpdateCash = new Hashtable();
         public static Hashtable domainScrappingScheduleStatus = new Hashtable();
@@ -243,10 +244,11 @@ namespace UnitTest.Lib
             return status;
         }
 
-        public static String articleURL(String domain, String question) {
+        public static String articleURL(String domain, String question, bool useHttps) {
             String filename = CommonModule.GetHtmlFileName("", question);
+            String httpPrefix = ( useHttps ? "https" : "http" );
 
-            return $"http://{domain}/{filename}";
+            return $"{httpPrefix}://{domain}/{filename}";
             //if ( isAWS == 0 ) return $"http://{domain}/{filename}";
             //else return $"http://{domain}.s3-website.us-east-2.amazonaws.com/{filename}";
         }
@@ -284,6 +286,7 @@ namespace UnitTest.Lib
                 {
                     var project = document.ConvertTo<Project>();
                     project2LanguageMap[document.Id] = project.Language.ToUpper();
+                    project2UseHttpsMap[document.Id] = project.UseHttps;
                 }
 
                 Task.Run(() => UpdateArticleScrappingProgress());//Refresh Article Forge Scrapping status.
@@ -565,6 +568,7 @@ namespace UnitTest.Lib
         {
             try
             {
+                String httpPrefix = (((bool)project2UseHttpsMap[domainid]) ? "https" : "http");
                 String lang = CommonModule.project2LanguageMap[domainid].ToString();
                 String hostingDomain = CommonModule.GetDomain(domain, isAWSHost, s3Name, region);
                 String curFolder = Directory.GetCurrentDirectory();
@@ -593,7 +597,7 @@ namespace UnitTest.Lib
                         //}}Stop When update theme
                         String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
                         String articleTemplate = GetArticleTemplate(domain);
-                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{hostingDomain}/{title}", article, articleTemplate, lang);
+                        GenerateArticleHtml(curFolder + "\\" + title, $"{httpPrefix}://{hostingDomain}/{title}", article, articleTemplate, lang);
 
                         //{{Update state
                         if (article.State != 3)
@@ -624,8 +628,9 @@ namespace UnitTest.Lib
 
                 Query query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 QuerySnapshot qSnapshot = await query.GetSnapshotAsync();
+
                 GenerateURLFile(qSnapshot, curFolder, "url.html", domainid, domainMap, isAWSHost, s3Name, region);
-                GenerateSiteMapFile(qSnapshot, curFolder, domainid, $"http://{hostingDomain}", domainMap);
+                GenerateSiteMapFile(qSnapshot, curFolder, domainid, $"{httpPrefix}://{hostingDomain}", domainMap);
             }
             catch (Exception ex)
             {
@@ -637,6 +642,7 @@ namespace UnitTest.Lib
         {
             try
             {
+                String httpPrefix = (((bool)CommonModule.project2UseHttpsMap[domainid]) ? "https" : "http");
                 String lang = CommonModule.project2LanguageMap[domainid].ToString();
                 String hostingDomain = CommonModule.GetDomain(domain, isAWSHost, s3Name, region);
                 String curFolder = Directory.GetCurrentDirectory();
@@ -669,7 +675,7 @@ namespace UnitTest.Lib
                         while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
                         //}}Stop When update theme
                         String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{hostingDomain}/{title}", article, articleTemplate, lang);
+                        GenerateArticleHtml(curFolder + "\\" + title, $"{httpPrefix}://{hostingDomain}/{title}", article, articleTemplate, lang);
 
                         //{{Update state
                         if (article.State == 2)
@@ -693,8 +699,9 @@ namespace UnitTest.Lib
 
                 query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 snapshot = await query.GetSnapshotAsync();
+
                 GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap, isAWSHost, s3Name, region);
-                GenerateSiteMapFile(snapshot, curFolder, domainid, $"http://{hostingDomain}", domainMap);
+                GenerateSiteMapFile(snapshot, curFolder, domainid, $"{httpPrefix}://{hostingDomain}", domainMap);
 
                 if (articleUpdateStateIds.Length > 0)
                 {
@@ -711,6 +718,7 @@ namespace UnitTest.Lib
         {
             try
             {
+                String httpPrefix = (((bool)CommonModule.project2UseHttpsMap[domainid]) ? "https" : "http");
                 String lang = CommonModule.project2LanguageMap[domainid].ToString();
                 String hostingDomain = CommonModule.GetDomain(domain, isAWS, s3Name, region);
                 String[] aids = articleIds.Split(',');
@@ -741,7 +749,8 @@ namespace UnitTest.Lib
                         while (CommonModule.onThemeUpdateCash[domainid] != null && (bool)CommonModule.onThemeUpdateCash[domainid]) Thread.Sleep(500);
                         //}}Stop When update theme
                         String title = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                        GenerateArticleHtml(curFolder + "\\" + title, $"http://{hostingDomain}/{title}", article, articleTemplate, lang);
+
+                        GenerateArticleHtml(curFolder + "\\" + title, $"{httpPrefix}://{hostingDomain}/{title}", article, articleTemplate, lang);
                     }
                 }
 
@@ -757,8 +766,9 @@ namespace UnitTest.Lib
 
                 query = articlesCol.WhereEqualTo("State", 3).OrderBy("Title");
                 snapshot = await query.GetSnapshotAsync();
+
                 GenerateURLFile(snapshot, curFolder, "url.html", domainid, domainMap, isAWS, s3Name, region);
-                GenerateSiteMapFile(snapshot, curFolder, domainid, $"http://{hostingDomain}", domainMap);
+                GenerateSiteMapFile(snapshot, curFolder, domainid, $"{httpPrefix}://{hostingDomain}", domainMap);
             }
             catch (Exception ex)
             {
@@ -962,7 +972,9 @@ namespace UnitTest.Lib
 
                     String orgTitle = article.Title;
                     String titlelink = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
-                    String baseURL = $"http://{hostingDomain}";
+                    String httpPrefix = (((bool)CommonModule.project2UseHttpsMap[article.ProjectId]) ? "https" : "http");
+
+                    String baseURL = $"{httpPrefix}://{hostingDomain}";
                     writer.WriteLine($"<a href='{baseURL}/{titlelink}'>{orgTitle}</a><br/>");
                 }
                 writer.WriteLine("</body>");
@@ -994,7 +1006,7 @@ namespace UnitTest.Lib
             {
                 if (s3Name == null || s3Name.Length == 0) s3Name = domain;
                 if (s3Region == null || s3Region.Length == 0) s3Region = "us-east-2";
-                return $"{s3Name}.s3-website.{s3Region}.amazonaws.com";
+                return $"{s3Name}.s3.{s3Region}.amazonaws.com";
             }
         }
 
@@ -1025,9 +1037,10 @@ namespace UnitTest.Lib
                         {
                             var article = document.ConvertTo<Article>();
                             if (diMap.domainId != article.ProjectId) continue;
+                            String httpPrefix = (((bool)CommonModule.project2UseHttpsMap[article.ProjectId]) ? "https" : "http");
                             String fileName = CommonModule.GetHtmlFileName(article.MetaTitle, article.Title);
                             writer2.WriteLine("   <url>");
-                            writer2.WriteLine($"      <loc>http://{hostingDomain}/{fileName}</loc>");
+                            writer2.WriteLine($"      <loc>{httpPrefix}://{hostingDomain}/{fileName}</loc>");
                             writer2.WriteLine($"      <lastmod>{updateDate}</lastmod>");
                             //always
                             //hourly
@@ -1062,13 +1075,14 @@ namespace UnitTest.Lib
 
                     String OriginalFileName = folder + $"//sitemap-{diMap.domain}.xml";
                     String CompressedFileName = folder + $"//sitemap-{diMap.domain}.xml.gz";
+                    String httpPrefix = (((bool)CommonModule.project2UseHttpsMap[diMap.domainId]) ? "https" : "http");
                     using FileStream originalFileStream = File.Open(OriginalFileName, FileMode.Open);
                     using FileStream compressedFileStream = File.Create(CompressedFileName);
                     using var compressor = new GZipStream(compressedFileStream, CompressionMode.Compress);
                     originalFileStream.CopyTo(compressor);
 
                     writer.WriteLine($"   <sitemap>");
-                    writer.WriteLine($"      <loc>http://{hostingDomain}/sitemap-{diMap.domain}.xml.gz</loc>");
+                    writer.WriteLine($"      <loc>{httpPrefix}://{hostingDomain}/sitemap-{diMap.domain}.xml.gz</loc>");
                     writer.WriteLine($"      <lastmod>{lastMod}</lastmod>");
                     writer.WriteLine($"   </sitemap>");
                     num++;

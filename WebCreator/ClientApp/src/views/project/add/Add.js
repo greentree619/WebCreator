@@ -56,6 +56,9 @@ const Add = (props) => {
   }
 
   const [validated, setValidated] = useState(false)
+  const [useHttps, setUseHttps] = useState(
+    location.state != null && !simpleMode ? location.state.project.useHttps : false,
+  )
   const [projectName, setProjectName] = useState(
     location.state != null && !simpleMode ? location.state.project.name : '',
   )
@@ -156,6 +159,7 @@ const Add = (props) => {
       id: location.state && !simpleMode ? location.state.project.id : '-1',
       name: projectName,
       ip: ipAddress,
+      useHttps: useHttps,
       s3BucketName: s3BucketName,
       s3BucketRegion: s3BucketRegion,
       keyword: searchKeyword,
@@ -411,17 +415,35 @@ const Add = (props) => {
                   <CRow>
                     <CCol>
                       <div className="mb-3">
-                        <CFormLabel htmlFor="exampleFormControlInput1">Domain</CFormLabel>
-                        <CFormInput
-                          type="text"
-                          id="projectNameFormControlInput"
-                          placeholder="www.domain.com"
-                          aria-label="Domain"
-                          required
-                          onChange={(e) => inputChangeHandler(setProjectName, e)}
-                          disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
-                          value={projectName}
-                        />
+                        <CRow>
+                          <CCol>
+                            <CRow>
+                              <CCol>
+                                <CFormLabel htmlFor="projectNameFormControlInput">
+                                  Domain
+                                </CFormLabel>
+                              </CCol>
+                              <CCol className={simpleMode ? 'd-none' : 'mb-3'}>
+                                <CFormCheck id="useHttps" 
+                                  checked={useHttps} 
+                                  onChange={() => setUseHttps(!useHttps)}
+                                  label="Enable https"
+                                  disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                                />
+                              </CCol>
+                            </CRow>
+                            <CFormInput
+                              type="text"
+                              id="projectNameFormControlInput"
+                              placeholder="www.domain.com"
+                              aria-label="Domain"
+                              required
+                              onChange={(e) => inputChangeHandler(setProjectName, e)}
+                              disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}
+                              value={projectName}
+                            />
+                          </CCol>
+                        </CRow>
                       </div>
                       <div className={simpleMode ? 'd-none' : 'mb-3'}>
                         <CFormLabel htmlFor="exampleFormControlInput1">IP Address</CFormLabel>

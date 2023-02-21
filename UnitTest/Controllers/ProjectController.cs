@@ -339,6 +339,7 @@ namespace WebCreator.Controllers
                 S3BucketName = (projectInput.S3BucketName == null ? "" : projectInput.S3BucketName),
                 S3BucketRegion = (projectInput.S3BucketRegion == null ? "" : projectInput.S3BucketRegion),
                 Ip = projectInput.Ip,
+                UseHttps = projectInput.UseHttps,
                 OnScrapping = false,
                 OnAFScrapping = false,
                 OnPublishSchedule = false,
@@ -358,6 +359,7 @@ namespace WebCreator.Controllers
                     DocumentReference docRef = await projectsCol.AddAsync(project);
 
                     CommonModule.project2LanguageMap[docRef.Id] = project.Language;
+                    CommonModule.project2UseHttpsMap[docRef.Id] = project.UseHttps;
                     await addDefaultSchedule(docRef.Id);
                     addOK = true;
                 }
@@ -397,6 +399,7 @@ namespace WebCreator.Controllers
             var project = new Project
             {
                 Id = projectInput.Id,
+                UseHttps = projectInput.UseHttps,
                 Name = projectInput.Name,
                 Ip = projectInput.Ip,
                 S3BucketName = (projectInput.S3BucketName == null ? "" : projectInput.S3BucketName),
@@ -425,6 +428,7 @@ namespace WebCreator.Controllers
                 {
                     { "Name", projectInput.Name },
                     { "Ip", projectInput.Ip },
+                    { "UseHttps", projectInput.UseHttps },
                     { "S3BucketName", project.S3BucketName },
                     { "S3BucketRegion", project.S3BucketRegion },
                     { "Keyword", projectInput.Keyword },
@@ -436,6 +440,7 @@ namespace WebCreator.Controllers
                 };
                 await docRef.UpdateAsync(userUpdate);
                 CommonModule.project2LanguageMap[docRef.Id] = projectInput.Language;
+                CommonModule.project2UseHttpsMap[docRef.Id] = projectInput.UseHttps;
 
                 if (projectInput.Ip.CompareTo("0.0.0.0") == 0)
                     Task.Run(() => new CommonModule().CreateHostBucketThreadAsync(projectInput.Name));

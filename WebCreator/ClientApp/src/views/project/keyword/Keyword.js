@@ -38,8 +38,8 @@ import {saveToLocalStorage, globalRegionMap, loadFromLocalStorage, clearLocalSto
 const Keyword = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
-
   const activeProject = useSelector((state) => state.activeProject)
+
   if (location.search.length > 0) {
     //console.log()
     location.state = { project: activeProject }
@@ -68,11 +68,22 @@ const Keyword = (props) => {
     const reader = new FileReader()
     reader.onload = async (e) => { 
       const text = (e.target.result)
-      //console.log(text)
-      //alert(text.replaceAll('\r\n', ';'))
       var tmpKeyword = text.replaceAll('\r\n', ';')
       if(tmpKeyword[tmpKeyword.length-1] == ';') tmpKeyword = tmpKeyword.substring(0, tmpKeyword.length-1)
-      setSearchKeyword(tmpKeyword);
+      
+      const requestOptions = {
+        method: 'POST',
+        body: tmpKeyword,
+      }
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}project/keywordTranslate?lang=` + location.state.project.language,
+        requestOptions,
+      )
+      let ret = await response.json()
+      if (response.status === 200 && ret) {
+        setSearchKeyword(ret.data);
+      }
+      else toast.error('Keyword Translate Error!', alertConfirmOption);
     };
     reader.readAsText(e.target.files[0])
   }
@@ -82,11 +93,22 @@ const Keyword = (props) => {
     const reader = new FileReader()
     reader.onload = async (e) => { 
       const text = (e.target.result)
-      //console.log(text)
-      //alert(text.replaceAll('\r\n', ';'))
       var tmpKeyword = text.replaceAll('\r\n', ';')
       if(tmpKeyword[tmpKeyword.length-1] == ';') tmpKeyword = tmpKeyword.substring(0, tmpKeyword.length-1)
-      setFileSearchKeyword(tmpKeyword);
+      
+      const requestOptions = {
+        method: 'POST',
+        body: tmpKeyword,
+      }
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}project/keywordTranslate?lang=` + location.state.project.language,
+        requestOptions,
+      )
+      let ret = await response.json()
+      if (response.status === 200 && ret) {
+        setFileSearchKeyword(ret.data);
+      }
+      else toast.error('Keyword Translate Error!', alertConfirmOption);
     };
     reader.readAsText(e.target.files[0])
   }

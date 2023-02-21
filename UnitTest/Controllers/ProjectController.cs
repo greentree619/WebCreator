@@ -303,6 +303,29 @@ namespace WebCreator.Controllers
             return Ok(true);
         }
 
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
+        [DisableRequestSizeLimit]
+        [HttpPost("keywordTranslate")]
+        [DisableFormValueModelBinding]
+        public async Task<IActionResult> KeywordTranslate(String? lang= "EN-GB")
+        {
+            String keywordFile = "";
+            try
+            {
+                using (StreamReader reader
+                  = new StreamReader(Request.Body, Encoding.UTF8))
+                {
+                    keywordFile = await reader.ReadToEndAsync();
+                }
+
+                keywordFile = await CommonModule.deepLTranslate.Translate(keywordFile, lang.ToUpper());
+            }
+            catch (Exception ex)
+            {
+            }
+            return Ok(new { data = keywordFile });
+        }
+
         [HttpPost]
         public async Task<ActionResult> AddProjectAsync([FromBody] Project projectInput)
         {

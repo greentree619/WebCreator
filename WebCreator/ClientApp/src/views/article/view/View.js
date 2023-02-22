@@ -28,6 +28,8 @@ import plugins from 'suneditor/src/plugins'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
+import openAIImageGallery  from 'src/plugins/OpenAIImageGallery'
+import openAIVideoLibrary  from 'src/plugins/OpenAIVideoLibrary'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux'
@@ -247,7 +249,7 @@ const View = (props) => {
                 }}
                 setOptions={{
                     height: 200,
-                    plugins: {...plugins, pixabayImageGallery},
+                    plugins: {...plugins, pixabayImageGallery, openAIImageGallery, openAIVideoLibrary},
                     katex: katex,
                     //imageGalleryUrl: "",
                     buttonList: [
@@ -261,7 +263,7 @@ const View = (props) => {
                         ['outdent', 'indent'],
                         ['align', 'horizontalRule', 'list', 'lineHeight'],
                         ['table', 'link', 'image', 'video', 'audio' ,'math'], // You must add the 'katex' library at options to use the 'math' plugin.
-                        ['pixabayImageGallery'], // You must add the "imageGalleryUrl".
+                        ['pixabayImageGallery', 'openAIImageGallery', 'openAIVideoLibrary'], // You must add the "imageGalleryUrl".
                         ['fullScreen', 'showBlocks', 'codeView'],
                         ['preview', 'print'],
                         ['save', 'template'],
@@ -280,7 +282,7 @@ const View = (props) => {
                 }}
                 setOptions={{
                     height: 200,
-                    plugins: {...plugins, pixabayImageGallery},
+                    plugins: {...plugins, pixabayImageGallery, openAIImageGallery, openAIVideoLibrary},
                     katex: katex,
                     //imageGalleryUrl: "",
                     buttonList: [
@@ -294,7 +296,7 @@ const View = (props) => {
                         ['outdent', 'indent'],
                         ['align', 'horizontalRule', 'list', 'lineHeight'],
                         ['table', 'link', 'image', 'video', 'audio' ,'math'], // You must add the 'katex' library at options to use the 'math' plugin.
-                        ['pixabayImageGallery'], // You must add the "imageGalleryUrl".
+                        ['pixabayImageGallery', 'openAIImageGallery', 'openAIVideoLibrary'], // You must add the "imageGalleryUrl".
                         ['fullScreen', 'showBlocks', 'codeView'],
                         ['preview', 'print'],
                         ['save', 'template'],

@@ -38,6 +38,8 @@ const context =  [
   "/buildsync/sync",
   "/setting/afsetting",
   "/setting/openAISetting",
+  "OpenAI/image",
+  "OpenAI/video",
 ];
 
 module.exports = function(app) {

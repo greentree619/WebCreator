@@ -20,6 +20,9 @@ using Amazon.S3;
 using Amazon;
 using AWSUtility;
 using Amazon.S3.Model;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 namespace UnitTest.Lib
 {
@@ -198,12 +201,6 @@ namespace UnitTest.Lib
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
                     question = await CommonModule.deepLTranslate.Translate(question);
-                }
-
-                String ret = CommonModule.GetImageFromOpenAI(question);
-                if (ret.Length > 0)
-                {
-                    articleContent = $"<img src=\"{ret}\" alt=\"{orgLangQuetion}\" width=\"1024\" height=\"1024\">";
                 }
 
                 var result = await openAI.Completions.CreateCompletionAsync(
@@ -1359,6 +1356,81 @@ namespace UnitTest.Lib
             { }
 
             return ret;
+        }
+
+        public static List<Hashtable> GetImageFromOpenAI(String question, int n, String thumbFolder)
+        {
+            String ret = "";
+            var list = new List<Hashtable>();
+            HttpWebRequest request = WebRequest.CreateHttp("https://api.openai.com/v1/images/generations");
+            request.Method = "Post";
+            request.ContentType = "application/json";
+            request.Headers.Add("Authorization", "Bearer " + Config.OpenAIKey);
+
+            string json = $"{{\"prompt\": \"{question}\",\"n\": {n},\"size\": \"1024x1024\"}}";
+            using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+            {
+                streamWriter.Write(json);
+                streamWriter.Flush();
+                streamWriter.Close();
+            }
+
+            try
+            {
+                string sResult = "";
+                using (WebResponse response = request.GetResponse())
+                using (var streamReader = new StreamReader(response.GetResponseStream()))
+                    sResult = (streamReader.ReadToEnd());
+                dynamic jResult = JsonConvert.DeserializeObject(sResult);
+                JArray imgUrls = (JArray)jResult.data;
+                foreach (JObject imgUrl in imgUrls)
+                {
+                    Hashtable hashTbl = new Hashtable();
+                    hashTbl["url"] = imgUrl["url"].ToString();
+                    using (WebClient wc = new WebClient())
+                    {
+                        using (Stream s = wc.OpenRead( imgUrl["url"].ToString() ))
+                        {
+                            using (Bitmap bmp = new Bitmap(s))
+                            {
+                                String fileName = question.Trim().Replace(" ", "").Replace("?", "");
+                                fileName = $"{thumbFolder}\\{fileName}.jpg";
+                                bmp.Save(fileName);
+                                hashTbl["thumb"] = ThumbnailBase64Image(bmp, 256, 256);
+                            }
+                        }
+                    }
+                    list.Add( hashTbl );
+                }
+            }
+            catch (WebException e)
+            { }
+
+            return list;
+        }
+
+        public static String ThumbnailBase64Image(Bitmap imgBitmap, int width, int height)
+        {
+            String SigBase64 = "";
+            Bitmap srcBmp = imgBitmap;
+            float ratio = srcBmp.Width / srcBmp.Height;
+            SizeF newSize = new SizeF(width, height * ratio);
+            Bitmap target = new Bitmap((int)newSize.Width, (int)newSize.Height);
+            using (Graphics graphics = Graphics.FromImage(target))
+            {
+                graphics.CompositingQuality = CompositingQuality.HighSpeed;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.DrawImage(srcBmp, 0, 0, newSize.Width, newSize.Height);
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    target.Save(memoryStream, ImageFormat.Jpeg);
+                    byte[] byteImage = memoryStream.ToArray();
+                    SigBase64 = Convert.ToBase64String(byteImage); // Get Base64
+                }
+            }
+
+            return SigBase64;
         }
     }
 }

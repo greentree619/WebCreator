@@ -25,7 +25,7 @@ const openAIVideoLibrary = {
   title: "OpenAI Videos",
   listClass: 'se-image-list',
   innerHTML: `
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="30 30 150 150"><g><path d="M152.775,120.548V51.651c0-12.271-9.984-22.254-22.254-22.254H43.727c-12.271,0-22.254,9.983-22.254,22.254v68.896c0,12.27,9.983,22.254,22.254,22.254h86.795C142.791,142.802,152.775,132.817,152.775,120.548z M36.394,51.651c0-4.042,3.291-7.333,7.333-7.333h86.795c4.042,0,7.332,3.291,7.332,7.333v23.917l-14.938-17.767c-1.41-1.678-3.487-2.649-5.68-2.658h-0.029c-2.184,0-4.255,0.954-5.674,2.613L76.709,98.519l-9.096-9.398c-1.427-1.474-3.392-2.291-5.448-2.273c-2.052,0.025-4.004,0.893-5.396,2.4L36.394,111.32V51.651z M41.684,127.585l20.697-22.416l9.312,9.622c1.461,1.511,3.489,2.334,5.592,2.27c2.101-0.066,4.075-1.013,5.44-2.612l34.436-40.308l20.693,24.613v21.794c0,4.042-3.29,7.332-7.332,7.332H43.727C43.018,127.88,42.334,127.775,41.684,127.585z M182.616,152.5V75.657c0-4.12-3.34-7.46-7.461-7.46c-4.119,0-7.46,3.34-7.46,7.46V152.5c0,4.112-3.347,7.46-7.461,7.46h-94c-4.119,0-7.46,3.339-7.46,7.459c0,4.123,3.341,7.462,7.46,7.462h94C172.576,174.881,182.616,164.841,182.616,152.5z"/></g></svg>
+  <svg viewBox="30 30 150 150" xmlns="http://www.w3.org/2000/svg"> <g>  <title>Layer 1</title>  <rect stroke="#000" id="svg_2" height="58" width="179" y="120.99999" x="0.99999" stroke-width="0" fill="#ffffff"/>  <text transform="matrix(2.95354 0 0 1.58398 11.6123 -84.457)" stroke="#000" font-weight="bold" xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="55" id="svg_3" y="166.54228" x="-4.00001" stroke-width="0" fill="#000000">AI</text>  <g stroke="null">   <g stroke="null">    <path stroke="null" transform="translate(-4.41 -4.35)" d="m153.34235,47.84666l0,64.9873l-29.63541,-11.80903l0,9.02601l-88.7558,0l0,-59.19561l88.83102,0l0,9.25166l15.04336,-6.09256l15.04336,-6.16778l-0.52652,0zm-41.44445,50.69611l0,0l0,-33.54668l0,0l0,-2.33172l-64.9873,0l0,35.87841l65.21295,0l-0.22565,0zm29.63541,-2.78302l0,-30.08671l-17.82638,7.52168l0,15.04336l8.87558,3.61041l8.9508,3.61041l0,0.30087zm-80.03066,-50.92176a20.83505,20.83505 0 0 1 -20.68462,-20.68462a20.75983,20.75983 0 0 1 41.44445,0a20.91027,20.91027 0 0 1 -20.75983,20.68462zm0,-29.5602a9.10123,9.10123 0 0 0 -6.24299,2.63259a8.64993,8.64993 0 0 0 -2.55737,6.31821a8.19863,8.19863 0 0 0 2.55737,6.61908a8.64993,8.64993 0 0 0 6.69429,2.10607a8.4995,8.4995 0 0 0 8.34906,-8.72515a8.72515,8.72515 0 0 0 -8.80036,-8.9508zm44.3779,29.5602a17.60073,17.60073 0 0 1 -12.5612,-5.11474a17.29986,17.29986 0 0 1 -5.11474,-12.5612a17.67594,17.67594 0 0 1 30.08671,-12.5612a17.82638,17.82638 0 0 1 0,25.12241a17.52551,17.52551 0 0 1 -12.63642,5.11474l0.22565,0zm0,-23.61807a5.64126,5.64126 0 1 0 4.13692,1.65477a5.49083,5.49083 0 0 0 -4.13692,-1.65477z"/>   </g>  </g> </g></svg>
   `,
   buttonClass: "",
   add: function(core) {
@@ -62,11 +62,11 @@ const openAIVideoLibrary = {
             </svg>
           </button>
           <span class="se-modal-title">
-            ${lang.dialogBox.imageBox.title}
+            ${lang.dialogBox.videoBox.title}
           </span>
           <div class="se-dialog-form">
               <div class="se-dialog-form-files" style="padding-left: 20px;padding-right: 20px;">
-                <input id="pixabayKeyword" class="se-input-form se-input-url pixabayKeyword" type="text" placeholder="">
+                <input id="openAIKeyword" class="se-input-form se-input-url openAIKeyword" type="text" placeholder="">
                   <button type="button" data-command="update" class="se-btn se-dialog-files-edge-button _se_bookmark_button">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.73 15.75"><g><path d="M19.86,19.21a1,1,0,0,0,.28-.68,1,1,0,0,0-.28-.7L13,10.93a1,1,0,0,0-.7-.28,1,1,0,0,0-.68,1.65l6.9,6.9a1,1,0,0,0,.69.29.93.93,0,0,0,.69-.28ZM9.19,8.55a3,3,0,0,0,1.68,0,14.12,14.12,0,0,0,1.41-.32A11.26,11.26,0,0,0,10.8,7.06c-.56-.36-.86-.56-.91-.58S10,5.91,10,5.11s0-1.26-.15-1.37a4.35,4.35,0,0,0-1.19.71c-.53.4-.81.62-.87.68a9,9,0,0,0-2-.6,6.84,6.84,0,0,0-.76-.09s0,.27.08.77a8.6,8.6,0,0,0,.61,2q-.09.09-.69.87a3.59,3.59,0,0,0-.68,1.17c.12.17.57.23,1.36.15S7,9.26,7.15,9.23s.21.36.57.91a10.49,10.49,0,0,0,1.14,1.48c0-.1.14-.57.31-1.4a3,3,0,0,0,0-1.67Z" transform="translate(-4.41 -3.74)"/></g></svg>
                   </button>
@@ -166,7 +166,7 @@ const openAIVideoLibrary = {
 
     this.context.openAIVideoLibrary._xmlHttp.open(
       "get",
-      this.context.option.imageGalleryLoadURL,
+      this.context.option.openAIVideoLoadURL,
       true
     );
 
@@ -221,10 +221,10 @@ const openAIVideoLibrary = {
       case "update":
       {
         const modal = this.context.openAIVideoLibrary.modal;
-        const pixabayKeyword = modal.querySelector(".pixabayKeyword");
-        //console.log(pixabayKeyword.value.replaceAll(' ', "+").replaceAll('?', ''));
-        const keyword = pixabayKeyword.value.replaceAll(' ', "+").replaceAll('?', '');
-        this.context.option.imageGalleryLoadURL = 'https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=' + keyword + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
+        const openAIKeyword = modal.querySelector(".openAIKeyword");
+        //console.log(openAIKeyword.value.replaceAll(' ', "+").replaceAll('?', ''));
+        const keyword = openAIKeyword.value.replaceAll(' ', "+").replaceAll('?', '');
+        this.context.option.openAIVideoLoadURL = `${process.env.REACT_APP_SERVER_URL}openAI/video/10?prompt=${keyword}`;
         this.plugins.openAIVideoLibrary.loadImages.call(this, this.context);
         break;
       }

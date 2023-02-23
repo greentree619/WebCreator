@@ -198,6 +198,7 @@ const pixabayImageGallery = {
     this.plugins.dialog.close.call(this);
   },
   open: function() {
+    console.log(this.currentControllerName)
     this.plugins.dialog.open.call(
       this,
       "pixabayImageGallery",

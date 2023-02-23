@@ -74,17 +74,22 @@ const View = (props) => {
       {
         setMetaTitle(data.data.title + "-" + activeProject.contactInfo.brandname);
       }
-
       setArticle(data.data)
+
+      let q = data.data.title.replaceAll(' ', '+').replaceAll('?', '')
+      console.log(data.data.title, q)
+      let openAIKeyword = data.data.title.replaceAll('?', '')
+      console.log(data.data.title, openAIKeyword)
+      setPixabayURL()
+      footEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
+      bodyEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
+      footEditor.current.core.options.openAIImageLoadURL = `${process.env.REACT_APP_SERVER_URL}openAI/image/10?prompt=${openAIKeyword}`;
+      bodyEditor.current.core.options.openAIImageLoadURL = `${process.env.REACT_APP_SERVER_URL}openAI/image/10?prompt=${openAIKeyword}`;
+      footEditor.current.core.options.openAIVideoLoadURL = `${process.env.REACT_APP_SERVER_URL}openAI/video/10?prompt=${openAIKeyword}`;
+      bodyEditor.current.core.options.openAIVideoLoadURL = `${process.env.REACT_APP_SERVER_URL}openAI/video/10?prompt=${openAIKeyword}`;
+      //console.log(footEditor.current.core.options.imageGalleryLoadURL)
     }
     getFetch()
-
-    let q = title.replaceAll(' ', '+').replaceAll('?', '')
-    console.log(q, title)
-    setPixabayURL()
-    footEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
-    bodyEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
-    console.log(footEditor.current.core.options.imageGalleryLoadURL)
   }, [])
 
   const updateContent = async () => {
@@ -263,7 +268,7 @@ const View = (props) => {
                         ['outdent', 'indent'],
                         ['align', 'horizontalRule', 'list', 'lineHeight'],
                         ['table', 'link', 'image', 'video', 'audio' ,'math'], // You must add the 'katex' library at options to use the 'math' plugin.
-                        ['pixabayImageGallery', 'openAIImageGallery', 'openAIVideoLibrary'], // You must add the "imageGalleryUrl".
+                        ['pixabayImageGallery', 'openAIImageGallery'/*, 'openAIVideoLibrary'*/], // You must add the "imageGalleryUrl".
                         ['fullScreen', 'showBlocks', 'codeView'],
                         ['preview', 'print'],
                         ['save', 'template'],
@@ -296,7 +301,7 @@ const View = (props) => {
                         ['outdent', 'indent'],
                         ['align', 'horizontalRule', 'list', 'lineHeight'],
                         ['table', 'link', 'image', 'video', 'audio' ,'math'], // You must add the 'katex' library at options to use the 'math' plugin.
-                        ['pixabayImageGallery', 'openAIImageGallery', 'openAIVideoLibrary'], // You must add the "imageGalleryUrl".
+                        ['pixabayImageGallery', 'openAIImageGallery'/*, 'openAIVideoLibrary'*/], // You must add the "imageGalleryUrl".
                         ['fullScreen', 'showBlocks', 'codeView'],
                         ['preview', 'print'],
                         ['save', 'template'],

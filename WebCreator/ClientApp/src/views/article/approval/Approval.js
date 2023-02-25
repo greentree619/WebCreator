@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useEffect, Component } from 'react'
 import {
   CCard,
   CCardHeader,
@@ -558,13 +558,16 @@ ApprovalBase.propTypes = {
 const Approval = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
-  dispatch({ type: 'set', activeTab: 'article_approval' })
 
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
     domainName: new URLSearchParams(location.search).get('domainName'), 
     domainIp: new URLSearchParams(location.search).get('domainIp') }
   }
+
+  useEffect(() => {
+    dispatch({ type: 'set', activeTab: 'article_approval' })
+  }, [])
   //console.log(location.state)
   //console.log(location.search)
   //console.log(new URLSearchParams(location.search).get('domainId'))

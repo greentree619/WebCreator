@@ -173,13 +173,13 @@ const Setting = (props) => {
                   (ID of the model to use. You can use the List models API to see all of your available models, or see our Model overview for descriptions of them.)
                 </CCol>
                 <CCol className='col-3' xs>
-                  <CFormRange min={0.0} max={1.0} step={0.1} value={temperature} defaultValue={temperature} onChange={(obj)=>{setTemperature(obj.target.value)}} id="temperature" label={"Temperature (" + temperature + ")"} />
+                  <CFormRange min={0.0} max={1.0} step={0.1} value={temperature} onChange={(obj)=>{setTemperature(obj.target.value)}} id="temperature" label={"Temperature (" + temperature + ")"} />
                   <br/>
                   (What sampling temperature to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.
 We generally recommend altering this or top_p but not both)
                 </CCol>
                 <CCol className='col-3' xs>
-                  <CFormRange min={0.0} max={1.0} step={0.1} value={topP} defaultValue={topP} onChange={(obj)=>{setTopP(obj.target.value)}} id="topP" label={"TopP (" + topP + ")"} />
+                  <CFormRange min={0.0} max={1.0} step={0.1} value={topP} onChange={(obj)=>{setTopP(obj.target.value)}} id="topP" label={"TopP (" + topP + ")"} />
                   <br/>
                   (An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.
 We generally recommend altering this or temperature but not both.)
@@ -190,24 +190,24 @@ We generally recommend altering this or temperature but not both.)
               <CRow>
                 <CCol className='col-3' xs>
                   <CFormLabel htmlFor="nVariation">N</CFormLabel>
-                  <input type="number" className="form-control" defaultValue={1} onChange={(e) => inputChangeHandler(setN, e)} value={n} min={1} max={100} required></input>
+                  <input type="number" className="form-control" onChange={(e) => inputChangeHandler(setN, e)} value={n} min={1} max={100} required></input>
                   (How many completions to generate for each prompt.
 
 Note: Because this parameter generates many completions, it can quickly consume your token quota. Use carefully and ensure that you have reasonable settings for max_tokens and stop.)
                 </CCol>
                 <CCol className='col-3' xs>
                   <CFormLabel htmlFor="maxTokensVariation">Max Tokens</CFormLabel>
-                  <input type="number" className="form-control" defaultValue={500} onChange={(e) => inputChangeHandler(setMaxTokens, e)} value={maxTokens} min={1} max={2000} required></input>
+                  <input type="number" className="form-control" onChange={(e) => inputChangeHandler(setMaxTokens, e)} value={maxTokens} min={1} max={2000} required></input>
                   (The maximum number of tokens to generate in the completion.
 The token count of your prompt plus max_tokens cannot exceed the model&apos;s context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096))
                 </CCol>
                 <CCol className='col-3' xs>
-                  <CFormRange min={-2.0} max={2.0} step={0.1} value={presencePenalty} defaultValue={presencePenalty} onChange={(obj)=>{setPresencePenalty(obj.target.value)}} id="presencePenalty" label={"Presence Penalty (" + presencePenalty + ")"} />
+                  <CFormRange min={-2.0} max={2.0} step={0.1} value={presencePenalty} onChange={(obj)=>{setPresencePenalty(obj.target.value)}} id="presencePenalty" label={"Presence Penalty (" + presencePenalty + ")"} />
                   <br/>
                   (Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model&apos;s likelihood to talk about new topics.)
                 </CCol>
                 <CCol className='col-3' xs>
-                  <CFormRange min={-2.0} max={2.0} step={0.1} value={frequencyPenalty} defaultValue={frequencyPenalty} onChange={(obj)=>{setFrequencyPenalty(obj.target.value)}} id="frequencyPenalty" label={"frequency Penalty (" + frequencyPenalty + ")"} />
+                  <CFormRange min={-2.0} max={2.0} step={0.1} value={frequencyPenalty} onChange={(obj)=>{setFrequencyPenalty(obj.target.value)}} id="frequencyPenalty" label={"frequency Penalty (" + frequencyPenalty + ")"} />
                   <br/>
                   (Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model&apos;s likelihood to repeat the same line verbatim.)
                 </CCol>

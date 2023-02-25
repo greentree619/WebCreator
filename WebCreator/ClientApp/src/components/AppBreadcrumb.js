@@ -23,6 +23,7 @@ import { Outlet, Link } from 'react-router-dom'
 
 const AppBreadcrumb = () => {
   let refreshIntervalId = 0
+  const dispatch = useDispatch()
   const currentLocation = useLocation().pathname
   const activeDomainName = useSelector((state) => state.activeDomainName)
   const activeDomainIp = useSelector((state) => state.activeDomainIp)
@@ -72,11 +73,11 @@ const AppBreadcrumb = () => {
         const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${activeDomainId}`, requestOptions)
         let ret = await response.json()
         if (response.status === 200 && ret) {
-          //console.log(ret);
           setIsOnScrapping(ret.serpapi);
           setIsOnAFScrapping(ret.afapi);
           setIsOnPublish(ret.publish);
           setScrappingMode(ret.scrappingScheduleMode);
+          dispatch({ type: 'set', isOnScrapping: ret.serpapi, isOnAFScrapping: ret.afapi, isOnPublish: ret.publish })
         }
       }
       else {
@@ -84,6 +85,7 @@ const AppBreadcrumb = () => {
         setIsOnAFScrapping(false);
         setIsOnPublish(false);
         setScrappingMode(0);
+        dispatch({ type: 'set', isOnScrapping: false, isOnAFScrapping: false, isOnPublish: false })
       }
     } catch (e) {
       console.log(e);
@@ -185,15 +187,6 @@ const AppBreadcrumb = () => {
                 )}
               </CHeaderNav>
             </CBreadcrumb>
-          </CCol>
-          <CCol xs="auto">
-            <CBadge color={activeZoneStatus == 'active' ? "success" : "dark"} shape="rounded-pill">{activeDomainName}</CBadge>
-            &nbsp;
-            <CBadge color={isOnScrapping ? "success" : "dark"} shape="rounded-pill">Query Scrap</CBadge>
-            &nbsp;
-            <CBadge color={isOnAFScrapping ? "success" : "dark"} shape="rounded-pill">Scrapping</CBadge>
-            &nbsp;
-            <CBadge color={isOnPublish ? "success" : "dark"} shape="rounded-pill">Publish</CBadge>
           </CCol>
         </CRow>
       </CContainer>

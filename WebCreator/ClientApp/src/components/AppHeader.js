@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
@@ -10,6 +10,9 @@ import {
   CHeaderToggler,
   CNavLink,
   CNavItem,
+  CCol,
+  CBadge,
+
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilBell, cilEnvelopeOpen, cilList, cilMenu } from '@coreui/icons'
@@ -27,6 +30,13 @@ const AppHeader = () => {
   const activeZoneId = useSelector((state) => state.activeZoneId)
   const activeZoneName = useSelector((state) => state.activeZoneName)
   const activeZoneStatus = useSelector((state) => state.activeZoneStatus)
+  const isOnScrapping= useSelector((state) => state.isOnScrapping)
+  const isOnAFScrapping= useSelector((state) => state.isOnAFScrapping)
+  const isOnPublish= useSelector((state) => state.isOnPublish)
+
+  useEffect(() => {
+    console.log("AppHeader ->", isOnScrapping, isOnAFScrapping, isOnPublish, activeDomainName)
+  }, [isOnScrapping, isOnAFScrapping, isOnPublish, activeDomainName])
 
   return (
     <CHeader position="sticky" className="mb-4">
@@ -46,12 +56,12 @@ const AppHeader = () => {
               Dashboard
             </CNavLink>
           </CNavItem>
-          <CNavItem>
+          {/* <CNavItem>
             <CNavLink href="#">Users</CNavLink>
           </CNavItem>
           <CNavItem>
             <CNavLink href="#">Settings</CNavLink>
-          </CNavItem>
+          </CNavItem> */}
           <CNavItem>
           <CNavLink href={'#/article/setting/?domainId=' + activeDomainId}>
             AF Setting
@@ -64,12 +74,23 @@ const AppHeader = () => {
         </CNavItem>
         </CHeaderNav>
         <CHeaderNav>
-          <CNavItem>
-            <CNavLink href="#">
+        {activeDomainName.length > 0 && (
+          <CCol xs="auto">
+            <CBadge color={activeZoneStatus == 'active' ? "success" : "dark"} shape="rounded-pill">{activeDomainName}</CBadge>
+            &nbsp;
+            <CBadge color={isOnScrapping ? "success" : "dark"} shape="rounded-pill">Query Scrap</CBadge>
+            &nbsp;
+            <CBadge color={isOnAFScrapping ? "success" : "dark"} shape="rounded-pill">Scrapping</CBadge>
+            &nbsp;
+            <CBadge color={isOnPublish ? "success" : "dark"} shape="rounded-pill">Publish</CBadge>
+          </CCol>
+          )}
+          {/* <CNavItem>
+            <CNavLink href={void(0)}>
               <CIcon icon={cilBell} size="lg" />
             </CNavLink>
-          </CNavItem>
-          <CNavItem>
+          </CNavItem> */}
+          {/* <CNavItem>
             <CNavLink href="#">
               <CIcon icon={cilList} size="lg" />
             </CNavLink>
@@ -78,7 +99,7 @@ const AppHeader = () => {
             <CNavLink href="#">
               <CIcon icon={cilEnvelopeOpen} size="lg" />
             </CNavLink>
-          </CNavItem>
+          </CNavItem> */}
         </CHeaderNav>
         <CHeaderNav className="ms-3">
           <AppHeaderDropdown />

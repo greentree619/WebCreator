@@ -171,7 +171,7 @@ const Setting = (props) => {
                   (enable shuffle paragraphs or not. It can be either 0(disabled) or 1(enabled). The default value is 0.)
                 </CCol>
                 <CCol className='col-3' xs>
-                  <CFormRange min={0.00} max={1.00} step={0.01} value={video} defaultValue={video} onChange={(obj)=>{setVideo(obj.target.value)}} id="videoRange" label={"video Range (" + video + ")"} />
+                  <CFormRange min={0.00} max={1.00} step={0.01} value={video} onChange={(obj)=>{setVideo(obj.target.value)}} id="videoRange" label={"video Range (" + video + ")"} />
                   <br/>
                   (the probability of adding a video into the article. It should be a float number from 0.00 to 1.00. The default value is 0.00.)
                 </CCol>
@@ -207,7 +207,7 @@ const Setting = (props) => {
                   (It can be either 0 or 1. If it is set to be 0, the article generated is without titles and headings. The default value is 0.)
                 </CCol>
                 <CCol className='col-3' xs>
-                  <CFormRange min={0.00} max={1.00} step={0.01} value={image} defaultValue={image} onChange={(obj)=>{setImage(obj.target.value)}} id="imageRange" label={"Image Range (" + image  + ")"} />
+                  <CFormRange min={0.00} max={1.00} step={0.01} value={image} onChange={(obj)=>{setImage(obj.target.value)}} id="imageRange" label={"Image Range (" + image  + ")"} />
                   <br/>
                   (the probability of adding an image into the article. It should be a float number from 0.00 to 1.00. The default value is 0.00.)
                 </CCol>

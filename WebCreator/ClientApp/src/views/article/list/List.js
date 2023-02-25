@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useEffect, Component } from 'react'
 import {
   CCard,
   CCardHeader,
@@ -575,7 +575,6 @@ const List = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
   const activeProject = useSelector((state) => state.activeProject)
-  dispatch({ type: 'set', activeTab: 'article_list' })
   
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
@@ -583,6 +582,10 @@ const List = (props) => {
     domainIp: new URLSearchParams(location.search).get('domainIp'),
     project: activeProject }
   }
+
+  useEffect(() => {
+    dispatch({ type: 'set', activeTab: 'article_list' })
+  }, [])
   //console.log(location.state)
   //console.log(location.search)
   //console.log(new URLSearchParams(location.search).get('domainId'))

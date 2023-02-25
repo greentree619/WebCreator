@@ -15,6 +15,9 @@ import {
   cilWindow,
   cilPaintBucket,
   cilNoteAdd,
+  cilCloudUpload,
+  cilStorage,
+  cilSync,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -300,20 +303,20 @@ const _nav = [
     component: CNavItem,
     name: 'Create Website',
     to: '/project/add',
-    icon: <CIcon icon={cilNoteAdd} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'All Websites',
     to: '/project/list',
-    icon: <CIcon icon={cilWindow} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilStorage} customClassName="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: 'All Articles',
-    to: '/article/list',
-    icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'All Articles',
+  //   to: '/article/list',
+  //   icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
+  // },
   {
     component: CNavTitle,
     name: 'Domain Management',
@@ -322,14 +325,14 @@ const _nav = [
     component: CNavItem,
     name: 'Zone',
     to: '/cloudflare/zone/',
-    icon: <CIcon icon={cilNoteAdd} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilCloudUpload} customClassName="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: 'DNS Records',
-    to: '/cloudflare/dns',
-    icon: <CIcon icon={cilWindow} customClassName="nav-icon" />,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'DNS Records',
+  //   to: '/cloudflare/dns',
+  //   icon: <CIcon icon={cilWindow} customClassName="nav-icon" />,
+  // },
   {
     component: CNavItem,
     name: 'AWS S3 Bucket',
@@ -344,7 +347,7 @@ const _nav = [
     component: CNavItem,
     name: 'Build & SYNC',
     to: '/build/build/',
-    icon: <CIcon icon={cilNoteAdd} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilSync} customClassName="nav-icon" />,
   },
   ...coreUINav,
 ]

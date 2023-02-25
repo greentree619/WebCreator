@@ -33,8 +33,7 @@ import { alertConfirmOption } from 'src/utility/common'
 const View = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
-  dispatch({ type: 'set', activeTab: 'schedule_view' })
-
+  
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'),
                       isOnAFScrapping: new URLSearchParams(location.search).get('isOnAFScrapping'),
@@ -103,9 +102,10 @@ const View = (props) => {
     }
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/publishSchedule/${domainId}`, requestOptions)
     let ret = await response.json()
-    if (response.status === 200 && ret) {
+    if (response.status === 200 && ret && ret.data) {
       //console.log(ret, ret.data.publishJustNowCount);
       //console.log(unitLabelMap[ret.data.publishSpanUnit], ret.data.publishSpanUnit);
+      console.log("schedule ret.data=>", ret.data);
       location.state.publishScheduleId = ret.data.id;
       setPublishCountForNow(ret.data.justNowCount);
       setPublishEachCount(ret.data.eachCount);
@@ -116,6 +116,8 @@ const View = (props) => {
   }
 
   useEffect(() => {
+    dispatch({ type: 'set', activeTab: 'schedule_view' })
+
     if(location.state.projectid != null)
     {
       console.log("useEffect--->" + location.state.projectid);

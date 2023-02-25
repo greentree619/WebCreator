@@ -61,7 +61,9 @@ const Keyword = (props) => {
   const [alertMsg, setAlertMsg] = useState('')
   const [activeKey, setActiveKey] = useState(1)
 
-  dispatch({ type: 'set', activeTab: "project_keyword" })
+  useEffect(() => {
+    dispatch({ type: 'set', activeTab: "project_keyword" })
+  }, [])
 
   const readKeyFile = async (e) => {
     e.preventDefault()

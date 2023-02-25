@@ -58,8 +58,11 @@ import avatar6 from 'src/assets/images/avatars/6.jpg'
 
 import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
+import Truncate from 'react-truncate'
+import { useDispatch, useSelector } from 'react-redux'
 
 const Dashboard = () => {
+  const dispatch = useDispatch()
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
   const [projects, setProjects] = useState([])
 
@@ -94,6 +97,7 @@ const Dashboard = () => {
   ]
 
   useEffect(() => {
+    dispatch({ type: 'set', activeDomainName: '', activeProject: {}, activeDomainId: '' })
     getAllProject()
   }, [])
 

@@ -45,9 +45,7 @@ const Article = (props) => {
   const [alertMsg, setAlertMsg] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
   const navigate = useNavigate()
-
   const dispatch = useDispatch()
-  dispatch({ type: 'set', activeTab: 'theme_article' })
 
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
@@ -56,6 +54,7 @@ const Article = (props) => {
   }
 
   useEffect(() => {
+    dispatch({ type: 'set', activeTab: 'theme_article' })
   }, [])
 
   async function uploadHandler() {

@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useEffect, Component } from 'react'
 import {
   CCard,
   CCardHeader,
@@ -178,7 +178,6 @@ DnsBase.propTypes = {
 const Dns = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
-  dispatch({ type: 'set', activeTab: 'cloudflare_dns' })
 
   //console.log(location.state)
   if (location.state == null && location.search.length > 0) {
@@ -187,6 +186,10 @@ const Dns = (props) => {
       zoneName: new URLSearchParams(location.search).get('domainName'),
    }
   }
+
+  useEffect(() => {
+    dispatch({ type: 'set', activeTab: 'cloudflare_dns' })
+  }, [])
 
   return <DnsBase location={location} {...props} />
 }

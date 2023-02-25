@@ -10,6 +10,9 @@ const initialState = {
   activeZoneStatus: '',
   activeProject: {},
   activeTab: 'project_add',
+  isOnScrapping: false,
+  isOnAFScrapping: false,
+  isOnPublish: false,
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {

@@ -13,6 +13,8 @@ const initialState = {
   isOnScrapping: false,
   isOnAFScrapping: false,
   isOnPublish: false,
+  curProjectArticleList: [],
+  isLoadingAllArticle: false,
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {

@@ -24,7 +24,7 @@ import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useDispatch, useSelector } from 'react-redux'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption } from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray } from 'src/utility/common.js'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -524,15 +524,20 @@ class ApprovalBase extends Component {
       checkedItem: {},
     })
 
-    const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
-    const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}article/` +
-        (projectId != '' ? projectId + '/' + articleState + '/' : '') +
-        pageNo +
-        '/200?keyword='+this.state.searchKeyword,
-    )
-    const data = await response.json()
-    await data.data.map((item, index) => {
+    //{{
+    // const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
+    // const response = await fetch(
+    //   `${process.env.REACT_APP_SERVER_URL}article/` +
+    //     (projectId != '' ? projectId + '/' + articleState + '/' : '') +
+    //     pageNo +
+    //     '/200?keyword='+this.state.searchKeyword,
+    // )
+    // const data = await response.json()
+    //==
+    let {_data, _curPage, _total} = getPageFromArray(this.state.projectInfo.curProjectArticleList, 0, 200)
+    //}}
+    
+    await _data.map((item, index) => {
       var ret = this.state.checkedItem
       ret[item.id] = {checked: false, index: index}
       this.setState({
@@ -542,11 +547,11 @@ class ApprovalBase extends Component {
     });
 
     this.setState({
-      articles: data.data,
+      articles: _data,
       loading: false,
       alarmVisible: false,
-      curPage: data.curPage,
-      totalPage: data.total,
+      curPage: _curPage,
+      totalPage: _total,
     })
   }
 }
@@ -558,11 +563,15 @@ ApprovalBase.propTypes = {
 const Approval = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
+  const curProjectArticleList= useSelector((state) => state.curProjectArticleList)
+  const isLoadingAllArticle= useSelector((state) => state.isLoadingAllArticle)
 
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
     domainName: new URLSearchParams(location.search).get('domainName'), 
-    domainIp: new URLSearchParams(location.search).get('domainIp') }
+    domainIp: new URLSearchParams(location.search).get('domainIp'),
+    curProjectArticleList: curProjectArticleList,
+    isLoadingAllArticle: isLoadingAllArticle }
   }
 
   useEffect(() => {

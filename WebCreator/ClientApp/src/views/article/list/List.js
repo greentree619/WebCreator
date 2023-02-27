@@ -21,7 +21,7 @@ import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useDispatch, useSelector } from 'react-redux'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption } from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray } from 'src/utility/common.js'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -29,6 +29,10 @@ class ListBase extends Component {
   static displayName = ListBase.name
   static refreshIntervalId
   static articleListPage
+  static mapStateToProps = state => ({
+    isLoadingAllArticle: state.isLoadingAllArticle
+  });
+
   constructor(props) {
     super(props)
     this.state = {
@@ -50,7 +54,8 @@ class ListBase extends Component {
   }
 
   componentDidMount() {
-    this.populateArticleData(1)
+    if( !this.state.projectInfo.isLoadingAllArticle )
+      this.populateArticleData(1)
     this.articleListPage = true
   }
 
@@ -488,20 +493,25 @@ class ListBase extends Component {
       clearLocalStorage()
       return
     }
-    const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
-    const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}article/` +
-        (projectId != '' ? projectId + '/0/' : '') +
-        pageNo +
-        '/200?keyword='+this.state.searchKeyword,
-    )
-    const data = await response.json()
+    
+    //{{
+    //const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
+    // const response = await fetch(
+    //   `${process.env.REACT_APP_SERVER_URL}article/` +
+    //     (projectId != '' ? projectId + '/0/' : '') +
+    //     pageNo +
+    //     '/200?keyword='+this.state.searchKeyword,
+    // )
+    // const data = await response.json()
+    //==
+    let {_data, _curPage, _total} = getPageFromArray(this.state.projectInfo.curProjectArticleList, pageNo - 1, 200)
+    //}}
     this.setState({
-      articles: data.data,
+      articles: _data,
       loading: false,
       alarmVisible: false,
-      curPage: data.curPage,
-      totalPage: data.total,
+      curPage: _curPage,
+      totalPage: _total,
     })
 
     let ids = "";
@@ -509,7 +519,7 @@ class ListBase extends Component {
     this.setState({
       sync: {},
     })
-    await data.data.map((item, index) => {
+    await _data.map((item, index) => {
       if( /*item.isScrapping &&*/ item.articleId != null && item.articleId.length > 0)
       {
         if(item.progress != 100){
@@ -575,12 +585,16 @@ const List = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
   const activeProject = useSelector((state) => state.activeProject)
+  const curProjectArticleList = useSelector((state) => state.curProjectArticleList)
+  const isLoadingAllArticle = useSelector((state) => state.isLoadingAllArticle)
   
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
     domainName: new URLSearchParams(location.search).get('domainName'), 
     domainIp: new URLSearchParams(location.search).get('domainIp'),
-    project: activeProject }
+    project: activeProject,
+    curProjectArticleList: curProjectArticleList,
+    isLoadingAllArticle: isLoadingAllArticle }
   }
 
   useEffect(() => {

@@ -35,7 +35,12 @@ const AppHeader = () => {
   const isOnAFScrapping= useSelector((state) => state.isOnAFScrapping)
   const isOnPublish= useSelector((state) => state.isOnPublish)
   const activeProject= useSelector((state) => state.activeProject)
+  const curProjectArticleList= useSelector((state) => state.curProjectArticleList)
+  const isLoadingAllArticle= useSelector((state) => state.isLoadingAllArticle)
   const [curDomainName, setCurDomainName] = useState(activeDomainName)
+
+  let preLoadAsyncId = 0
+  let prevDomainId = ''
 
   useEffect(() => {
     console.log("AppHeader ->", isOnScrapping, isOnAFScrapping, isOnPublish, activeDomainName, activeDomainIp)
@@ -48,7 +53,48 @@ const AppHeader = () => {
     }
     else setCurDomainName(activeDomainName)
 
+    console.log( "AppHeader ->", activeDomainId, prevDomainId )
+    if(prevDomainId != activeDomainId)
+    {
+        if(preLoadAsyncId != 0) clearTimeout( preLoadAsyncId )
+        preLoadAsyncId = setTimeout(() => {
+          preLoadArticlesByDomain( activeDomainId )
+        }, 0)
+    }
+    prevDomainId = activeDomainId
   }, [isOnScrapping, isOnAFScrapping, isOnPublish, activeProject])
+
+  const preLoadArticlesByDomain = async ( domainId ) => {
+    console.log( "preLoadArticlesByDomain" )
+    const projectId = domainId
+
+    var curPage = 1
+    dispatch({ type: 'set', curProjectArticleList: [] })
+    dispatch({ type: 'set', isLoadingAllArticle: true })
+    var articlelst = [];
+    while( true )
+    {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}article/` +
+          (projectId != '' ? projectId + '/0/' : '') +
+          curPage +
+          '/50?keyword=',
+      )
+      const data = await response.json()
+      if (response.status === 200) 
+      {
+        //console.log( "data.total", data );
+        var articlelst = [...articlelst, ...data.data]
+        //console.log( "curProjectArticleList=>", articlelst, data.total, curPage );
+        dispatch({ type: 'set', curProjectArticleList: articlelst })
+        if( data.total <= curPage ) break
+      }
+      else break      
+      curPage++
+    }
+    dispatch({ type: 'set', isLoadingAllArticle: false })
+    preLoadAsyncId = 0
+  }
 
   return (
     <CHeader position="sticky" className="mb-4">

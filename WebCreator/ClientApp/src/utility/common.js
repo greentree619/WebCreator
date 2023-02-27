@@ -27,6 +27,18 @@ export function clearLocalStorage(storeID='state'){
     }
 };
 
+export function getPageFromArray(ary, pageNo, pageSize, keyword){
+    var pageList = []
+    var total = 0;
+    try {
+        total = Math.ceil( ary.length / pageSize )
+        pageList = ary.slice(pageNo * pageSize, (pageNo + 1) * pageSize);
+    } catch (e) {
+        console.error(e)
+    }
+    return {_data: pageList, _curPage: pageNo, _total: total}
+};
+
 export const globalRegionMap = [
     { region: 'US East (N. Virginia)', value: 'us-east-1'},
     { region: 'US East (Ohio)', value: 'us-east-2'},

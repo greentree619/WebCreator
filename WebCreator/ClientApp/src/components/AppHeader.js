@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
@@ -20,6 +20,7 @@ import { cilBell, cilEnvelopeOpen, cilList, cilMenu } from '@coreui/icons'
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
 import { logo } from 'src/assets/brand/logo'
+import { loadFromLocalStorage } from 'src/utility/common'
 
 const AppHeader = () => {
   const dispatch = useDispatch()
@@ -33,10 +34,21 @@ const AppHeader = () => {
   const isOnScrapping= useSelector((state) => state.isOnScrapping)
   const isOnAFScrapping= useSelector((state) => state.isOnAFScrapping)
   const isOnPublish= useSelector((state) => state.isOnPublish)
+  const activeProject= useSelector((state) => state.activeProject)
+  const [curDomainName, setCurDomainName] = useState(activeDomainName)
 
   useEffect(() => {
-    console.log("AppHeader ->", isOnScrapping, isOnAFScrapping, isOnPublish, activeDomainName)
-  }, [isOnScrapping, isOnAFScrapping, isOnPublish, activeDomainName])
+    console.log("AppHeader ->", isOnScrapping, isOnAFScrapping, isOnPublish, activeDomainName, activeDomainIp)
+
+    if(activeDomainIp == "0.0.0.0"){
+      var s3Host = loadFromLocalStorage('s3host')
+      var s3Name = (s3Host.name == null || s3Host.name.length == 0) ? activeDomainName : s3Host.name
+      var s3Region = s3Host.region == null ? "us-east-2" : s3Host.region
+      setCurDomainName(`${s3Name}.s3.${s3Region}.amazonaws.com`)
+    }
+    else setCurDomainName(activeDomainName)
+
+  }, [isOnScrapping, isOnAFScrapping, isOnPublish, activeProject])
 
   return (
     <CHeader position="sticky" className="mb-4">
@@ -76,7 +88,7 @@ const AppHeader = () => {
         <CHeaderNav>
         {activeDomainName.length > 0 && (
           <CCol xs="auto">
-            <CBadge color={activeZoneStatus == 'active' ? "success" : "dark"} shape="rounded-pill">{activeDomainName}</CBadge>
+            <CBadge color={activeZoneStatus == 'active' ? "success" : "dark"} shape="rounded-pill">{curDomainName}</CBadge>
             &nbsp;
             <CBadge color={isOnScrapping ? "success" : "dark"} shape="rounded-pill">Query Scrap</CBadge>
             &nbsp;
@@ -106,9 +118,12 @@ const AppHeader = () => {
         </CHeaderNav>
       </CContainer>
       <CHeaderDivider />
-      <CContainer fluid>
-        <AppBreadcrumb />
-      </CContainer>
+      {activeDomainName.length > 0 && (
+        <CContainer fluid>
+          <AppBreadcrumb />
+        </CContainer>
+      )}
+      
     </CHeader>
   )
 }

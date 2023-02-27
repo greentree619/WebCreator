@@ -132,7 +132,7 @@ const AppBreadcrumb = () => {
               <CHeaderNav className="d-md-flex me-auto">
                 <CNavItem className="px-1">
                   <CNavLink href="#/project/add?mode=view&tab=project_add" className={isSelctedTab("project_add")}>
-                    {'DOMAIN : ' + activeDomainName}
+                    {'Website'}
                   </CNavLink>
                 </CNavItem>
                 {activeDomainName.length > 0 && (

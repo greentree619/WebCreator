@@ -60,6 +60,7 @@ import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import Truncate from 'react-truncate'
 import { useDispatch, useSelector } from 'react-redux'
+import { loadFromLocalStorage, saveToLocalStorage, clearLocalStorage } from 'src/utility/common'
 
 const Dashboard = () => {
   const dispatch = useDispatch()
@@ -102,10 +103,20 @@ const Dashboard = () => {
   }, [])
 
   async function getAllProject() {
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/1/100`)
-    const data = await response.json()
-    console.log(data.data)
-    setProjects(data.data)
+    var allProjects = loadFromLocalStorage('allProjects')
+    console.log( allProjects )
+    if(allProjects == null || allProjects == undefined)
+    {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/1/200`)
+      const data = await response.json()
+      console.log(data.data)
+      saveToLocalStorage(data.data, 'allProjects')
+      setProjects(data.data)
+    }
+    else
+    {
+      setProjects( allProjects )
+    }
   }
 
   return (

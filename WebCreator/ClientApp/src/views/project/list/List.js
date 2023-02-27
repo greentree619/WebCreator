@@ -10,9 +10,12 @@ import {
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { Outlet, Link } from 'react-router-dom'
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import { alertConfirmOption } from 'src/utility/common'
+import { confirmAlert } from 'react-confirm-alert'
+import 'react-confirm-alert/src/react-confirm-alert.css'
+import { loadFromLocalStorage, saveToLocalStorage, clearLocalStorage } from 'src/utility/common'
 
 export default class List extends Component {
   static displayName = List.name
@@ -65,6 +68,23 @@ export default class List extends Component {
     // this.setState({ alarmVisible: true })
   }
 
+   deleteProjectConfirm = ( _id ) => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to delete this website.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: async () => await this.delete( _id )
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  };
+
   async delete(_id) {
     const requestOptions = {
       method: 'DELETE',
@@ -86,6 +106,20 @@ export default class List extends Component {
             curPage: this.state.curPage,
             totalPage: this.state.total,
           })
+
+          var allProjects = loadFromLocalStorage('allProjects')
+          if(allProjects != null && allProjects != undefined)
+          {
+            let tmpProjects = [...allProjects]
+            let idx = tmpProjects.findIndex((pro) => pro.id === _id)
+            tmpProjects.splice(idx, 1)
+            saveToLocalStorage(tmpProjects, 'allProjects')
+          }
+          toast.success('Deleted project successfully.', alertConfirmOption);
+        }
+        else
+        {
+          toast.error('Unfortunately, Deleting faild.', alertConfirmOption);
         }
       })
       .catch((err) => console.log(err))
@@ -208,7 +242,7 @@ export default class List extends Component {
                     <CButton type="button">Edit</CButton>
                   </Link>
                   &nbsp;
-                  <CButton type="button" onClick={() => this.delete(project.id)}>
+                  <CButton type="button" onClick={() => this.deleteProjectConfirm(project.id)}>
                     Delete
                   </CButton>
                 </td>
@@ -238,14 +272,31 @@ export default class List extends Component {
   }
 
   async populateProjectData(pageNo) {
-    const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/` + pageNo + '/200')
-    const data = await response.json()
-    this.setState({
-      projects: data.data,
-      loading: false,
-      alarmVisible: false,
-      curPage: data.curPage,
-      totalPage: data.total,
-    })
+    var allProjects = loadFromLocalStorage('allProjects')
+    console.log( allProjects )
+    if(allProjects == null || allProjects == undefined)
+    {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/` + pageNo + '/200')
+      const data = await response.json()
+      console.log(data.data)
+      saveToLocalStorage(data.data, 'allProjects')
+      this.setState({
+        projects: data.data,
+        loading: false,
+        alarmVisible: false,
+        curPage: data.curPage,
+        totalPage: data.total,
+      })
+    }
+    else
+    {
+      this.setState({
+        projects: allProjects,
+        loading: false,
+        alarmVisible: false,
+        curPage: 1,
+        totalPage: 1,
+      })
+    }
   }
 }

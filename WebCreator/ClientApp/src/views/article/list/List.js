@@ -20,7 +20,7 @@ import PropTypes from 'prop-types'
 import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
-import { useDispatch, useSelector, connect } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray } from 'src/utility/common.js'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -53,7 +53,7 @@ class ListBase extends Component {
   componentDidMount() {
     this.populateArticleData(1)
     this.articleListPage = true
-    console.log('child props: ', this.props.location)
+    console.log('child props: ', this.props.isLoadingAllArticle)
   }
 
   componentWillUnmount(){
@@ -413,9 +413,8 @@ class ListBase extends Component {
     )
   }
 
-
   render() {
-    let contents = this.props.location.state.isLoadingAllArticle ? (
+    let contents = this.props.isLoadingAllArticle ? (
       <p>
         <em>Loading...</em>
       </p>
@@ -601,7 +600,7 @@ const List = (props) => {
   useEffect(() => {
     dispatch({ type: 'set', activeTab: 'article_list' })
     console.log('location: ', location)
-  }, [props, activeProject, curProjectArticleList, isLoadingAllArticle])
+  }, [])
   //console.log(location.state)
   //console.log(location.search)
   //console.log(new URLSearchParams(location.search).get('domainId'))

@@ -62,6 +62,16 @@ class ListBase extends Component {
     console.log("loadScrappingStatus cleared")
   }
 
+  componentDidUpdate(prevProps) {
+    // do something
+    //console.log("componentDidUpdate", prevProps, this.props)
+    if( prevProps.isLoadingAllArticle && !this.props.isLoadingAllArticle )
+      // || (prevProps.isLoadingAllArticle && this.props.isLoadingAllArticle) )
+    {
+      this.populateArticleData(1)
+    }
+  }
+
   static async loadScrappingStatus(ids) {
     //console.log("loadScrappingStatus")
     try {
@@ -267,6 +277,11 @@ class ListBase extends Component {
   }
 
   renderArticlesTable = (articles) => {
+    // if(articles.length == 0)
+    // {
+    //   this.populateArticleData(1)
+    //   articles = this.state.articles
+    // }
     let pageButtonCount = 3
     let pagination = <p></p>
 
@@ -502,7 +517,7 @@ class ListBase extends Component {
     // )
     // const data = await response.json()
     //==
-    let {_data, _curPage, _total} = getPageFromArray(this.state.projectInfo.curProjectArticleList, pageNo - 1, 200)
+    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, pageNo - 1, 200)
     //}}
     this.setState({
       articles: _data,
@@ -577,6 +592,8 @@ class ListBase extends Component {
 
 ListBase.propTypes = {
   location: PropTypes.any,
+  isLoadingAllArticle: PropTypes.bool,
+  curProjectArticleList: PropTypes.array,
 }
 
 const List = (props) => {
@@ -591,9 +608,7 @@ const List = (props) => {
       projectid: new URLSearchParams(location.search).get('domainId'), 
       domainName: new URLSearchParams(location.search).get('domainName'), 
       domainIp: new URLSearchParams(location.search).get('domainIp'),
-      project: activeProject,
-      curProjectArticleList: curProjectArticleList,
-      isLoadingAllArticle: isLoadingAllArticle 
+      project: activeProject
     }
   }
 
@@ -604,7 +619,7 @@ const List = (props) => {
   //console.log(location.state)
   //console.log(location.search)
   //console.log(new URLSearchParams(location.search).get('domainId'))
-  return <ListBase location={location} {...props} />
+  return <ListBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} {...props} />
 }
 
 export default List

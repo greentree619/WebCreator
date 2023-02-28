@@ -17,7 +17,7 @@ import { useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Outlet, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage} from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, getPageFromArray} from 'src/utility/common.js'
 
 class ListBase extends Component {
   static displayName = ListBase.name
@@ -43,6 +43,15 @@ class ListBase extends Component {
 
   gotoPrevPage() {
     this.populateArticleData(this.state.curPage - 1)
+  }
+
+  componentDidUpdate(prevProps) {
+    // do something
+    //console.log("componentDidUpdate", prevProps, this.props)
+    if( prevProps.isLoadingAllArticle && !this.props.isLoadingAllArticle )
+    {
+      this.populateArticleData(1)
+    }
   }
 
   gotoNextPage() {
@@ -207,7 +216,7 @@ class ListBase extends Component {
   }
 
   render() {
-    let contents = this.state.loading ? (
+    let contents = this.props.isLoadingAllArticle ? (
       <p>
         <em>Loading...</em>
       </p>
@@ -223,24 +232,29 @@ class ListBase extends Component {
   }
 
   async populateArticleData(pageNo) {
-    const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
-    const response = await fetch(
-      `${process.env.REACT_APP_SERVER_URL}article/valid/` +
-        (projectId != '' ? projectId + '/' : '') +
-        pageNo +
-        '/200',
-    )
-    const data = await response.json()
+    //{{
+    // const projectId = this.state.projectInfo == null ? '' : this.state.projectInfo.projectid
+    // const response = await fetch(
+    //   `${process.env.REACT_APP_SERVER_URL}article/valid/` +
+    //     (projectId != '' ? projectId + '/' : '') +
+    //     pageNo +
+    //     '/200',
+    // )
+    // const data = await response.json()
+    //==
+    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, pageNo - 1, 200)
+    //}}
+
     this.setState({
-      articles: data.data,
+      articles: _data,
       loading: false,
       alarmVisible: false,
-      curPage: data.curPage,
-      totalPage: data.total,
+      curPage: _curPage,
+      totalPage: _total,
     })
 
     let ids = "";
-    await data.data.map((item, index) => {
+    await _data.map((item, index) => {
       if(ids.length > 0) ids += ",";
       ids += item.id;
 
@@ -249,19 +263,22 @@ class ListBase extends Component {
       }, 100*index);
       console.log("sync view<--", index);
     });
-
     //Omitted this.loadSyncStatus(ids);
   }
 }
 
 ListBase.propTypes = {
   location: PropTypes.any,
+  isLoadingAllArticle: PropTypes.bool,
+  curProjectArticleList: PropTypes.array,
 }
 
 const List = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
   const activeProject = useSelector((state) => state.activeProject)
+  const curProjectArticleList = useSelector((state) => state.curProjectArticleList)
+  const isLoadingAllArticle = useSelector((state) => state.isLoadingAllArticle)
 
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
@@ -274,6 +291,6 @@ const List = (props) => {
     dispatch({ type: 'set', activeTab: 'sync_view' })
   }, [])
 
-  return <ListBase location={location} {...props} />
+  return <ListBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} {...props} />
 }
 export default List

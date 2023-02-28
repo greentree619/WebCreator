@@ -57,9 +57,20 @@ class ApprovalBase extends Component {
 
   componentDidMount() {
     this.populateArticleData(1, this.state.articleState)
+    console.log('child props: ', this.props.isLoadingAllArticle)
   }
 
   componentWillUnmount(){
+  }
+
+  componentDidUpdate(prevProps) {
+    // do something
+    //console.log("componentDidUpdate", prevProps, this.props)
+    if( prevProps.isLoadingAllArticle && !this.props.isLoadingAllArticle )
+      // || (prevProps.isLoadingAllArticle && this.props.isLoadingAllArticle) )
+    {
+      this.populateArticleData(1, this.state.articleState)
+    }
   }
 
   // shouldComponentUpdate(prevProps, prevState) {
@@ -460,7 +471,7 @@ class ApprovalBase extends Component {
   }
 
   render() {
-    let contents = this.state.loading ? (
+    let contents = this.props.isLoadingAllArticle ? (
       <p>
         <em>Loading...</em>
       </p>
@@ -534,7 +545,7 @@ class ApprovalBase extends Component {
     // )
     // const data = await response.json()
     //==
-    let {_data, _curPage, _total} = getPageFromArray(this.state.projectInfo.curProjectArticleList, 0, 200)
+    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, 0, 200)
     //}}
     
     await _data.map((item, index) => {
@@ -558,6 +569,8 @@ class ApprovalBase extends Component {
 
 ApprovalBase.propTypes = {
   location: PropTypes.any,
+  isLoadingAllArticle: PropTypes.bool,
+  curProjectArticleList: PropTypes.array,
 }
 
 const Approval = (props) => {
@@ -569,9 +582,7 @@ const Approval = (props) => {
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
     domainName: new URLSearchParams(location.search).get('domainName'), 
-    domainIp: new URLSearchParams(location.search).get('domainIp'),
-    curProjectArticleList: curProjectArticleList,
-    isLoadingAllArticle: isLoadingAllArticle }
+    domainIp: new URLSearchParams(location.search).get('domainIp') }
   }
 
   useEffect(() => {
@@ -580,6 +591,6 @@ const Approval = (props) => {
   //console.log(location.state)
   //console.log(location.search)
   //console.log(new URLSearchParams(location.search).get('domainId'))
-  return <ApprovalBase location={location} {...props} />
+  return <ApprovalBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} {...props} />
 }
 export default Approval

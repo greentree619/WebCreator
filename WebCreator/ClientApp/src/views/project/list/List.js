@@ -9,16 +9,19 @@ import {
   CPaginationItem,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet, Link, useLocation } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
-export default class List extends Component {
-  static displayName = List.name
+import PropTypes from 'prop-types'
+
+class ListBase extends Component {
+  static displayName = ListBase.name
 
   constructor(props) {
     super(props)
     this.state = {
       projects: [],
-      loading: true,
+      loading: this.props.isLoading,
       alarmVisible: false,
       alertMsg: '',
       alertColor: 'success',
@@ -197,7 +200,7 @@ export default class List extends Component {
   }
 
   render() {
-    let contents = this.state.loading ? (
+    let contents = this.props.isLoading ? (
       <p>
         <em>Loading...</em>
       </p>
@@ -224,3 +227,22 @@ export default class List extends Component {
     })
   }
 }
+
+ListBase.propTypes = {
+  location: PropTypes.any,
+  isLoading: PropTypes.any,
+}
+
+const List = (props) => {
+  const location = useLocation()
+  const isLoading = useSelector((state) => state.isLoading)
+
+  return (
+    <div>
+      {isLoading ? 'Loading...................' : 'loading completed.....'}
+      <ListBase location={location} isLoading={isLoading} {...props} />
+    </div>
+  )
+}
+
+export default List

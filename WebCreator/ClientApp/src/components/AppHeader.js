@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
@@ -21,6 +21,16 @@ import { logo } from 'src/assets/brand/logo'
 const AppHeader = () => {
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const isLoading = useSelector((state) => state.isLoading)
+
+  useEffect(() => {
+    console.log('timout: ', isLoading)
+    dispatch({ type: 'set', isLoading: true })
+    setTimeout(() => {
+      dispatch({ type: 'set', isLoading: false })
+      console.log('timout: ', ' 3s later', isLoading)
+    }, 3000)
+  }, [])
 
   return (
     <CHeader position="sticky" className="mb-4">

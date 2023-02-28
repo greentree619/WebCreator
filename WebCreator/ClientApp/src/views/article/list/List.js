@@ -12,6 +12,7 @@ import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Outlet, Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 class ListBase extends Component {
   static displayName = ListBase.name
@@ -19,13 +20,14 @@ class ListBase extends Component {
     super(props)
     this.state = {
       articles: [],
-      loading: true,
+      // loading: true,
       curPage: 1,
       totalPage: 1,
       projectInfo: this.props.location.state,
       alarmVisible: false,
       alertMsg: '',
       alertColor: 'success',
+      loading: this.props.isLoading,
     }
   }
 
@@ -190,7 +192,7 @@ class ListBase extends Component {
   render() {
     let contents = this.state.loading ? (
       <p>
-        <em>Loading...</em>
+        <em>Loading...........</em>
       </p>
     ) : (
       this.renderArticlesTable(this.state.articles)
@@ -198,7 +200,7 @@ class ListBase extends Component {
     return (
       <CCard className="mb-4">
         <CCardHeader>All Articles</CCardHeader>
-        <CCardBody>{contents}</CCardBody>
+        {/* <CCardBody>{contents}</CCardBody> */}
       </CCard>
     )
   }
@@ -224,11 +226,15 @@ class ListBase extends Component {
 
 ListBase.propTypes = {
   location: PropTypes.any,
+  isLoading: PropTypes.any,
 }
 
 const List = (props) => {
   const location = useLocation()
+  const isLoading = useSelector((state) => state.isLoading)
+
   //console.log(location.state)
-  return <ListBase location={location} {...props} />
+  return <div> {isLoading ? 'Loading...................' : 'loading completed.....'}</div>
+  // return <ListBase location={location} isLoading={isLoading} {...props} />
 }
 export default List

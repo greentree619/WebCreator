@@ -20,7 +20,7 @@ import PropTypes from 'prop-types'
 import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector, connect } from 'react-redux'
 import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray } from 'src/utility/common.js'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -29,9 +29,6 @@ class ListBase extends Component {
   static displayName = ListBase.name
   static refreshIntervalId
   static articleListPage
-  static mapStateToProps = state => ({
-    isLoadingAllArticle: state.isLoadingAllArticle
-  });
 
   constructor(props) {
     super(props)
@@ -54,9 +51,9 @@ class ListBase extends Component {
   }
 
   componentDidMount() {
-    if( !this.state.projectInfo.isLoadingAllArticle )
-      this.populateArticleData(1)
+    this.populateArticleData(1)
     this.articleListPage = true
+    console.log('child props: ', this.props.location)
   }
 
   componentWillUnmount(){
@@ -416,14 +413,16 @@ class ListBase extends Component {
     )
   }
 
+
   render() {
-    let contents = this.state.loading ? (
+    let contents = this.props.location.state.isLoadingAllArticle ? (
       <p>
         <em>Loading...</em>
       </p>
     ) : (
       this.renderArticlesTable(this.state.articles)
     )
+    
     return (
       <CCard className="mb-4">
         <CCardHeader>
@@ -589,20 +588,24 @@ const List = (props) => {
   const isLoadingAllArticle = useSelector((state) => state.isLoadingAllArticle)
   
   if (location.state == null && location.search.length > 0) {
-    location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
-    domainName: new URLSearchParams(location.search).get('domainName'), 
-    domainIp: new URLSearchParams(location.search).get('domainIp'),
-    project: activeProject,
-    curProjectArticleList: curProjectArticleList,
-    isLoadingAllArticle: isLoadingAllArticle }
+    location.state = { 
+      projectid: new URLSearchParams(location.search).get('domainId'), 
+      domainName: new URLSearchParams(location.search).get('domainName'), 
+      domainIp: new URLSearchParams(location.search).get('domainIp'),
+      project: activeProject,
+      curProjectArticleList: curProjectArticleList,
+      isLoadingAllArticle: isLoadingAllArticle 
+    }
   }
 
   useEffect(() => {
     dispatch({ type: 'set', activeTab: 'article_list' })
-  }, [])
+    console.log('location: ', location)
+  }, [props, activeProject, curProjectArticleList, isLoadingAllArticle])
   //console.log(location.state)
   //console.log(location.search)
   //console.log(new URLSearchParams(location.search).get('domainId'))
   return <ListBase location={location} {...props} />
 }
+
 export default List

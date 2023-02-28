@@ -70,29 +70,30 @@ const AppHeader = () => {
 
     var curPage = 1
     dispatch({ type: 'set', curProjectArticleList: [] })
-    dispatch({ type: 'set', isLoadingAllArticle: true })
-    var articlelst = [];
-    while( true )
-    {
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}article/` +
-          (projectId != '' ? projectId + '/0/' : '') +
-          curPage +
-          '/50?keyword=',
-      )
-      const data = await response.json()
-      if (response.status === 200) 
-      {
-        //console.log( "data.total", data );
-        var articlelst = [...articlelst, ...data.data]
-        //console.log( "curProjectArticleList=>", articlelst, data.total, curPage );
-        dispatch({ type: 'set', curProjectArticleList: articlelst })
-        if( data.total <= curPage ) break
-      }
-      else break      
-      curPage++
-    }
-    dispatch({ type: 'set', isLoadingAllArticle: false })
+    // dispatch({ type: 'set', isLoadingAllArticle: true })
+    // var articlelst = [];
+    // while( true )
+    // {
+    //   const response = await fetch(
+    //     `${process.env.REACT_APP_SERVER_URL}article/` +
+    //       (projectId != '' ? projectId + '/0/' : '') +
+    //       curPage +
+    //       '/50?keyword=',
+    //   )
+    //   const data = await response.json()
+    //   if (response.status === 200) 
+    //   {
+    //     console.log( "data.total", data );
+    //     var articlelst = [...articlelst, ...data.data]
+    //     console.log( "curProjectArticleList=>", articlelst, data.total, curPage );
+    //     dispatch({ type: 'set', curProjectArticleList: articlelst })
+    //     if( data.total <= curPage ) break
+    //   }
+    //   else break      
+    //   curPage++
+    // }
+    // dispatch({ type: 'set', isLoadingAllArticle: false })
+    console.log('locading complete: ', isLoadingAllArticle, "wowwwoowowo")
     preLoadAsyncId = 0
   }
 

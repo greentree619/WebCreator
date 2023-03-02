@@ -200,7 +200,11 @@ const Add = (props) => {
       dispatch({ type: 'set', activeProject: location.state.project })
       saveToLocalStorage({name: location.state.project.s3BucketName, region: location.state.project.s3BucketRegion}, 's3host')
 
-      if (simpleMode) navigate('/dashboard')
+      if (simpleMode)
+      {
+        clearLocalStorage('allProjects')
+        navigate('/dashboard')
+      }
     }
     else {
       toast.error('Faild to create/update new domain unfortunatley.', alertConfirmOption);

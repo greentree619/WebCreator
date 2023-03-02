@@ -105,7 +105,7 @@ const Dashboard = () => {
   async function getAllProject() {
     var allProjects = loadFromLocalStorage('allProjects')
     console.log( allProjects )
-    if(allProjects == null || allProjects == undefined)
+    if(allProjects == null || allProjects == undefined || allProjects.length == 0)
     {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/1/200`)
       const data = await response.json()

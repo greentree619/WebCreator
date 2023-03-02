@@ -24,7 +24,7 @@ import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useDispatch, useSelector } from 'react-redux'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray } from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray, deleteFromArray } from 'src/utility/common.js'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -169,6 +169,8 @@ class ApprovalBase extends Component {
   };
 
   async deleteArticle(_id) {
+    deleteFromArray(this.props.curProjectArticleList, _id)
+
     const requestOptions = {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -212,6 +214,7 @@ class ApprovalBase extends Component {
     Object.keys( checkedItem ).map((item)=>{
       if( checkedItem[item].checked )
       {
+        if( articleState == 4 ) deleteFromArray(this.props.curProjectArticleList, item)
         articles[checkedItem[item].index].state = articleState
         if(articleIds.length > 0) articleIds += ","
         articleIds += item
@@ -265,7 +268,7 @@ class ApprovalBase extends Component {
     //console.log(articleState)
     switch(articleState)
     {
-      case 0: return ("UnApproved");
+      case 0: return ("");
       case 1: return ("UnApproved");
       case 2: return ("Approved");
       case 3: return ("Online");
@@ -286,6 +289,7 @@ class ApprovalBase extends Component {
       this.setState({
         loading: true,
       })
+      
       this.populateArticleData(1, this.state.articleState)
     }
   }
@@ -423,8 +427,8 @@ class ApprovalBase extends Component {
             </tr>
           </thead>
           <tbody>
-            {helperBar("up", articles.length)}
-            {articles.map((article) => {
+            {helperBar("up", this.state.articles.length)}
+            {this.state.articles.map((article) => {
               //if (article.content != null && article.content.length > 0)
               {
                 return (<tr key={article.id}>
@@ -545,9 +549,16 @@ class ApprovalBase extends Component {
     // )
     // const data = await response.json()
     //==
-    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, 0, 200)
+    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, 0, 200, this.state.searchKeyword, articleState)
     //}}
-    
+    this.setState({
+      articles: _data,
+      loading: false,
+      alarmVisible: false,
+      curPage: _curPage,
+      totalPage: _total,
+    })
+
     await _data.map((item, index) => {
       var ret = this.state.checkedItem
       ret[item.id] = {checked: false, index: index}
@@ -556,14 +567,6 @@ class ApprovalBase extends Component {
       })      
       //console.log(ids, "<--", articleDocumentIds);
     });
-
-    this.setState({
-      articles: _data,
-      loading: false,
-      alarmVisible: false,
-      curPage: _curPage,
-      totalPage: _total,
-    })
   }
 }
 
@@ -571,12 +574,14 @@ ApprovalBase.propTypes = {
   location: PropTypes.any,
   isLoadingAllArticle: PropTypes.bool,
   curProjectArticleList: PropTypes.array,
+  curSearchArticleList: PropTypes.array,
 }
 
 const Approval = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
   const curProjectArticleList= useSelector((state) => state.curProjectArticleList)
+  const curSearchArticleList= useSelector((state) => state.curSearchArticleList)
   const isLoadingAllArticle= useSelector((state) => state.isLoadingAllArticle)
 
   if (location.state == null && location.search.length > 0) {
@@ -591,6 +596,6 @@ const Approval = (props) => {
   //console.log(location.state)
   //console.log(location.search)
   //console.log(new URLSearchParams(location.search).get('domainId'))
-  return <ApprovalBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} {...props} />
+  return <ApprovalBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} curSearchArticleList ={curSearchArticleList} {...props} />
 }
 export default Approval

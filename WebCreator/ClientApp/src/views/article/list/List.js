@@ -21,7 +21,7 @@ import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useDispatch, useSelector } from 'react-redux'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray } from 'src/utility/common.js'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray, deleteFromArray } from 'src/utility/common.js'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -133,6 +133,8 @@ class ListBase extends Component {
   };
 
   async deleteArticle(_id) {
+    deleteFromArray(this.props.curProjectArticleList, _id)
+
     const requestOptions = {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -517,7 +519,7 @@ class ListBase extends Component {
     // )
     // const data = await response.json()
     //==
-    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, pageNo - 1, 200)
+    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, pageNo - 1, 200, this.state.searchKeyword, 0)
     //}}
     this.setState({
       articles: _data,
@@ -594,6 +596,7 @@ ListBase.propTypes = {
   location: PropTypes.any,
   isLoadingAllArticle: PropTypes.bool,
   curProjectArticleList: PropTypes.array,
+  curSearchArticleList: PropTypes.array,
 }
 
 const List = (props) => {
@@ -601,6 +604,7 @@ const List = (props) => {
   const dispatch = useDispatch()
   const activeProject = useSelector((state) => state.activeProject)
   const curProjectArticleList = useSelector((state) => state.curProjectArticleList)
+  const curSearchArticleList = useSelector((state) => state.curSearchArticleList)
   const isLoadingAllArticle = useSelector((state) => state.isLoadingAllArticle)
   
   if (location.state == null && location.search.length > 0) {
@@ -619,7 +623,7 @@ const List = (props) => {
   //console.log(location.state)
   //console.log(location.search)
   //console.log(new URLSearchParams(location.search).get('domainId'))
-  return <ListBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} {...props} />
+  return <ListBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} curSearchArticleList ={curSearchArticleList} {...props} />
 }
 
 export default List

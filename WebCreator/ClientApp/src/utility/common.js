@@ -27,16 +27,39 @@ export function clearLocalStorage(storeID='state'){
     }
 };
 
-export function getPageFromArray(ary, pageNo, pageSize, keyword){
+export function deleteFromArray(ary, articleId){
+    let idx = ary.findIndex((article) => article.id === articleId)
+    ary.splice(idx, 1)
+};
+
+export function getPageFromArray(ary, pageNo, pageSize, keyword, state){
     var pageList = []
+    var aryBuf = ary
     var total = 0;
     try {
-        total = Math.ceil( ary.length / pageSize )
-        pageList = ary.slice(pageNo * pageSize, (pageNo + 1) * pageSize);
+        if(keyword.length > 0 || state > 0)
+        {
+            let { _data } = searchFromArray(ary, keyword, state)
+            aryBuf = _data
+        }
+
+        total = Math.ceil( aryBuf.length / pageSize )
+        pageList = aryBuf.slice(pageNo * pageSize, (pageNo + 1) * pageSize);
     } catch (e) {
         console.error(e)
     }
     return {_data: pageList, _curPage: pageNo, _total: total}
+};
+
+export function searchFromArray( ary, keyword, state ){
+    var result = []
+    ary.map((row) => {
+        var index = row.title.indexOf( keyword )
+        console.log(index)
+        if(index >= 0 && (state == 0 || state == row.state))
+            result.push(row)
+    })
+    return {_data: result}
 };
 
 export const globalRegionMap = [

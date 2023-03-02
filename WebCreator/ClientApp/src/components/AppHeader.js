@@ -70,6 +70,7 @@ const AppHeader = () => {
 
     var curPage = 1
     dispatch({ type: 'set', curProjectArticleList: [] })
+    dispatch({ type: 'set', curSearchArticleList: [] })
     dispatch({ type: 'set', isLoadingAllArticle: true })
     var articlelst = [];
     while( true )

@@ -14,6 +14,7 @@ const initialState = {
   isOnAFScrapping: false,
   isOnPublish: false,
   curProjectArticleList: [],
+  curSearchArticleList: [],
   isLoadingAllArticle: false,
 }
 

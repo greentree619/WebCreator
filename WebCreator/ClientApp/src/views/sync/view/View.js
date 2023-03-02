@@ -242,7 +242,7 @@ class ListBase extends Component {
     // )
     // const data = await response.json()
     //==
-    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, pageNo - 1, 200)
+    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, pageNo - 1, 200, "", 0)
     //}}
 
     this.setState({
@@ -271,6 +271,7 @@ ListBase.propTypes = {
   location: PropTypes.any,
   isLoadingAllArticle: PropTypes.bool,
   curProjectArticleList: PropTypes.array,
+  curSearchArticleList: PropTypes.array,
 }
 
 const List = (props) => {
@@ -278,6 +279,7 @@ const List = (props) => {
   const dispatch = useDispatch()
   const activeProject = useSelector((state) => state.activeProject)
   const curProjectArticleList = useSelector((state) => state.curProjectArticleList)
+  const curSearchArticleList = useSelector((state) => state.curSearchArticleList)
   const isLoadingAllArticle = useSelector((state) => state.isLoadingAllArticle)
 
   if (location.state == null && location.search.length > 0) {
@@ -291,6 +293,6 @@ const List = (props) => {
     dispatch({ type: 'set', activeTab: 'sync_view' })
   }, [])
 
-  return <ListBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} {...props} />
+  return <ListBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} curSearchArticleList ={curSearchArticleList} {...props} />
 }
 export default List

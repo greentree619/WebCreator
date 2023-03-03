@@ -364,7 +364,7 @@ namespace UnitTest.Lib
             }
         }
 
-        static public async Task<bool> AddArticle(Article articleParam, String articleId, Int32 progress)
+        static public async Task<Article> AddArticle(Article articleParam, String articleId, Int32 progress)
         {
             bool ret = false;
             var article = new Article
@@ -383,7 +383,8 @@ namespace UnitTest.Lib
                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             };
-            var articleData = article;
+
+            Article articleData = article;
 
             try
             {
@@ -394,7 +395,8 @@ namespace UnitTest.Lib
                 QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
                 if (projectsSnapshot.Documents.Count == 0)
                 {
-                    await articlesCol.AddAsync(articleData);
+                    DocumentReference docRef = await articlesCol.AddAsync(articleData);
+                    articleData.Id = docRef.Id;
                     ret = true;
                 }
             }
@@ -403,7 +405,8 @@ namespace UnitTest.Lib
                 Console.WriteLine(ex.Message);
             }
 
-            return ret;
+            if ( !ret ) articleData = null;
+            return articleData;
         }
 
         public static async Task<bool> UpdateBatchState(String articleids, int state)

@@ -444,8 +444,8 @@ namespace WebCreator.Controllers
         {
             await CommonModule.historyLog.LogKeywordAction(article.ProjectId, article.Title, true, true);
 
-            bool ret = await CommonModule.AddArticle(article, "1234567890", 100);
-            return Ok(ret);
+            Article artResult = await CommonModule.AddArticle(article, "1234567890", 100);
+            return Ok(new { data = artResult });
         }
 
         [HttpGet("AddArticlesByTitle/{domainId}/{keywords}")]

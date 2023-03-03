@@ -29,7 +29,8 @@ import 'katex/dist/katex.min.css'
 import pixabayImageGallery  from 'src/plugins/PixabayImageGallery'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { alertConfirmOption } from 'src/utility/common'
+import { alertConfirmOption, saveToLocalStorage, loadFromLocalStorage } from 'src/utility/common'
+import { useDispatch, useSelector } from 'react-redux'
 
 const Add = (props) => {
   const location = useLocation()
@@ -45,8 +46,10 @@ const Add = (props) => {
   const [metaAuthor, setMetaAuthor] = useState('')
   const [pixabayURL, setPixabayURL] = useState('https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=480&min_height=600&per_page=100&page=1')
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const curProjectArticleList = useSelector((state) => state.curProjectArticleList)
 
-  function onChange(content)
+  function onChange( content )
   {
     console.log('onChange', content);
   }
@@ -80,10 +83,12 @@ const Add = (props) => {
     // setAlertColor('danger')
     // setAlertMsg('Faild to add article unfortunatley.')
     let ret = await response.json()
-    if (response.status === 200 && ret) {
+    if (response.status === 200 && ret.data != null) {
       // setAlertMsg('Article content is added successfully.')
       // setAlertColor('success')
       toast.success('Article content is added successfully.', alertConfirmOption);
+      var articlesAry = [ret.data, ...curProjectArticleList];
+      dispatch({ type: 'set', curProjectArticleList: articlesAry })
     }
     else
     {

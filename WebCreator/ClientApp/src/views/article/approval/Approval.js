@@ -353,41 +353,43 @@ class ApprovalBase extends Component {
           <tr>
             <td colSpan={4}>
               <table>
-                <tr>
-                  <td>
-                    <CFormCheck id={"checkAll" + id} label="Chceck All | Selected" 
-                      onChange={(e) => {
-                        var checkedItem = this.state.checkedItem
-                        Object.keys(this.state.checkedItem).map((item)=>{
-                          checkedItem[item].checked = e.target.checked
-                          //console.log(item)
-                        })
-                        this.setState({
-                          checkedItem: checkedItem,
-                        })  
-                        //console.log(e.target.checked, this.state.checkedItem[article.id])
-                      }}
-                    />
-                  </td>
-                  <td className='px-2'>
-                    <CButton onClick={() => this.setArticleState(2)}>Approval</CButton>
-                  </td>
-                  <td className='px-2'>
-                    <CButton onClick={() => this.setArticleState(1)}>UnApproval</CButton>
-                  </td>
-                  <td className='px-2'>
-                    <CButton onClick={() => this.setArticleState(3)}>Online</CButton>
-                  </td>
-                  <td className='px-2'>
-                    <CButton onClick={() => this.scrapFromAPI(0)}>Scrap From AF</CButton>
-                  </td>
-                  <td className='px-2'>
-                    <CButton onClick={() => this.scrapFromAPI(1)}>Scrap From OpenAI</CButton>
-                  </td>
-                  <td className='px-2'>
-                    <CButton onClick={() => this.deleteBatchArticleConfirm()}>Delete</CButton>
-                  </td>
-                </tr>
+                <tbody>
+                  <tr>
+                    <td>
+                      <CFormCheck id={"checkAll" + id} label="Chceck All | Selected" 
+                        onChange={(e) => {
+                          var checkedItem = this.state.checkedItem
+                          Object.keys(this.state.checkedItem).map((item)=>{
+                            checkedItem[item].checked = e.target.checked
+                            //console.log(item)
+                          })
+                          this.setState({
+                            checkedItem: checkedItem,
+                          })  
+                          //console.log(e.target.checked, this.state.checkedItem[article.id])
+                        }}
+                      />
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.setArticleState(2)}>Approval</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.setArticleState(1)}>UnApproval</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.setArticleState(3)}>Online</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.scrapFromAPI(0)}>Scrap From AF</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.scrapFromAPI(1)}>Scrap From OpenAI</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.deleteBatchArticleConfirm()}>Delete</CButton>
+                    </td>
+                  </tr>
+                </tbody>
               </table>
             </td>
           </tr>

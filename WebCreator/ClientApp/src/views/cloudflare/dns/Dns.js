@@ -7,12 +7,20 @@ import {
   CAlert,
   CPagination,
   CPaginationItem,
+  CRow,
+  CCol,
+  CContainer,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { Outlet, Link } from 'react-router-dom'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { alertConfirmOption } from 'src/utility/common'
+import { confirmAlert } from 'react-confirm-alert'
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 class DnsBase extends Component {
   static displayName = DnsBase.name
@@ -45,6 +53,47 @@ class DnsBase extends Component {
 
   gotoNextPage() {
     this.populateData(this.state.curPage + 1)
+  }
+
+  deleteDnsConfirm = (dnsName) => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to delete this dnse.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => this.deleteDns(dnsName)
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  };
+
+  async deleteDns(dnsName) {
+    const requestOptions = {
+      method: 'GET'
+    }
+    fetch(`${process.env.REACT_APP_SERVER_URL}dns/deleteDns/${dnsName}`, requestOptions)
+      .then((response) => {
+        if (response.status === 200) {
+          response.json().then(data => {
+            if( data.result )
+            {
+              console.log('success:', data.result)
+              toast.success('DNS \"' + dnsName + '\" was deleted successfully.', alertConfirmOption);
+            }
+            else
+            {
+              console.log('failed:', data.result)
+              toast.error(`Failed to delete this DNS ${dnsName}.`, alertConfirmOption);
+            }
+          })
+        }
+      })
+      .catch((err) => console.log(err))
   }
 
   renderProjectsTable(state) {
@@ -107,24 +156,42 @@ class DnsBase extends Component {
         >
           {state.alertMsg}
         </CAlert>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
         <table className="table">
           <thead>
             <tr>
-              <th>Id</th>
-              <th>Domain</th>
-              <th>Content</th>
-              <th>Type</th>
-              <th>TTL</th>
+              <th className='text-center'>Id</th>
+              <th className='text-center'>Domain</th>
+              <th className='text-center'>Content</th>
+              <th className='text-center'>Type</th>
+              <th className='text-center'>TTL</th>
+              <th className='text-center'>Action</th>
             </tr>
           </thead>
           <tbody>
             {state.listData.map((dns) => (
               <tr key={dns.id}>
-                <td>{dns.id}</td>
+                <td className='text-center'>{dns.id}</td>
                 <td>{dns.name}</td>
                 <td>{dns.content}</td>
-                <td>{dns.type}</td>
-                <td>{dns.ttl}</td>
+                <td className='text-center'>{dns.type}</td>
+                <td className='text-center'>{dns.ttl}</td>
+                <td className='text-center'>
+                  <CButton type="button" onClick={() => this.deleteDnsConfirm(dns.name)}>
+                    Delete
+                  </CButton>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -148,7 +215,21 @@ class DnsBase extends Component {
     )
     return (
       <CCard className="mb-4">
-        <CCardHeader>All DNS For {this.state.zoneInfo.zoneName}</CCardHeader>
+        <CCardHeader>
+          <CContainer>
+            <CRow>
+              <CCol className="align-self-start">All DNS For {this.state.zoneInfo.zoneName}</CCol>
+              <CCol className="align-self-end" xs="auto">
+                <CButton
+                  type="button"
+                  onClick={() => this.props.navigate(-1)}
+                >
+                  Back
+                </CButton>
+              </CCol>
+            </CRow>
+          </CContainer>
+        </CCardHeader>
         <CCardBody>{contents}</CCardBody>
       </CCard>
     )
@@ -173,11 +254,13 @@ class DnsBase extends Component {
 
 DnsBase.propTypes = {
   location: PropTypes.any,
+  navigate: PropTypes.any,
 }
 
 const Dns = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   //console.log(location.state)
   if (location.state == null && location.search.length > 0) {
@@ -191,6 +274,6 @@ const Dns = (props) => {
     dispatch({ type: 'set', activeTab: 'cloudflare_dns' })
   }, [])
 
-  return <DnsBase location={location} {...props} />
+  return <DnsBase location={location} navigate ={navigate} {...props} />
 }
 export default Dns

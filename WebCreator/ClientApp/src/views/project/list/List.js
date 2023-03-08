@@ -208,23 +208,23 @@ export default class List extends Component {
         <table className="table">
           <thead>
             <tr>
-              <th>Id</th>
-              <th>Domain</th>
-              <th>Keyword</th>
-              <th>Action</th>
+              <th className='text-center'>Id</th>
+              <th className='text-center'>Domain</th>
+              <th className='text-center'>Keyword</th>
+              <th className='text-center'>Action</th>
             </tr>
           </thead>
           <tbody>
             {state.projects.map((project) => (
               <tr key={project.id}>
-                <td>{project.id}</td>
+                <td className='text-center'>{project.id}</td>
                 <td>
                   <Link to={`/article/list`} state={{ projectid: project.id }}>
                     {project.name}
                   </Link>
                 </td>
                 <td>{project.keyword}</td>
-                <td>
+                <td className='text-center'>
                   <CButton
                     className="d-none"
                     type="button"

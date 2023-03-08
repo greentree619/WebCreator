@@ -58,6 +58,22 @@ namespace WebCreator.Controllers
             return Content(sResult, "application/json");
         }
 
+        [HttpGet("deleteZone/{zoneName}")]
+        public async Task<IActionResult> DeleteZoneNameAsync(String zoneName)
+        {
+            bool ret = false;
+            ret = new CloudFlareAPI().DeleteZone(zoneName);
+            return Ok(new { result = ret });
+        }
+
+        [HttpGet("deleteDns/{zoneName}")]
+        public async Task<IActionResult> DeleteDnsNameAsync(String zoneName)
+        {
+            bool ret = false;
+            ret = await new CloudFlareAPI().DeleteDnsThreadAsync(zoneName, "");
+            return Ok(new { result = ret });
+        }
+
         [HttpGet("{zoneid}/{page}/{count}")]
         public async Task<IActionResult> GetAsync(string zoneId, int page = 1, int count = 5)
         {

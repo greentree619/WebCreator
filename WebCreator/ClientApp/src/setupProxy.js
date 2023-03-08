@@ -28,6 +28,8 @@ const context =  [
   "/article/scrapArticleManual",
   "/dns",
   "/dns/byname",
+  "/dns/deleteZone",
+  "/dns/deleteDns",
   "/s3Bucket",
   "/s3Bucket/contents",
   "/s3Bucket/upload",

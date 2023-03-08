@@ -422,10 +422,10 @@ class ApprovalBase extends Component {
         <table className="table">
           <thead>
             <tr>
-              <th>Id</th>
-              <th>Title</th>
-              <th>Action</th>
-              <th>Status</th>
+              <th className='text-center'>Id</th>
+              <th className='text-center'>Title</th>
+              <th className='text-center'>Action</th>
+              <th className='text-center'>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -434,7 +434,7 @@ class ApprovalBase extends Component {
               //if (article.content != null && article.content.length > 0)
               {
                 return (<tr key={article.id}>
-                  <td><CFormCheck id={article.id} label={article.id}
+                  <td className='text-center'><CFormCheck id={article.id} label={article.id}
                       checked={this.state.checkedItem[article.id].checked}
                       onChange={(e) => {
                         var ret = this.state.checkedItem
@@ -453,7 +453,7 @@ class ApprovalBase extends Component {
                                                             (article.content == null || article.content.length == 0) ? "info" : "success"
                                                             }>OpenAI</CBadge></>) ))}
                   </td>
-                  <td>
+                  <td className='text-center'>
                     <Link onClick={()=>this.savePageState()} to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
                       <CButton type="button">View</CButton>
                     </Link>
@@ -462,7 +462,7 @@ class ApprovalBase extends Component {
                       Delete
                     </CButton>
                   </td>
-                  <td>
+                  <td className='text-center'>
                     {this.getArticleState(article.state)}
                   </td>
                 </tr>)

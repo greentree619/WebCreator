@@ -93,9 +93,9 @@ const View = (props) => {
         <table className="table">
           <thead>
             <tr>
-              <th>Id</th>
-              <th>Action</th>
-              <th>Date Time</th>
+              <th className='text-center'>Id</th>
+              <th className='text-center'>Action</th>
+              <th className='text-center'>Date Time</th>
             </tr>
           </thead>
           <tbody>
@@ -103,7 +103,7 @@ const View = (props) => {
               //if (log.content != null && log.content.length > 0)
               {
                 return (<tr key={log.id}>
-                  <td>{log.id}</td>
+                  <td className='text-center'>{log.id}</td>
                   <td>{log.log}</td>
                   <td>{log.createdTime.replace('T', ' ')}</td>
                 </tr>)

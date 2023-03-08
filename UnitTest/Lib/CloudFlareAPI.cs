@@ -103,8 +103,9 @@ namespace UnitTest.Lib
             }
         }
 
-        public async Task DeleteDnsThreadAsync(String domain, String ip)
+        public async Task<bool> DeleteDnsThreadAsync(String domain, String ip)
         {
+            bool bret = false;
             try
             {
                 String[] domainInfo = domain.Split(".");
@@ -112,7 +113,7 @@ namespace UnitTest.Lib
                 {
                     String zone = domainInfo[domainInfo.Length - 2] + "." + domainInfo[domainInfo.Length - 1];
                     ListDns(zone, domain);
-                    DeleteDns(zone, domain);//DeleteZone(domain, "");
+                    bret = DeleteDns(zone, domain);//DeleteZone(domain, "");
                     ListDns(zone, domain);//ListZone(domain, "");
                 }
             }
@@ -120,6 +121,7 @@ namespace UnitTest.Lib
             {
                 Console.WriteLine("[CloudFlare] =========> " + e.Message);
             }
+            return bret;
         }
 
         /*

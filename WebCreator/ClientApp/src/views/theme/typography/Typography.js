@@ -18,8 +18,8 @@ const Typography = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Heading</th>
-                <th>Example</th>
+                <th className='text-center'>Heading</th>
+                <th className='text-center'>Example</th>
               </tr>
             </thead>
             <tbody>

@@ -597,9 +597,9 @@ const Modals = () => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Size</th>
-                  <th>Property size</th>
-                  <th>Modal max-width</th>
+                  <th className='text-center'>Size</th>
+                  <th className='text-center'>Property size</th>
+                  <th className='text-center'>Modal max-width</th>
                 </tr>
               </thead>
               <tbody>
@@ -656,8 +656,8 @@ const Modals = () => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Property fullscrean</th>
-                  <th>Availability</th>
+                  <th className='text-center'>Property fullscrean</th>
+                  <th className='text-center'>Availability</th>
                 </tr>
               </thead>
               <tbody>

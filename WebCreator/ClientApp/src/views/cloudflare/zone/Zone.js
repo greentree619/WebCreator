@@ -7,12 +7,22 @@ import {
   CAlert,
   CPagination,
   CPaginationItem,
+  CRow,
+  CCol,
+  CContainer,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet, Link, useNavigate } from 'react-router-dom'
+import PropTypes from 'prop-types'
+import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage } from 'src/utility/common.js'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { alertConfirmOption } from 'src/utility/common'
+import { confirmAlert } from 'react-confirm-alert'
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
-export default class Zone extends Component {
-  static displayName = Zone.name
+class ZoneBase extends Component {
+  static displayName = ZoneBase.name
 
   constructor(props) {
     super(props)
@@ -37,6 +47,51 @@ export default class Zone extends Component {
 
   gotoNextPage() {
     this.populateData(this.state.curPage + 1)
+  }
+
+  savePageState = () => {
+    saveToLocalStorage({listData: this.state.listData, curPage: this.state.curPage, totalPage: this.state.totalPage}, 'zoneList')
+  }
+
+  deleteZoneConfirm = (zoneName) => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to delete this zone.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => this.deleteZone(zoneName)
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  };
+
+  async deleteZone(zoneName) {
+    const requestOptions = {
+      method: 'GET'
+    }
+    fetch(`${process.env.REACT_APP_SERVER_URL}dns/deleteZone/${zoneName}`, requestOptions)
+      .then((response) => {
+        if (response.status === 200) {
+          response.json().then(data => {
+            if( data.result )
+            {
+              console.log('success:', data.result)
+              toast.success('Zone \"' + zoneName + '\" was deleted successfully.', alertConfirmOption);
+            }
+            else
+            {
+              console.log('failed:', data.result)
+              toast.error('Failed to delete this zone.', alertConfirmOption);
+            }
+          })
+        }
+      })
+      .catch((err) => console.log(err))
   }
 
   renderProjectsTable(state) {
@@ -99,29 +154,47 @@ export default class Zone extends Component {
         >
           {state.alertMsg}
         </CAlert>
+        <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
         <table className="table">
           <thead>
             <tr>
-              <th>Id</th>
-              <th>Zone</th>
-              <th>status</th>
-              <th>name servers</th>
+              <th className='text-center'>Id</th>
+              <th className='text-center'>Zone</th>
+              <th className='text-center'>Status</th>
+              <th className='text-center'>Name servers</th>
+              <th className='text-center'>Action</th>
             </tr>
           </thead>
           <tbody>
             {state.listData.map((row) => (
               <tr key={row.id}>
-                <td>{row.id}</td>
+                <td className='text-center'>{row.id}</td>
                 <td>
-                  <Link to={`/cloudflare/dns`} state={{ zoneId: row.id, zoneName: row.name }}>
+                  <Link onClick={()=>this.savePageState()} to={`/cloudflare/dns`} state={{ zoneId: row.id, zoneName: row.name }}>
                     {row.name}
                   </Link>
                 </td>
-                <td>{row.status}</td>
+                <td className='text-center'>{row.status}</td>
                 <td>
                   {row.name_servers.map((serv, index) => {
                     return serv + ', '
                   })}
+                </td>
+                <td className='text-center'>
+                  <CButton type="button" onClick={() => this.deleteZoneConfirm(row.name)}>
+                    Delete
+                  </CButton>
                 </td>
               </tr>
             ))}
@@ -141,14 +214,44 @@ export default class Zone extends Component {
       this.renderProjectsTable(this.state)
     )
     return (
-      <CCard className="mb-4">
-        <CCardHeader>All Zones</CCardHeader>
-        <CCardBody>{contents}</CCardBody>
-      </CCard>
+      <>
+        <CCard className="mb-4">
+          <CCardHeader>
+            <CContainer>
+              <CRow>
+                <CCol className="align-self-start">All Zones</CCol>
+                <CCol className="align-self-end" xs="auto">
+                  {/* <CButton
+                    type="button"
+                    onClick={() => this.props.navigate(-1)}
+                  >
+                    Back
+                  </CButton> */}
+                </CCol>
+              </CRow>
+            </CContainer>
+          </CCardHeader>
+          <CCardBody>{contents}</CCardBody>
+        </CCard>
+      </>
     )
   }
 
   async populateData(pageNo) {
+    var zoneList = loadFromLocalStorage('zoneList')
+    if(zoneList != null && zoneList != undefined)
+    {
+      //console.log(zoneList)
+      this.setState({
+        listData: zoneList.listData,
+        curPage: zoneList.curPage,
+        totalPage: zoneList.totalPage,
+        loading: false,
+      })
+      clearLocalStorage('zoneList')
+      return
+    }
+
     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}dns/` + pageNo + '/200')
     const data = await response.json()
     this.setState({
@@ -160,3 +263,16 @@ export default class Zone extends Component {
     })
   }
 }
+
+ZoneBase.propTypes = {
+  navigate: PropTypes.any,
+}
+
+const Zone = (props) => {
+  const navigate = useNavigate()
+
+  // useEffect(() => {
+  // }, [])
+  return <ZoneBase navigate ={navigate} {...props} />
+}
+export default Zone

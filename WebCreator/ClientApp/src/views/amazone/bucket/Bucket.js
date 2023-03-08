@@ -222,12 +222,12 @@ const Bucket = (props) => {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th>No</th>
-                        <th>Bucket Name</th>
-                        <th>Region</th>
-                        <th>Create Date</th>
-                        <th>Action</th>
-                        <th>Status</th>
+                        <th className='text-center'>No</th>
+                        <th className='text-center'>Bucket Name</th>
+                        <th className='text-center'>Region</th>
+                        <th className='text-center'>Create Date</th>
+                        <th className='text-center'>Action</th>
+                        <th className='text-center'>Status</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -241,7 +241,7 @@ const Bucket = (props) => {
                             //if (article.content != null && article.content.length > 0)
                             {
                               return (<tr key={bucket.index}>
-                                <td><CFormCheck id={bucket.index+""} label={bucket.index}
+                                <td className='text-center'><CFormCheck id={bucket.index+""} label={bucket.index}
                                     // checked={checkedItem[String(bucket.name)].checked}
                                     onChange={(e) => {
                                       var ret = checkedItem
@@ -252,9 +252,9 @@ const Bucket = (props) => {
                                     }}/>
                                 </td>
                                 <td>{bucket.name}</td>
-                                <td>{bucket.region}</td>
-                                <td>{bucket.createDate}</td>
-                                <td>
+                                <td className='text-center'>{bucket.region}</td>
+                                <td className='text-center'>{bucket.createDate}</td>
+                                <td className='text-center'>
                                   <Link to={`/amazone/contents`} state={{ domainId:'1234567890', domain:bucket.name, region: bucket.region }}>
                                     <CButton type="button" onClick={() => onContent()}>Content</CButton>
                                   </Link>
@@ -273,7 +273,7 @@ const Bucket = (props) => {
                                     Delete
                                   </CButton>
                                 </td>
-                                <td>
+                                <td className='text-center'>
                                   {"Public"}
                                 </td>
                               </tr>)

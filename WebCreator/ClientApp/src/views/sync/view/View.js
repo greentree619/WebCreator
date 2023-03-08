@@ -179,10 +179,10 @@ class ListBase extends Component {
         <table className="table">
           <thead>
             <tr>
-              <th>Id</th>
-              <th>Title</th>
-              <th>Link</th>
-              <th>Status</th>
+              <th className='text-center'>Id</th>
+              <th className='text-center'>Title</th>
+              <th className='text-center'>Link</th>
+              <th className='text-center'>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -191,17 +191,17 @@ class ListBase extends Component {
               {
                 return (
                   <tr key={article.id}>
-                    <td>{article.id}</td>
+                    <td className='text-center'>{article.id}</td>
                     <td>
                         {article.title}
                       {/* <Link to={{pathname: `/openlink`, search: '?url='+this.getLink(article.title)}}>
                         {article.title}
                       </Link> */}
                     </td>
-                    <td>
+                    <td className='text-center'>
                       <button disabled={article.content == null || article.content.length == 0} onClick={() => openNewPage(article.title)}>Open Link</button>
                     </td>
-                    <td>
+                    <td className='text-center'>
                       {this.state.sync[article.id] == null ?  <CSpinner size="sm"/> : (this.state.sync[article.id] ? "OK" : "Failed")}
                     </td>
                   </tr>

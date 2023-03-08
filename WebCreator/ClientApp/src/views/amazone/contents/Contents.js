@@ -151,9 +151,9 @@ const Contents = (props) => {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th>FileName</th>
-                        <th>Modified Date</th>
-                        <th>Size</th>
+                        <th className='text-center'>FileName</th>
+                        <th className='text-center'>Modified Date</th>
+                        <th className='text-center'>Size</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -170,8 +170,8 @@ const Contents = (props) => {
                                 <td>
                                   {file.key}
                                 </td>
-                                <td>{file.date}</td>
-                                <td>{file.size}</td>
+                                <td className='text-center'>{file.date}</td>
+                                <td className='text-center'>{file.size}</td>
                               </tr>)
                             }
                           })

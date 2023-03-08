@@ -337,6 +337,10 @@ const Keyword = (props) => {
                       />
                     </div>
                     <div className={'mb-12 d-grid gap-2 col-6 mx-auto'}>
+                      <CButton type="button" onClick={() =>
+                        updateProject()
+                      }>Update</CButton>
+                      &nbsp;
                       <CButton
                         type="button"
                         onClick={() =>
@@ -349,10 +353,6 @@ const Keyword = (props) => {
                       >
                         Scrap
                       </CButton>
-                      &nbsp;
-                      <CButton type="button" onClick={() =>
-                            updateProject()
-                          }>Update</CButton>
                     </div>
                   </CTabPane>
                   <CTabPane role="tabpanel" aria-labelledby="profile-tab" visible={activeKey === 2}>

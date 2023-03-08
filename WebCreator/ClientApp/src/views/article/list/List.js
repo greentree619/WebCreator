@@ -360,10 +360,10 @@ class ListBase extends Component {
         <table className="table">
           <thead>
             <tr>
-              <th>Id</th>
-              <th>Title</th>
-              <th>Action</th>
-              <th>Status</th>
+              <th className='text-center'>Id</th>
+              <th className='text-center'>Title</th>
+              <th className='text-center'>Action</th>
+              <th className='text-center'>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -371,7 +371,7 @@ class ListBase extends Component {
               //if (article.content != null && article.content.length > 0)
               {
                 return (<tr key={article.id}>
-                  <td>{article.id}</td>
+                  <td className='text-center'>{article.id}</td>
                   <td>{article.title}{((article.articleId != null && article.articleId != '1234567890' && article.articleId != '55555')
                                                                                         && (<>&nbsp;<CBadge color={
                                                             (article.content == null || article.content.length == 0) ? "info" : "success"
@@ -380,7 +380,7 @@ class ListBase extends Component {
                                                             (article.content == null || article.content.length == 0) ? "info" : "success"
                                                             }>OpenAI</CBadge></>) ))}
                   </td>
-                  <td>
+                  <td className='text-center'>
                   <CButton
                       type="button"
                       onClick={() => this.scrapArticle(article.id, article.title, 0)}
@@ -414,7 +414,7 @@ class ListBase extends Component {
                       Delete
                     </CButton>
                   </td>
-                  <td>
+                  <td className='text-center'>
                     {article.articleId != null && article.articleId.length > 0 && this.state.sync[article.articleId] != null ? 
                       (<>{this.state.sync[article.articleId]} %</>) 
                       : 

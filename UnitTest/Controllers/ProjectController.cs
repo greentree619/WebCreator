@@ -330,6 +330,7 @@ namespace WebCreator.Controllers
         public async Task<ActionResult> AddProjectAsync([FromBody] Project projectInput)
         {
             bool addOK = false;
+            projectInput.UseHttps = (projectInput.UseHttps == null ? false : projectInput.UseHttps);
             var project = new Project
             {
                 Name = projectInput.Name,
@@ -339,7 +340,7 @@ namespace WebCreator.Controllers
                 S3BucketName = (projectInput.S3BucketName == null ? "" : projectInput.S3BucketName),
                 S3BucketRegion = (projectInput.S3BucketRegion == null ? "" : projectInput.S3BucketRegion),
                 Ip = projectInput.Ip,
-                UseHttps = projectInput.UseHttps,
+                UseHttps = (projectInput.Ip.CompareTo("0.0.0.0") == 0 ? true : projectInput.UseHttps),
                 OnScrapping = false,
                 OnAFScrapping = false,
                 OnPublishSchedule = false,

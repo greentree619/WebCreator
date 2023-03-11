@@ -229,6 +229,7 @@ const Add = (props) => {
 
   const handleIpAddrClick = (ipAddr) => {
     setIpAddress(ipAddr)
+    if(ipAddr == "0.0.0.0") setUseHttps( true )
     //console.log('clicked ' + i + ', state.value = ' + languageValue)
   }
 

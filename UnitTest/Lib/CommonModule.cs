@@ -966,6 +966,8 @@ namespace UnitTest.Lib
                 {
                     var article = document.ConvertTo<Article>();
                     DomainIpMap domainInfo = (DomainIpMap)domainMap[article.ProjectId.ToString()];
+                    if (domainInfo == null) continue;
+
                     String hostingDomain = CommonModule.GetDomain(domainInfo.domain, isAWSHost, s3Name, region);
                     if ( !selfdomain.ip.Equals(domainInfo.ip) 
                         || !selfHostingDomain.Equals(hostingDomain) ) continue;

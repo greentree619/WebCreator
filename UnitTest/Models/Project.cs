@@ -69,6 +69,8 @@ namespace WebCreator.Models
         [FirestoreProperty]
         public bool OnAFScrapping { get; set; }
         [FirestoreProperty]
+        public bool OnOpenAIScrapping { get; set; }
+        [FirestoreProperty]
         public bool OnPublishSchedule { get; set; }
         [FirestoreProperty]
         public String Language { get; set; }

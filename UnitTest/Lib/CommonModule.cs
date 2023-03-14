@@ -29,7 +29,7 @@ namespace UnitTest.Lib
     internal class CommonModule
     {
         public static Hashtable threadList = new Hashtable();
-        public static Hashtable afThreadList = new Hashtable();
+        public static Hashtable articleScrappingThreadList = new Hashtable();
         public static Hashtable publishThreadList = new Hashtable();
         public static Hashtable project2LanguageMap = new Hashtable();
         public static Hashtable project2UseHttpsMap = new Hashtable();
@@ -87,6 +87,26 @@ namespace UnitTest.Lib
             }
         }
 
+        public static async Task SetDomainOpenAIScrappingAsync(String domainId, bool isScrapping)
+        {
+            try
+            {
+                CollectionReference col = Config.FirebaseDB.Collection("Projects");
+                DocumentReference docRef = col.Document(domainId);
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                {
+                    { "OnOpenAIScrapping",  isScrapping},
+                    { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
+                };
+                await docRef.UpdateAsync(userUpdate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         public static async Task SetDomainPublishScheduleAsync(String domainId, bool isRunning)
         {
             try
@@ -107,34 +127,34 @@ namespace UnitTest.Lib
             }
         }        
 
-        public static async Task<JObject> IsDomainScrappingAsync(String domainId)
-        {
-            bool isScrapping = false;
-            bool isAFScrapping = false;
-            try
-            {
-                CollectionReference articlesCol = Config.FirebaseDB.Collection("Projects");
-                DocumentReference docRef = articlesCol.Document(domainId);
-                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
-                if (snapshot.Exists)
-                {
-                    var prj = snapshot.ConvertTo<Project>();
-                    isScrapping = (prj.OnScrapping != null ? prj.OnScrapping : false);
-                    isAFScrapping = (prj.OnAFScrapping != null ? prj.OnAFScrapping : false);
-                }
+        //public static async Task<JObject> IsDomainScrappingAsync(String domainId)
+        //{
+        //    bool isScrapping = false;
+        //    bool isAFScrapping = false;
+        //    try
+        //    {
+        //        CollectionReference articlesCol = Config.FirebaseDB.Collection("Projects");
+        //        DocumentReference docRef = articlesCol.Document(domainId);
+        //        DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+        //        if (snapshot.Exists)
+        //        {
+        //            var prj = snapshot.ConvertTo<Project>();
+        //            isScrapping = (prj.OnScrapping != null ? prj.OnScrapping : false);
+        //            isAFScrapping = (prj.OnAFScrapping != null ? prj.OnAFScrapping : false);
+        //        }
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //    }
 
-            JObject res = new JObject();
-            res["serpapi"] = isScrapping;
-            res["afapi"] = isAFScrapping;
+        //    JObject res = new JObject();
+        //    res["serpapi"] = isScrapping;
+        //    res["afapi"] = isAFScrapping;
 
-            return res;
-        }
+        //    return res;
+        //}
 
         public static async Task<bool> ScrapArticleAsync(ArticleForge af, String question, String articleid, String language) {
             bool status = false;
@@ -287,10 +307,53 @@ namespace UnitTest.Lib
                 }
 
                 Task.Run(() => UpdateArticleScrappingProgress());//Refresh Article Forge Scrapping status.
+                Task.Run(() => RestartBackgroundThreads());//If publish thread and scrapping thread is on, resume the threads.
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+            }
+        }
+
+        public async Task RestartBackgroundThreads()
+        {
+            try
+            {
+                CollectionReference projectsCol = Config.FirebaseDB.Collection("Projects");
+                QuerySnapshot projectsSnapshot = await projectsCol.GetSnapshotAsync();
+                foreach (DocumentSnapshot document in projectsSnapshot.Documents)
+                {
+                    var project = document.ConvertTo<Project>();
+                    project.Id = document.Id;
+                    
+                    if (project.OnPublishSchedule)
+                    { //Resume publish
+                        CommonModule.publishThreadList[project.Id] = true;
+                        Schedule schedule = await CommonModule.GetPublishScheduleAsync(project.Id);
+                        Task.Run(() => new SerpapiScrap().PublishThreadAsync(project.Id, schedule.Id));
+                    }
+
+                    if (project.OnOpenAIScrapping || project.OnAFScrapping)
+                    { //Resume AF Scrapping || Resume OpenAI Scrapping
+                        CommonModule.articleScrappingThreadList[project.Id] = true;
+                        CommonModule.domainScrappingScheduleStatus[project.Id] = 
+                            new ScrappingScheduleStatus { isRunning = true, mode = (project.OnAFScrapping ? 0 : 1) };
+                        Schedule schedule = await CommonModule.GetScheduleAsync(project.Id);
+
+                        if ( project.OnAFScrapping )
+                        {
+                            Task.Run(() => new SerpapiScrap().ScrappingAFThreadAsync(project.Id, schedule.Id));
+                        }
+                        else if ( project.OnOpenAIScrapping )
+                        {
+                            Task.Run(() => new SerpapiScrap().ScrappingOpenAIThreadAsync(project.Id, schedule.Id));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -1436,6 +1499,34 @@ namespace UnitTest.Lib
             }
 
             return SigBase64;
+        }
+
+        public static async Task<Schedule> GetPublishScheduleAsync(String projectId)
+        {
+            Schedule schedule = null;
+            CollectionReference col = Config.FirebaseDB.Collection("PublishSchedules");
+            Query query = col.WhereEqualTo("ProjectId", projectId).Limit(1);
+            QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+            if (projectsSnapshot.Documents.Count > 0)
+            {
+                schedule = projectsSnapshot.Documents[0].ConvertTo<Schedule>();
+                schedule.Id = projectsSnapshot.Documents[0].Id;
+            }
+            return schedule;
+        }
+
+        public static async Task<Schedule> GetScheduleAsync(String projectId)
+        {
+            Schedule schedule = null;
+            CollectionReference col = Config.FirebaseDB.Collection("Schedules");
+            Query query = col.WhereEqualTo("ProjectId", projectId).Limit(1);
+            QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+            if (projectsSnapshot.Documents.Count > 0)
+            {
+                schedule = projectsSnapshot.Documents[0].ConvertTo<Schedule>();
+                schedule.Id = projectsSnapshot.Documents[0].Id;
+            }
+            return schedule;
         }
     }
 }

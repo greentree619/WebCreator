@@ -86,7 +86,7 @@ namespace UnitTest.Lib
                     {
                         schedule = scheduleSnapshot.ConvertTo<Schedule>();
 
-                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.afThreadList[_id]; i++)
+                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
                         {
                             Article scrapAF = scrapArticles.Pop();
                             do {
@@ -96,14 +96,14 @@ namespace UnitTest.Lib
                                 //}}In case start manual scrap, sleep untile complete
                                 afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
                             }
-                            while (!afRet && (bool)CommonModule.afThreadList[_id]);
+                            while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
                         }
 
-                        while ( (bool)CommonModule.afThreadList[_id] )
+                        while ( (bool)CommonModule.articleScrappingThreadList[_id] )
                         {
                             Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
-                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.afThreadList[_id]; i++)
+                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
                                 do {
@@ -113,7 +113,7 @@ namespace UnitTest.Lib
                                     //}}In case start manual scrap, sleep untile complete
                                     afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
                                 }
-                                while ( !afRet && (bool)CommonModule.afThreadList[_id]);
+                                while ( !afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
                                 
                             }
                         }
@@ -127,14 +127,14 @@ namespace UnitTest.Lib
                 Console.WriteLine("AF scrapping All done.");
 
                 CommonModule.SetDomainAFScrappingAsync(_id, false);
-                CommonModule.afThreadList[_id] = false;
+                CommonModule.articleScrappingThreadList[_id] = false;
             }
         }
 
         public async Task ScrappingOpenAIThreadAsync(String _id, String scheduleId)
         {
             {
-                CommonModule.SetDomainAFScrappingAsync(_id, true);
+                CommonModule.SetDomainOpenAIScrappingAsync(_id, true);
                 try
                 {
                     Schedule schedule;
@@ -160,7 +160,7 @@ namespace UnitTest.Lib
                     {
                         schedule = scheduleSnapshot.ConvertTo<Schedule>();
 
-                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.afThreadList[_id]; i++)
+                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
                         {
                             Article scrapAF = scrapArticles.Pop();
                             do
@@ -171,14 +171,14 @@ namespace UnitTest.Lib
                                 //}}In case start manual scrap, sleep untile complete
                                 afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
                             }
-                            while (!afRet && (bool)CommonModule.afThreadList[_id]);
+                            while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
                         }
 
-                        while ((bool)CommonModule.afThreadList[_id])
+                        while ((bool)CommonModule.articleScrappingThreadList[_id])
                         {
                             Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
-                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.afThreadList[_id]; i++)
+                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
                                 do
@@ -189,7 +189,7 @@ namespace UnitTest.Lib
                                     //}}In case start manual scrap, sleep untile complete
                                     afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
                                 }
-                                while (!afRet && (bool)CommonModule.afThreadList[_id]);
+                                while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
 
                             }
                         }
@@ -202,8 +202,8 @@ namespace UnitTest.Lib
 
                 Console.WriteLine("OpenAI scrapping All done.");
 
-                CommonModule.SetDomainAFScrappingAsync(_id, false);
-                CommonModule.afThreadList[_id] = false;
+                CommonModule.SetDomainOpenAIScrappingAsync(_id, false);
+                CommonModule.articleScrappingThreadList[_id] = false;
             }
         }
 

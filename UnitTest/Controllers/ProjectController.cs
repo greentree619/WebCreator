@@ -92,14 +92,7 @@ namespace WebCreator.Controllers
             Schedule schedule = null;
             try
             {
-                CollectionReference col = Config.FirebaseDB.Collection("Schedules");
-                Query query = col.WhereEqualTo("ProjectId", domainid).Limit(1);
-                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
-                if (projectsSnapshot.Documents.Count > 0)
-                {
-                    schedule = projectsSnapshot.Documents[0].ConvertTo<Schedule>();
-                    schedule.Id = projectsSnapshot.Documents[0].Id;
-                }
+                schedule = await CommonModule.GetScheduleAsync(domainid);
             }
             catch (Exception ex)
             {
@@ -114,14 +107,7 @@ namespace WebCreator.Controllers
             Schedule schedule = null;
             try
             {
-                CollectionReference col = Config.FirebaseDB.Collection("PublishSchedules");
-                Query query = col.WhereEqualTo("ProjectId", domainid).Limit(1);
-                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
-                if (projectsSnapshot.Documents.Count > 0)
-                {
-                    schedule = projectsSnapshot.Documents[0].ConvertTo<Schedule>();
-                    schedule.Id = projectsSnapshot.Documents[0].Id;
-                }
+                schedule = await CommonModule.GetPublishScheduleAsync(domainid);
             }
             catch (Exception ex)
             {
@@ -135,13 +121,13 @@ namespace WebCreator.Controllers
         {
             //Omitted JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(domainId);
             bool isScrapping = (CommonModule.threadList[domainId] != null ? (bool)CommonModule.threadList[domainId] : false);
-            bool isAFScrapping = (CommonModule.afThreadList[domainId] != null ? (bool)CommonModule.afThreadList[domainId] : false);
+            bool isArticleScrapping = (CommonModule.articleScrappingThreadList[domainId] != null ? (bool)CommonModule.articleScrappingThreadList[domainId] : false);
             bool isPublishing = (CommonModule.publishThreadList[domainId] != null ? (bool)CommonModule.publishThreadList[domainId] : false);
             int scrappingScheduleMode = (CommonModule.domainScrappingScheduleStatus[domainId] != null ? 
                 ((ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[domainId]).mode : 0);
 
             //return list;
-            return Ok(new { serpapi=isScrapping, afapi= isAFScrapping, publish= isPublishing, scrappingScheduleMode = scrappingScheduleMode });
+            return Ok(new { serpapi=isScrapping, afapi= isArticleScrapping, publish= isPublishing, scrappingScheduleMode = scrappingScheduleMode });
         }
 
         [HttpGet("allDownload/{domainId}/{domainName}/{domainIp}")]
@@ -343,6 +329,7 @@ namespace WebCreator.Controllers
                 UseHttps = (projectInput.Ip.CompareTo("0.0.0.0") == 0 ? true : projectInput.UseHttps),
                 OnScrapping = false,
                 OnAFScrapping = false,
+                OnOpenAIScrapping = false,
                 OnPublishSchedule = false,
                 LanguageString = projectInput.LanguageString,
                 ContactInfo = projectInput.ContactInfo,
@@ -583,9 +570,9 @@ namespace WebCreator.Controllers
         {
             bool ret = false;
             String lang = CommonModule.project2LanguageMap[_id].ToString();
-            if (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false)
+            if (CommonModule.articleScrappingThreadList[_id] == null || (bool)CommonModule.articleScrappingThreadList[_id] == false)
             {
-                CommonModule.afThreadList[_id] = true;
+                CommonModule.articleScrappingThreadList[_id] = true;
                 if (CommonModule.domainScrappingScheduleStatus[_id] == null)
                     CommonModule.domainScrappingScheduleStatus[_id] = new ScrappingScheduleStatus { isRunning = true, mode = 0 };
                 else {
@@ -598,7 +585,7 @@ namespace WebCreator.Controllers
             }
             else
             {
-                CommonModule.afThreadList[_id] = false;
+                CommonModule.articleScrappingThreadList[_id] = false;
                 ScrappingScheduleStatus status = (ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[_id];
                 status.isRunning = false;
                 ret = false;
@@ -610,9 +597,9 @@ namespace WebCreator.Controllers
         public ActionResult StartOpenAIapi(String _id, String sid)
         {
             bool ret = false;
-            if (CommonModule.afThreadList[_id] == null || (bool)CommonModule.afThreadList[_id] == false)
+            if (CommonModule.articleScrappingThreadList[_id] == null || (bool)CommonModule.articleScrappingThreadList[_id] == false)
             {
-                CommonModule.afThreadList[_id] = true;
+                CommonModule.articleScrappingThreadList[_id] = true;
                 if (CommonModule.domainScrappingScheduleStatus[_id] == null)
                     CommonModule.domainScrappingScheduleStatus[_id] = new ScrappingScheduleStatus { isRunning = true, mode = 1 };
                 else
@@ -627,7 +614,7 @@ namespace WebCreator.Controllers
             }
             else
             {
-                CommonModule.afThreadList[_id] = false;
+                CommonModule.articleScrappingThreadList[_id] = false;
                 ScrappingScheduleStatus status = (ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[_id];
                 status.isRunning = false;
                 ret = false;

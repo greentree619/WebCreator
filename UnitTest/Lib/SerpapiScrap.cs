@@ -266,6 +266,7 @@ namespace UnitTest.Lib
                 CommonModule.SetDomainPublishScheduleAsync(_id, true);
                 try
                 {
+                    bool publishRet = false;
                     PublishSchedule schedule;
                     CollectionReference scheduleCol = Config.FirebaseDB.Collection("PublishSchedules");
                     DocumentReference docRef = scheduleCol.Document(scheduleId);
@@ -307,8 +308,9 @@ namespace UnitTest.Lib
                                 await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
                                 await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip, projInfo.S3BucketName);
                                 //}}
+                                publishRet = true;
                             }
-                            while ((bool)CommonModule.publishThreadList[_id]);
+                            while ( !publishRet );
                         }
 
                         while ((bool)CommonModule.publishThreadList[_id])
@@ -328,9 +330,9 @@ namespace UnitTest.Lib
                                     await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
                                     await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip, projInfo.S3BucketName);
                                     //}}
+                                    publishRet = true;
                                 }
-                                while ((bool)CommonModule.publishThreadList[_id]);
-
+                                while ( !publishRet );
                             }
                         }
                     }

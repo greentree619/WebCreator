@@ -194,8 +194,10 @@ namespace WebCreator.Controllers
                     scrapStatus[article.ArticleId.ToString()] = article.Progress;
                 }
 #else
+                String refArticleId = "";
                 foreach (String articleId in articleRefKeyList) {
-                    int prog = af.getApiProgress(articleId);
+                    refArticleId = articleId;
+                    int prog = af.getApiProgress(ref refArticleId);
                     scrapStatus[articleId] = prog;
                 }
 
@@ -205,7 +207,7 @@ namespace WebCreator.Controllers
                         && CommonModule.refKeyCash[articleDocId].ToString().Length > 0 )
                     {
                         String articleId = CommonModule.refKeyCash[articleDocId].ToString();
-                        int prog = af.getApiProgress(articleId);
+                        int prog = af.getApiProgress(ref articleId);
                         scrapStatus[articleDocId] = prog;
                     }
                 }
@@ -300,7 +302,9 @@ namespace WebCreator.Controllers
 #else
                 if (article.IsScrapping && article.Progress == 0 && article.ArticleId != null)
                 {
-                    int prog = af.getApiProgress(article.ArticleId);
+                    String refArticleId = article.ArticleId;
+                    int prog = af.getApiProgress(ref refArticleId);
+                    //article.ArticleId = refArticleId;
                     article.Progress = prog;
                     if (prog == 100)
                     {

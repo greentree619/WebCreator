@@ -117,7 +117,9 @@ const Add = (props) => {
   const [language, setLanguage] = useState(
     location.state && !simpleMode ? location.state.project.languageString : 'Engllish',
   )
-  const [languageValue, setLanguageValue] = useState('en')
+  const [languageValue, setLanguageValue] = useState(
+    location.state && !simpleMode ? location.state.project.language : 'en',
+  )
   const [isOnScrapping, setIsOnScrapping] = useState(false)
   const [isOnAFScrapping, setIsOnAFScrapping] = useState(false)
   const [isOnPublish, setIsOnPublish] = useState(false)
@@ -200,6 +202,18 @@ const Add = (props) => {
       dispatch({ type: 'set', activeProject: location.state.project })
       saveToLocalStorage({name: location.state.project.s3BucketName, region: location.state.project.s3BucketRegion}, 's3host')
 
+      if (location.state && !simpleMode)
+      {//Because update, update redux project array.
+        var allProjects = loadFromLocalStorage('allProjects')
+        if(allProjects != null && allProjects != undefined)
+        {
+          let tmpProjects = [...allProjects]
+          let idx = tmpProjects.findIndex((pro) => pro.id === projInfo.id)
+          tmpProjects[idx] = projInfo//tmpProjects.splice(idx, 1)
+          saveToLocalStorage(tmpProjects, 'allProjects')
+        }
+      }
+
       if (simpleMode)
       {
         clearLocalStorage('allProjects')
@@ -210,7 +224,6 @@ const Add = (props) => {
       toast.error('Faild to create/update new domain unfortunatley.', alertConfirmOption);
     }
     //setAlarmVisible(true)
-
   }
 
   const handleClick = (lang, value) => {
@@ -468,7 +481,7 @@ const Add = (props) => {
                             <CCol className='mb-8'>
                               <CFormSelect id="bucketSelect" value={s3BucketName} 
                                 onChange={(obj) => onChangedBucketName(obj.target.value)} 
-                                size="sm" className="mb-3" aria-label="Small select example"
+                                size="sm" className="mb-3" aria-label="Select Bucket"
                                 disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}>
                                 {
                                   s3BucketList.map((bucketItem, index) => {
@@ -480,7 +493,7 @@ const Add = (props) => {
                             <CCol className='mb-4'>
                               <CFormSelect id="regionSelect" value={s3BucketRegion} 
                                 onChange={(obj) => setS3BucketRegion(obj.target.value)} 
-                                size="sm" className="mb-3" aria-label="Small select example"
+                                size="sm" className="mb-3" aria-label="Select Region"
                                 disabled={true}>
                                 {
                                   globalRegionMap.map((regionItem, index) => {
@@ -531,7 +544,7 @@ const Add = (props) => {
                       <div className={simpleMode ? 'd-none' : 'mb-3'}>
                         <CRow>
                           <CCol>
-                            <CFormLabel htmlFor="exampleFormControlInput1">Language</CFormLabel>
+                            <CFormLabel htmlFor="exampleFormControlInput1">Language({languageValue})</CFormLabel>
                             &nbsp;
                             <CDropdown
                               id="axes-dd"

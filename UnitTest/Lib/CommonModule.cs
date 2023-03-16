@@ -374,10 +374,15 @@ namespace UnitTest.Lib
                         if (!article.IsScrapping && article.Progress == 100) continue;
 
                         int prog = 0;
+                        if (article.ArticleId != null
+                            && (article.ArticleId.CompareTo("55555") == 0 || article.ArticleId.CompareTo("1234567890") == 0)) continue;
+
                         if (article.ArticleId != null)
                         {
-                            prog = af.getApiProgress(article.ArticleId);
-                            if (prog == article.Progress) continue;
+                            String refArticleId = article.ArticleId;
+                            prog = af.getApiProgress(ref refArticleId);
+                            article.ArticleId = refArticleId;
+                            if (refArticleId != null && prog == article.Progress) continue;
                         }
                         //if (prog == 0) continue;
 
@@ -391,6 +396,7 @@ namespace UnitTest.Lib
                         }
                         else if (article.ArticleId == null)
                         {
+                            update["ArticleId"] = null;
                             update["IsScrapping"] = false;
                             update["Progress"] = 0;
                         }

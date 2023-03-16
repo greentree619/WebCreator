@@ -61,6 +61,7 @@ import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import Truncate from 'react-truncate'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadFromLocalStorage, saveToLocalStorage, clearLocalStorage } from 'src/utility/common'
+import { ReactSession }  from 'react-client-session'
 
 const Dashboard = () => {
   const dispatch = useDispatch()
@@ -105,17 +106,27 @@ const Dashboard = () => {
   async function getAllProject() {
     var allProjects = loadFromLocalStorage('allProjects')
     console.log( allProjects )
-    if(allProjects == null || allProjects == undefined || allProjects.length == 0)
+
+    var prevAllProjects = ReactSession.get("allProjects")
+    //console.log("prevAllProjects 1", prevAllProjects)
+    if(prevAllProjects === undefined)
     {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/1/200`)
       const data = await response.json()
       console.log(data.data)
       saveToLocalStorage(data.data, 'allProjects')
       setProjects(data.data)
+
+      ReactSession.set("allProjects", "1")
+      //prevAllProjects = ReactSession.get("allProjects")
+      //console.log("prevAllProjects 2", prevAllProjects)
     }
     else
     {
-      setProjects( allProjects )
+      if(allProjects != null && allProjects != undefined && allProjects.length > 0)
+      {
+        setProjects( allProjects )
+      }
     }
   }
 

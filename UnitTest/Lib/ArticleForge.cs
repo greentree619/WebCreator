@@ -314,7 +314,7 @@ namespace UnitTest.Lib
          * @param int $ref_key ref ID in ArticleForge
          * @return int the percentage of completion, range 0-100
          */
-        public int getApiProgress(String ref_key)
+        public int getApiProgress(ref String ref_key)
         {
             if (ref_key.Length == 0)
             {
@@ -347,6 +347,7 @@ namespace UnitTest.Lib
                 return progress;
             }
 
+            ref_key = null;
             return 0;
         }
 

@@ -27,10 +27,11 @@ namespace WebCreator.Models
         [FirestoreProperty]
         public String? MetaAuthor { get; set; }
         [FirestoreProperty]
-
         public String? Content { get; set; }
         [FirestoreProperty]
         public String? Footer { get; set; }
+        [FirestoreProperty]
+        public List<String>? ImageArray { get; set; }
         [FirestoreProperty]
         public int State { get; set; }//0-Unknow, 1-UnApproved, 2-Approved , 3-Online, 4 - Delete
         [FirestoreProperty]

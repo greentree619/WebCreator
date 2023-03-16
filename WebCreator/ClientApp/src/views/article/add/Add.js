@@ -17,6 +17,7 @@ import {
   CDropdownItem,
   CDropdownToggle,
   CDropdownMenu,
+  CImage,
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -31,6 +32,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { alertConfirmOption, saveToLocalStorage, loadFromLocalStorage } from 'src/utility/common'
 import { useDispatch, useSelector } from 'react-redux'
+import AddImage from 'src/assets/images/AddImage.png'
 
 const Add = (props) => {
   const location = useLocation()
@@ -76,6 +78,7 @@ const Add = (props) => {
         metaAuthor: metaAuthor,
         content: content,
         footer: footer,
+        imageArray: ["asdf1", "asdf2", "asdf3", "asdf4"],
       }),
     }
 
@@ -251,6 +254,11 @@ const Add = (props) => {
                   ]
               }}
               />
+            </div>
+            <div className="clearfix">
+              <CImage align="start" rounded src={"https://cdn.pixabay.com/photo/2023/03/08/10/11/crocuses-7837426_150.jpg"} width={80} height={80} />
+              &nbsp;<CImage align="start" rounded src={"https://cdn.pixabay.com/photo/2023/03/11/07/36/bird-7843879_150.jpg"} width={80} height={80} />
+              &nbsp;<CImage align="start" rounded src={AddImage} width={80} height={80} />
             </div>
             <div className="mb-3">
               <CButton type="button" onClick={() => navigate(-1)}>

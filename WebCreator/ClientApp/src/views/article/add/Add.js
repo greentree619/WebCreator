@@ -33,6 +33,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { alertConfirmOption, saveToLocalStorage, loadFromLocalStorage } from 'src/utility/common'
 import { useDispatch, useSelector } from 'react-redux'
 import AddImage from 'src/assets/images/AddImage.png'
+import { render } from '@testing-library/react'
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 const Add = (props) => {
   const location = useLocation()
@@ -50,6 +53,12 @@ const Add = (props) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const curProjectArticleList = useSelector((state) => state.curProjectArticleList)
+  const [addImgVisible, setAddImgVisible] = useState(false)
+  const [imageGallery, setImageGallery] = useState([])
+  const [imageArray, setImageArray] = useState([])
+  const [thumbImageArray, setThumbImageArray] = useState([])
+  const [searchPixabay, setSearchPixabay] = useState(true)
+  const [refreshFlag, setRefreshFlag] = useState(true)
 
   function onChange( content )
   {
@@ -78,7 +87,8 @@ const Add = (props) => {
         metaAuthor: metaAuthor,
         content: content,
         footer: footer,
-        imageArray: ["asdf1", "asdf2", "asdf3", "asdf4"],
+        imageArray: imageArray,
+        thumbImageArray: thumbImageArray,
       }),
     }
 

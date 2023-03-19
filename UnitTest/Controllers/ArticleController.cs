@@ -475,6 +475,7 @@ namespace WebCreator.Controllers
                         { "MetaKeywords", article.MetaKeywords },
                         { "Content", article.Content },
                         { "ImageArray", article.ImageArray },
+                        { "ThumbImageArray", article.ThumbImageArray },
                         { "Footer", article.Footer },
                     };
                 await docRef.UpdateAsync(userUpdate);

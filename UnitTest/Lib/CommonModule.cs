@@ -449,6 +449,8 @@ namespace UnitTest.Lib
                 IsScrapping = false,
                 Progress = progress,
                 State = 0,
+                ImageArray = articleParam.ImageArray,
+                ThumbImageArray = articleParam.ThumbImageArray,
                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             };
@@ -617,6 +619,20 @@ namespace UnitTest.Lib
                     if (!m.Success)
                     {
                         articleTemplate = Regex.Replace(articleTemplate, @"([<][/]head[>])", "  " + canonialTag + "\n" + "</head>");
+                    }
+
+                    if (article.ImageArray != null && article.ImageArray.Count > 0)
+                    {//Image replace
+                        String imagePattern = @"(['""]?{{IMAGE}}['""]?)";
+                        Match im = Regex.Match(articleTemplate, imagePattern, RegexOptions.IgnoreCase);
+                        int i = 0, sz = article.ImageArray.Count;
+                        Regex rgx = new Regex(imagePattern, RegexOptions.IgnoreCase);
+                        while ( im.Success )
+                        {
+                            articleTemplate = rgx.Replace(articleTemplate, "\"" + article.ImageArray[i].ToString() + "\"", 1);
+                            im = Regex.Match(articleTemplate, imagePattern, RegexOptions.IgnoreCase);
+                            i++;i %= sz;
+                        }
                     }
 
                     //Auto replace for title

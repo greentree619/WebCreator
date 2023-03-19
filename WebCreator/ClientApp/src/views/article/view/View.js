@@ -19,6 +19,19 @@ import {
   CDropdownMenu,
   CFormCheck,
   CImage,
+  CModal,
+  CModalBody,
+  CModalTitle,
+  CModalFooter,
+  CModalHeader,
+  CFormSwitch,
+  CContainer,
+  COffcanvas,
+  COffcanvasHeader,
+  CCloseButton,
+  CCardTitle,
+  CCardText,
+  CNavLink,
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -36,6 +49,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux'
 import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption } from 'src/utility/common.js'
 import AddImage from 'src/assets/images/AddImage.png'
+import { render } from '@testing-library/react'
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import AddImagesComponent from '../common/AddImagesComponent'
 
 const View = (props) => {
   const location = useLocation()
@@ -54,6 +71,12 @@ const View = (props) => {
   const [metaAuthor, setMetaAuthor] = useState('')
   const [pixabayURL, setPixabayURL] = useState('https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=480&min_height=600&per_page=100&page=1')
   const [useTitleByBrandname, setUseTitleByBrandname] = useState(activeProject.contactInfo.useTitleByBrandname)
+  const [addImgVisible, setAddImgVisible] = useState(false)
+  const [imageGallery, setImageGallery] = useState([])
+  const [imageArray, setImageArray] = useState([])
+  const [thumbImageArray, setThumbImageArray] = useState([])
+  const [searchPixabay, setSearchPixabay] = useState(true)
+  const addImagesComponent = useRef()
   
   console.log(activeProject)
 
@@ -71,6 +94,8 @@ const View = (props) => {
       if (data.data.metaAuthor != null) setMetaAuthor(data.data.metaAuthor)
       if (data.data.content != null) setContent(data.data.content)
       if (data.data.footer != null) setFooter(data.data.footer)
+      if (data.data.imageArray != null) setImageArray(data.data.imageArray)
+      if (data.data.thumbImageArray != null) setThumbImageArray(data.data.thumbImageArray)
 
       if( useTitleByBrandname )
       {
@@ -107,7 +132,8 @@ const View = (props) => {
         metaTitle: (metaTitle.length == 0 ? title : metaTitle),
         footer: footer,
         state: article.state,
-        ImageArray: ["asdf1", "asdf2", "asdf3", "asdf4"],
+        imageArray: imageArray,
+        thumbImageArray: thumbImageArray,
       }),
     }
 
@@ -142,6 +168,84 @@ const View = (props) => {
   const getBodySunEditorInstance = (sunEditor) => {
     bodyEditor.current = sunEditor;
   };
+
+  // const attachImageGallery = async ( isPixabay, keyword ) => {
+  //   console.log("attachImageGallery=>", isPixabay, keyword)
+
+  //   setImageGallery([])
+  //   //if(keyword.length == 0) return
+  //   if(isPixabay)
+  //   {
+  //     const requestOptions = {
+  //       method: 'GET',
+  //     }
+  //     const response = await fetch(`https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=${keyword}&image_type=photo&min_width=480&min_height=600&per_page=100&page=1`, requestOptions)
+  //     let ret = await response.json()
+  //     if (response.status === 200 && ret) {
+  //       //console.log(ret.hits[0])
+  //       var tmpGallery = []
+  //       ret.hits.map((img, idx) => {
+  //         tmpGallery.push({url:img.largeImageURL
+  //           , thumb:img.previewURL})          
+  //       })
+  //       setImageGallery(tmpGallery)
+  //       //console.log(imageGallery)
+  //     }
+  //   }
+  //   else
+  //   {
+
+  //   }
+  // }
+
+  // const generateImagesFromTitle = async () => {
+  //   var query = title.replace("?", "").replace(" ", "+")
+  //   const response = await fetch(
+  //     `${process.env.REACT_APP_SERVER_URL}project/translateKeyword?keyword=${query}`,
+  //   )
+  //   const data = await response.json()
+  //   if (response.status === 200 && data) {
+  //     query = data.data
+  //   }
+  //   setSearchKeyword(query)
+  //   console.log(searchKeyword)
+  //   attachImageGallery(searchPixabay, searchKeyword)
+  // }
+
+  // const addImageArray = (url, thumb) => {
+  //   console.log('thumb: ', url, thumb)
+  //   setImageArray(prev => [...prev, url])
+  //   setThumbImageArray(prev => [...prev, thumb])
+  //   setAddImgVisible(false)
+  // }
+
+  const deleteImageConfirm = (idx) => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to delete this.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => deleteImage(idx)
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  }
+
+  const deleteImage = async (idx) => {
+    console.log("deleteImage=>", idx)
+    var tmpimgAry = [...imageArray]
+    var tmpThumImgAry = [...thumbImageArray]
+    tmpimgAry.splice(idx, 1)
+    tmpThumImgAry.splice(idx, 1)
+    setImageArray(tmpimgAry)
+    setThumbImageArray(tmpThumImgAry)
+    console.log(thumbImageArray)
+  }
 
   return (
     <>
@@ -312,11 +416,23 @@ const View = (props) => {
                     ]
               }}/>
             </div>
-            <div className="clearfix">
-              <CImage align="start" rounded src={"https://cdn.pixabay.com/photo/2023/03/08/10/11/crocuses-7837426_150.jpg"} width={80} height={80} />
-              &nbsp;<CImage align="start" rounded src={"https://cdn.pixabay.com/photo/2023/03/11/07/36/bird-7843879_150.jpg"} width={80} height={80} />
-              &nbsp;<CImage align="start" rounded src={AddImage} width={80} height={80} />
-            </div>
+            <CCard style={{ width: '100%' }}>
+              <CCardBody>
+                <CCardTitle>Article Images</CCardTitle>
+                <CCardText>
+                  <div className="clearfix">
+                  {thumbImageArray.map((img, idx) => {
+                    //console.log(img.thumb)
+                    return (
+                      <>
+                        &nbsp;<CImage onClick={() => deleteImageConfirm(idx)} key={"thumb"+idx} align="start" rounded src={img} width={80} height={80} />
+                      </>)
+                  })}
+                    &nbsp;<CImage onClick={() => addImagesComponent.current.showAddImageModal()} align="start" rounded src={AddImage} width={80} height={80} />
+                  </div>                  
+                </CCardText>
+              </CCardBody>
+            </CCard>
             <div className="mb-3">
               <CButton type="button" onClick={() => navigate(-1)}>
                 Back
@@ -329,6 +445,53 @@ const View = (props) => {
           </CForm>
         </CCardBody>
       </CCard>
+      <AddImagesComponent 
+        ref = {addImagesComponent}
+        title = {title}
+        addImgVisible = {addImgVisible}
+        setAddImgVisible = {setAddImgVisible}
+        imageArray = {imageArray}
+        setImageArray = {setImageArray}
+        thumbImageArray = {thumbImageArray}
+        setThumbImageArray = {setThumbImageArray}
+      />
+      {/* <CModal scrollable size="xl" visible={addImgVisible} 
+        onClose={() => setAddImgVisible(false)}>
+        <CModalHeader onClose={() => setAddImgVisible(false)}>
+          <CRow className='col-12'>
+            <CCol xs={4} className="d-flex justify-content-center">
+              <CFormSwitch value={searchPixabay} onChange={(e)=>setSearchPixabay(!e.target.checked)} label="From Pixabay/OpenAI images" id="pixabayOrOpenAI"/>
+            </CCol>
+            <CCol xs={4} className="d-flex justify-content-center">
+              <CFormInput type="text" value={searchKeyword} 
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              placeholder="Search Keyword" aria-label="Search Keyword"/>
+              <CButton color="primary" onClick={()=>attachImageGallery(searchPixabay, searchKeyword)}>Search</CButton>
+            </CCol>
+            <CCol xs={4} className="d-flex justify-content-center">
+              <CButton color="dark" onClick={()=>generateImagesFromTitle()}>Generate Images From Title</CButton>
+            </CCol>
+          </CRow>
+        </CModalHeader>
+        <CModalBody>
+          <div className="clearfix">
+            {imageGallery.map((img, idx) => {
+              //console.log(img.thumb)
+              return (
+                <>
+                  <CImage key={idx} onClick={()=>addImageArray(img.url, img.thumb)}  align="start" className='p-1' rounded src={img.thumb} width={150} height={150} />
+                </>
+              )
+            })}
+          </div>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setAddImgVisible(false)}>
+            Close
+          </CButton>
+          <CButton color="primary">Select</CButton>
+        </CModalFooter>
+      </CModal> */}
     </>
   )
 }

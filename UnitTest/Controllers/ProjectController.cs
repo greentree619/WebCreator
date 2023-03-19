@@ -312,6 +312,19 @@ namespace WebCreator.Controllers
             return Ok(new { data = keywordFile });
         }
 
+        [HttpGet("translateKeyword")]
+        public async Task<IActionResult> TranslateKeyword(String keyword)
+        {
+            String transKeyword = "";
+            try
+            {
+                transKeyword = await CommonModule.deepLTranslate.Translate(keyword);
+            }
+            catch (Exception ex)
+            {}
+            return Ok(new { data = transKeyword });
+        }
+
         [HttpPost]
         public async Task<ActionResult> AddProjectAsync([FromBody] Project projectInput)
         {

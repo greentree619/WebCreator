@@ -148,11 +148,9 @@ const AddImagesComponent = forwardRef((props, ref) => {
           <div className="clearfix">
             {imageGallery.map((img, idx) => {
               //console.log(img.thumb)
-              return (
-                <>
-                  <CImage key={idx} onClick={()=>addImageArray(img.url, img.thumb)}  align="start" className='p-1' rounded src={img.thumb} width={150} height={150} />
-                </>
-              )
+              return <div key={idx}>
+                <CImage onClick={()=>addImageArray(img.url, img.thumb)}  align="start" className='p-1' rounded src={img.thumb} width={150} height={150} />
+              </div>
             })}
           </div>
         </CModalBody>

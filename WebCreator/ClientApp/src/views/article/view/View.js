@@ -75,7 +75,6 @@ const View = (props) => {
   const [imageGallery, setImageGallery] = useState([])
   const [imageArray, setImageArray] = useState([])
   const [thumbImageArray, setThumbImageArray] = useState([])
-  const [searchPixabay, setSearchPixabay] = useState(true)
   const addImagesComponent = useRef()
   
   console.log(activeProject)
@@ -168,56 +167,6 @@ const View = (props) => {
   const getBodySunEditorInstance = (sunEditor) => {
     bodyEditor.current = sunEditor;
   };
-
-  // const attachImageGallery = async ( isPixabay, keyword ) => {
-  //   console.log("attachImageGallery=>", isPixabay, keyword)
-
-  //   setImageGallery([])
-  //   //if(keyword.length == 0) return
-  //   if(isPixabay)
-  //   {
-  //     const requestOptions = {
-  //       method: 'GET',
-  //     }
-  //     const response = await fetch(`https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=${keyword}&image_type=photo&min_width=480&min_height=600&per_page=100&page=1`, requestOptions)
-  //     let ret = await response.json()
-  //     if (response.status === 200 && ret) {
-  //       //console.log(ret.hits[0])
-  //       var tmpGallery = []
-  //       ret.hits.map((img, idx) => {
-  //         tmpGallery.push({url:img.largeImageURL
-  //           , thumb:img.previewURL})          
-  //       })
-  //       setImageGallery(tmpGallery)
-  //       //console.log(imageGallery)
-  //     }
-  //   }
-  //   else
-  //   {
-
-  //   }
-  // }
-
-  // const generateImagesFromTitle = async () => {
-  //   var query = title.replace("?", "").replace(" ", "+")
-  //   const response = await fetch(
-  //     `${process.env.REACT_APP_SERVER_URL}project/translateKeyword?keyword=${query}`,
-  //   )
-  //   const data = await response.json()
-  //   if (response.status === 200 && data) {
-  //     query = data.data
-  //   }
-  //   setSearchKeyword(query)
-  //   console.log(searchKeyword)
-  //   attachImageGallery(searchPixabay, searchKeyword)
-  // }
-
-  // const addImageArray = (url, thumb) => {
-  //   console.log('thumb: ', url, thumb)
-  //   setImageArray(prev => [...prev, url])
-  //   setThumbImageArray(prev => [...prev, thumb])
-  //   setAddImgVisible(false)
-  // }
 
   const deleteImageConfirm = (idx) => {
     confirmAlert({
@@ -455,43 +404,6 @@ const View = (props) => {
         thumbImageArray = {thumbImageArray}
         setThumbImageArray = {setThumbImageArray}
       />
-      {/* <CModal scrollable size="xl" visible={addImgVisible} 
-        onClose={() => setAddImgVisible(false)}>
-        <CModalHeader onClose={() => setAddImgVisible(false)}>
-          <CRow className='col-12'>
-            <CCol xs={4} className="d-flex justify-content-center">
-              <CFormSwitch value={searchPixabay} onChange={(e)=>setSearchPixabay(!e.target.checked)} label="From Pixabay/OpenAI images" id="pixabayOrOpenAI"/>
-            </CCol>
-            <CCol xs={4} className="d-flex justify-content-center">
-              <CFormInput type="text" value={searchKeyword} 
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              placeholder="Search Keyword" aria-label="Search Keyword"/>
-              <CButton color="primary" onClick={()=>attachImageGallery(searchPixabay, searchKeyword)}>Search</CButton>
-            </CCol>
-            <CCol xs={4} className="d-flex justify-content-center">
-              <CButton color="dark" onClick={()=>generateImagesFromTitle()}>Generate Images From Title</CButton>
-            </CCol>
-          </CRow>
-        </CModalHeader>
-        <CModalBody>
-          <div className="clearfix">
-            {imageGallery.map((img, idx) => {
-              //console.log(img.thumb)
-              return (
-                <>
-                  <CImage key={idx} onClick={()=>addImageArray(img.url, img.thumb)}  align="start" className='p-1' rounded src={img.thumb} width={150} height={150} />
-                </>
-              )
-            })}
-          </div>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" onClick={() => setAddImgVisible(false)}>
-            Close
-          </CButton>
-          <CButton color="primary">Select</CButton>
-        </CModalFooter>
-      </CModal> */}
     </>
   )
 }

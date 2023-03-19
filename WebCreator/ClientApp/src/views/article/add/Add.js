@@ -18,6 +18,8 @@ import {
   CDropdownToggle,
   CDropdownMenu,
   CImage,
+  CCardTitle,
+  CCardText,
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -36,6 +38,7 @@ import AddImage from 'src/assets/images/AddImage.png'
 import { render } from '@testing-library/react'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import AddImagesComponent from '../common/AddImagesComponent'
 
 const Add = (props) => {
   const location = useLocation()
@@ -57,8 +60,7 @@ const Add = (props) => {
   const [imageGallery, setImageGallery] = useState([])
   const [imageArray, setImageArray] = useState([])
   const [thumbImageArray, setThumbImageArray] = useState([])
-  const [searchPixabay, setSearchPixabay] = useState(true)
-  const [refreshFlag, setRefreshFlag] = useState(true)
+  const addImagesComponent = useRef()
 
   function onChange( content )
   {
@@ -77,7 +79,7 @@ const Add = (props) => {
 
   const addNewArticle = async () => {
     const requestOptions = {
-      method: 'PUT',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         projectId: projectId,
@@ -124,6 +126,34 @@ const Add = (props) => {
   const getBodySunEditorInstance = (sunEditor) => {
     bodyEditor.current = sunEditor;
   };
+
+  const deleteImageConfirm = (idx) => {
+    confirmAlert({
+      title: 'Warnning',
+      message: 'Are you sure to delete this.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => deleteImage(idx)
+        },
+        {
+          label: 'No',
+          onClick: () => {return false;}
+        }
+      ]
+    });
+  }
+
+  const deleteImage = async (idx) => {
+    console.log("deleteImage=>", idx)
+    var tmpimgAry = [...imageArray]
+    var tmpThumImgAry = [...thumbImageArray]
+    tmpimgAry.splice(idx, 1)
+    tmpThumImgAry.splice(idx, 1)
+    setImageArray(tmpimgAry)
+    setThumbImageArray(tmpThumImgAry)
+    console.log(thumbImageArray)
+  }
 
   return (
     <>
@@ -265,11 +295,23 @@ const Add = (props) => {
               }}
               />
             </div>
-            <div className="clearfix">
-              <CImage align="start" rounded src={"https://cdn.pixabay.com/photo/2023/03/08/10/11/crocuses-7837426_150.jpg"} width={80} height={80} />
-              &nbsp;<CImage align="start" rounded src={"https://cdn.pixabay.com/photo/2023/03/11/07/36/bird-7843879_150.jpg"} width={80} height={80} />
-              &nbsp;<CImage align="start" rounded src={AddImage} width={80} height={80} />
-            </div>
+            <CCard style={{ width: '100%' }}>
+              <CCardBody>
+                <CCardTitle>Article Images</CCardTitle>
+                <CCardText>
+                  <div className="clearfix">
+                  {thumbImageArray.map((img, idx) => {
+                    //console.log(img.thumb)
+                    return (
+                      <>
+                        &nbsp;<CImage onClick={() => deleteImageConfirm(idx)} key={"thumb"+idx} align="start" rounded src={img} width={80} height={80} />
+                      </>)
+                  })}
+                    &nbsp;<CImage onClick={() => addImagesComponent.current.showAddImageModal()} align="start" rounded src={AddImage} width={80} height={80} />
+                  </div>                  
+                </CCardText>
+              </CCardBody>
+            </CCard>
             <div className="mb-3">
               <CButton type="button" onClick={() => navigate(-1)}>
                 Back
@@ -282,6 +324,16 @@ const Add = (props) => {
           </CForm>
         </CCardBody>
       </CCard>
+      <AddImagesComponent 
+        ref = {addImagesComponent}
+        title = {title}
+        addImgVisible = {addImgVisible}
+        setAddImgVisible = {setAddImgVisible}
+        imageArray = {imageArray}
+        setImageArray = {setImageArray}
+        thumbImageArray = {thumbImageArray}
+        setThumbImageArray = {setThumbImageArray}
+      />
     </>
   )
 }

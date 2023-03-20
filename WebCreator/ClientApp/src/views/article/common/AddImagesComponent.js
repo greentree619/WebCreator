@@ -32,6 +32,7 @@ import {
   CCardTitle,
   CCardText,
   CNavLink,
+  CSpinner,
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -57,13 +58,15 @@ const AddImagesComponent = forwardRef((props, ref) => {
   const [imageGallery, setImageGallery] = useState([])
   const [searchPixabay, setSearchPixabay] = useState(true)
   const [searchKeyword, setSearchKeyword] = useState('')
+  const [searchOn, setSearchOn] = useState(false)
 
   useEffect(() => {
   }, [])
 
   const attachImageGallery = async ( isPixabay, keyword ) => {
     console.log("attachImageGallery=>", isPixabay, keyword)
-
+    
+    setSearchOn(true)
     setImageGallery([])
     //if(keyword.length == 0) return
     if(isPixabay)
@@ -83,10 +86,26 @@ const AddImagesComponent = forwardRef((props, ref) => {
         setImageGallery(tmpGallery)
         //console.log(imageGallery)
       }
+      setSearchOn(false)
     }
     else
     {
-
+      const requestOptions = {
+        method: 'GET',
+      }
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}openAI/image/10?prompt=${keyword}`, requestOptions)
+      let ret = await response.json()
+      if (response.status === 200 && ret) {
+        //console.log(ret)
+        var tmpGallery = []
+        ret.data.map((img, idx) => {
+          tmpGallery.push({url:img.url
+            , thumb:"data:image/jpeg;base64," + img.thumb})
+        })
+        setImageGallery(tmpGallery)
+        //console.log(imageGallery)
+        setSearchOn(false)
+      }
     }
   }
 
@@ -94,13 +113,14 @@ const AddImagesComponent = forwardRef((props, ref) => {
     showAddImageModal()
     {
       props.setAddImgVisible(true)
-      setSearchPixabay(true)
-      setSearchKeyword("")
-      attachImageGallery(searchPixabay, searchKeyword)
+      //setSearchPixabay(true)
+      //setSearchKeyword("")
+      //attachImageGallery(searchPixabay, searchKeyword)
     }
   }));
 
   const generateImagesFromTitle = async () => {
+    setSearchOn(true)
     var query = props.title.replace("?", "").replace(" ", "+")
     const response = await fetch(
       `${process.env.REACT_APP_SERVER_URL}project/translateKeyword?keyword=${query}`,
@@ -111,7 +131,7 @@ const AddImagesComponent = forwardRef((props, ref) => {
     }
     setSearchKeyword(query)
     console.log(searchKeyword)
-    attachImageGallery(searchPixabay, searchKeyword)
+    attachImageGallery(searchPixabay, query)
   }
 
   const addImageArray = (url, thumb) => {
@@ -130,7 +150,10 @@ const AddImagesComponent = forwardRef((props, ref) => {
         onClose={() => props.setAddImgVisible(false)}>
         <CModalHeader onClose={() => props.setAddImgVisible(false)}>
           <CRow className='col-12'>
-            <CCol xs={4} className="d-flex justify-content-center">
+            <CCol xs={1} className="d-flex justify-content-center">
+              {searchOn ? <CSpinner size="md"/> : ""}
+            </CCol>
+            <CCol xs={3} className="d-flex justify-content-center">
               <CFormSwitch value={searchPixabay} onChange={(e)=>setSearchPixabay(!e.target.checked)} label="From Pixabay/OpenAI images" id="pixabayOrOpenAI"/>
             </CCol>
             <CCol xs={4} className="d-flex justify-content-center">
@@ -158,7 +181,7 @@ const AddImagesComponent = forwardRef((props, ref) => {
           <CButton color="secondary" onClick={() => props.setAddImgVisible(false)}>
             Close
           </CButton>
-          <CButton color="primary">Select</CButton>
+          {/* <CButton color="primary">Select</CButton> */}
         </CModalFooter>
       </CModal>
     </>

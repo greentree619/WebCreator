@@ -56,20 +56,20 @@ import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 const AddImagesComponent = forwardRef((props, ref) => {
   const [imageGallery, setImageGallery] = useState([])
-  const [searchPixabay, setSearchPixabay] = useState(true)
+  const [searchOpenAI, setSearchOpenAI] = useState(false)
   const [searchKeyword, setSearchKeyword] = useState('')
   const [searchOn, setSearchOn] = useState(false)
 
   useEffect(() => {
   }, [])
 
-  const attachImageGallery = async ( isPixabay, keyword ) => {
-    console.log("attachImageGallery=>", isPixabay, keyword)
+  const attachImageGallery = async ( searchOpenAI, keyword ) => {
+    console.log("attachImageGallery=>", searchOpenAI, keyword)
     
     setSearchOn(true)
     setImageGallery([])
     //if(keyword.length == 0) return
-    if(isPixabay)
+    if(!searchOpenAI)
     {
       const requestOptions = {
         method: 'GET',
@@ -112,10 +112,11 @@ const AddImagesComponent = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     showAddImageModal()
     {
+      console.log("showAddImageModal=>", searchOpenAI)
       props.setAddImgVisible(true)
-      //setSearchPixabay(true)
+      //setSearchOpenAI(true)
       //setSearchKeyword("")
-      //attachImageGallery(searchPixabay, searchKeyword)
+      //attachImageGallery(searchOpenAI, searchKeyword)
     }
   }));
 
@@ -131,7 +132,7 @@ const AddImagesComponent = forwardRef((props, ref) => {
     }
     setSearchKeyword(query)
     console.log(searchKeyword)
-    attachImageGallery(searchPixabay, query)
+    attachImageGallery(searchOpenAI, query)
   }
 
   const addImageArray = (url, thumb) => {
@@ -154,13 +155,13 @@ const AddImagesComponent = forwardRef((props, ref) => {
               {searchOn ? <CSpinner size={"md"}/> : ""}
             </CCol>
             <CCol xs={3} className="d-flex justify-content-center">
-              <CFormSwitch value={searchPixabay} onChange={(e)=>setSearchPixabay(!e.target.checked)} label="From Pixabay/OpenAI images" id="pixabayOrOpenAI"/>
+              <CFormSwitch checked={searchOpenAI} onChange={(e)=>setSearchOpenAI(e.target.checked)} label="From Pixabay/OpenAI images" id="pixabayOrOpenAI"/>
             </CCol>
             <CCol xs={4} className="d-flex justify-content-center">
               <CFormInput type="text" value={searchKeyword} 
               onChange={(e) => setSearchKeyword(e.target.value)}
               placeholder="Search Keyword" aria-label="Search Keyword"/>
-              <CButton color="primary" onClick={()=>attachImageGallery(searchPixabay, searchKeyword)}>Search</CButton>
+              <CButton color="primary" onClick={()=>attachImageGallery(searchOpenAI, searchKeyword)}>Search</CButton>
             </CCol>
             <CCol xs={4} className="d-flex justify-content-center">
               <CButton color="dark" onClick={()=>generateImagesFromTitle()}>Generate Images From Title</CButton>

@@ -374,7 +374,7 @@ const View = (props) => {
                     //console.log(img.thumb)
                     return (
                       <>
-                        &nbsp;<CImage onClick={() => deleteImageConfirm(idx)} key={"thumb"+idx} align="start" rounded src={img} width={80} height={80} />
+                        &nbsp;<CImage key={"thumb"+idx} onClick={() => deleteImageConfirm(idx)} align="start" rounded src={img} width={80} height={80} />
                       </>)
                   })}
                     &nbsp;<CImage onClick={() => addImagesComponent.current.showAddImageModal()} align="start" rounded src={AddImage} width={80} height={80} />

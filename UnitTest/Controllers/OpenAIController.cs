@@ -57,7 +57,7 @@ namespace UnitTest.Controllers
                 Directory.CreateDirectory(thumbFolder);
             }
 
-            if( prompt == null || prompt.Length == 0 ) return Ok(new { data = new List<String>() });
+            if (prompt == null || prompt.Length == 0) return Ok(new { data = new List<String>() });
 
             List<Hashtable> urls = CommonModule.GetImageFromOpenAI(prompt, n, thumbFolder);
             return Ok(new { data = urls });

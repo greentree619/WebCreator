@@ -151,7 +151,7 @@ const AddImagesComponent = forwardRef((props, ref) => {
         <CModalHeader onClose={() => props.setAddImgVisible(false)}>
           <CRow className='col-12'>
             <CCol xs={1} className="d-flex justify-content-center">
-              {searchOn ? <CSpinner size="md"/> : ""}
+              {searchOn ? <CSpinner size={"md"}/> : ""}
             </CCol>
             <CCol xs={3} className="d-flex justify-content-center">
               <CFormSwitch value={searchPixabay} onChange={(e)=>setSearchPixabay(!e.target.checked)} label="From Pixabay/OpenAI images" id="pixabayOrOpenAI"/>

@@ -257,7 +257,7 @@ const View = (props) => {
     if (response.status === 200 && ret) {
       // setAlertMsg('Updated AF schedule successfully.')
       // setAlertColor('success')
-      toast.success('Updated AF schedule successfully.', alertConfirmOption);
+      toast.success('Updated AF schedule successfully. Please restart schedule.', alertConfirmOption);
     }
     else
     {
@@ -301,7 +301,7 @@ const View = (props) => {
     if (response.status === 200 && ret) {
       // setAlertMsg('Updated publish schedule successfully.')
       // setAlertColor('success')
-      toast.success('Updated publish schedule successfully.', alertConfirmOption);
+      toast.success('Updated publish schedule successfully. Please restart schedule.', alertConfirmOption);
     }
     else
     {

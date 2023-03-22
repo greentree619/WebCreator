@@ -71,48 +71,31 @@ namespace UnitTest.Lib
                     DocumentReference docRef = scheduleCol.Document(scheduleId);
                     DocumentSnapshot scheduleSnapshot = await docRef.GetSnapshotAsync();
 
-                    CollectionReference col = Config.FirebaseDB.Collection("Articles");
-                    Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false).OrderBy("CreatedTime");
-                    QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
-
-                    Stack<Article> scrapArticles = new Stack<Article>();
-                    foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                    while ( (bool)CommonModule.articleScrappingThreadList[_id] )
                     {
-                        var article = document.ConvertTo<Article>();
-                        article.Id = document.Id;
-                        scrapArticles.Push(article);
-                    }
+                        CollectionReference col = Config.FirebaseDB.Collection("Articles");
+                        Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false).OrderBy("CreatedTime");
+                        QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
 
-                    ArticleForge af = new ArticleForge();
-                    bool afRet = false;
-                    if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
-                    {
-                        schedule = scheduleSnapshot.ConvertTo<Schedule>();
-
-                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                        Stack<Article> scrapArticles = new Stack<Article>();
+                        foreach (DocumentSnapshot document in totalSnapshot.Documents)
                         {
-                            Article scrapAF = scrapArticles.Pop();
-                            do {
-                                Thread.Sleep(10000);
-                                //{{In case start manual scrap, sleep untile complete
-                                while( CommonModule.isManualAFScrapping ) Thread.Sleep(5000);
-                                //}}In case start manual scrap, sleep untile complete
-                                afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
-                                await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
-                                    , _id
-                                    , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start");
-                            }
-                            while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
+                            var article = document.ConvertTo<Article>();
+                            article.Id = document.Id;
+                            scrapArticles.Push(article);
                         }
 
-                        while ( (bool)CommonModule.articleScrappingThreadList[_id] )
+                        ArticleForge af = new ArticleForge();
+                        bool afRet = false;
+                        if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
                         {
-                            Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+                            schedule = scheduleSnapshot.ConvertTo<Schedule>();
 
-                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                            for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
-                                do {
+                                do
+                                {
                                     Thread.Sleep(10000);
                                     //{{In case start manual scrap, sleep untile complete
                                     while (CommonModule.isManualAFScrapping) Thread.Sleep(5000);
@@ -122,10 +105,37 @@ namespace UnitTest.Lib
                                         , _id
                                         , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start");
                                 }
-                                while ( !afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
-                                
+                                while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
+                            }
+
+                            while ((bool)CommonModule.articleScrappingThreadList[_id])
+                            {
+                                Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+
+                                for (int i = 0; i < schedule.EachCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                                {
+                                    Article scrapAF = scrapArticles.Pop();
+                                    do
+                                    {
+                                        Thread.Sleep(10000);
+                                        //{{In case start manual scrap, sleep untile complete
+                                        while (CommonModule.isManualAFScrapping) Thread.Sleep(5000);
+                                        //}}In case start manual scrap, sleep untile complete
+                                        afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
+                                        await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                            , _id
+                                            , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start");
+                                    }
+                                    while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
+
+                                }
                             }
                         }
+
+                        await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                            , _id
+                                            , $"[Project ID={_id}] AF Article Scrapping Repeat");
+                        Thread.Sleep(10000);
                     }
                 }
                 catch (Exception ex)
@@ -157,46 +167,27 @@ namespace UnitTest.Lib
                     DocumentReference docRef = scheduleCol.Document(scheduleId);
                     DocumentSnapshot scheduleSnapshot = await docRef.GetSnapshotAsync();
 
-                    CollectionReference col = Config.FirebaseDB.Collection("Articles");
-                    Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false).OrderBy("CreatedTime");
-                    QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
-
-                    Stack<Article> scrapArticles = new Stack<Article>();
-                    foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                    while ( (bool)CommonModule.articleScrappingThreadList[_id] )
                     {
-                        var article = document.ConvertTo<Article>();
-                        article.Id = document.Id;
-                        scrapArticles.Push(article);
-                    }
+                        CollectionReference col = Config.FirebaseDB.Collection("Articles");
+                        Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false).OrderBy("CreatedTime");
+                        QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
 
-                    ArticleForge af = new ArticleForge();
-                    bool afRet = false;
-                    if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
-                    {
-                        schedule = scheduleSnapshot.ConvertTo<Schedule>();
-
-                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                        Stack<Article> scrapArticles = new Stack<Article>();
+                        foreach (DocumentSnapshot document in totalSnapshot.Documents)
                         {
-                            Article scrapAF = scrapArticles.Pop();
-                            do
-                            {
-                                Thread.Sleep(10000);
-                                //{{In case start manual scrap, sleep untile complete
-                                while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
-                                //}}In case start manual scrap, sleep untile complete
-                                afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
-                                await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
-                                    , _id
-                                    , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok");
-                            }
-                            while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
+                            var article = document.ConvertTo<Article>();
+                            article.Id = document.Id;
+                            scrapArticles.Push(article);
                         }
 
-                        while ((bool)CommonModule.articleScrappingThreadList[_id])
+                        ArticleForge af = new ArticleForge();
+                        bool afRet = false;
+                        if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
                         {
-                            Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+                            schedule = scheduleSnapshot.ConvertTo<Schedule>();
 
-                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                            for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
                                 do
@@ -211,9 +202,36 @@ namespace UnitTest.Lib
                                         , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok");
                                 }
                                 while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
+                            }
 
+                            while ((bool)CommonModule.articleScrappingThreadList[_id])
+                            {
+                                Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+
+                                for (int i = 0; i < schedule.EachCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                                {
+                                    Article scrapAF = scrapArticles.Pop();
+                                    do
+                                    {
+                                        Thread.Sleep(10000);
+                                        //{{In case start manual scrap, sleep untile complete
+                                        while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
+                                        //}}In case start manual scrap, sleep untile complete
+                                        afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                        await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                            , _id
+                                            , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok");
+                                    }
+                                    while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
+
+                                }
                             }
                         }
+
+                        await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                            , _id
+                                            , $"[Project ID={_id}] OpenAI Article Scrapping Repeat");
+                        Thread.Sleep(10000);
                     }
                 }
                 catch (Exception ex)
@@ -304,55 +322,32 @@ namespace UnitTest.Lib
                     DocumentSnapshot projectSnapshot = await docRef2.GetSnapshotAsync();
                     var projInfo = projectSnapshot.ConvertTo<Project>();
 
-                    CollectionReference col = Config.FirebaseDB.Collection("Articles");
-                    Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("State", 2).OrderBy("UpdateTime");
-                    QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
-
-                    Stack<Article> scrapArticles = new Stack<Article>();
-                    foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                    while ( (bool)CommonModule.publishThreadList[_id] )
                     {
-                        var article = document.ConvertTo<Article>();
-                        article.Id = document.Id;
-                        scrapArticles.Push(article);
-                    }
+                        CollectionReference col = Config.FirebaseDB.Collection("Articles");
+                        Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("State", 2).OrderBy("UpdateTime");
+                        QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
 
-                    ArticleForge af = new ArticleForge();
-                    if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
-                    {
-                        schedule = scheduleSnapshot.ConvertTo<PublishSchedule>();
-
-                        for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.publishThreadList[_id]; i++)
+                        Stack<Article> scrapArticles = new Stack<Article>();
+                        foreach (DocumentSnapshot document in totalSnapshot.Documents)
                         {
-                            Article scrapAF = scrapArticles.Pop();
-                            do
-                            {
-                                Thread.Sleep(10000);
-                                
-                                //Incase manual sync, sleep untile complete
-                                while (CommonModule.isManualSync) Thread.Sleep(5000);
-
-                                //{{
-                                await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
-                                await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip, projInfo.S3BucketName);
-                                //}}
-                                await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
-                                    , _id
-                                    , $"[Project ID={_id}] Article Id={scrapAF.Id} Sync OK");
-                                publishRet = true;
-                            }
-                            while ( !publishRet );
+                            var article = document.ConvertTo<Article>();
+                            article.Id = document.Id;
+                            scrapArticles.Push(article);
                         }
 
-                        while ((bool)CommonModule.publishThreadList[_id])
+                        ArticleForge af = new ArticleForge();
+                        if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
                         {
-                            Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+                            schedule = scheduleSnapshot.ConvertTo<PublishSchedule>();
 
-                            for (int i = 0; i < schedule.EachCount && (bool)CommonModule.publishThreadList[_id]; i++)
+                            for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.publishThreadList[_id]; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
                                 do
                                 {
                                     Thread.Sleep(10000);
+
                                     //Incase manual sync, sleep untile complete
                                     while (CommonModule.isManualSync) Thread.Sleep(5000);
 
@@ -361,13 +356,44 @@ namespace UnitTest.Lib
                                     await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip, projInfo.S3BucketName);
                                     //}}
                                     await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
-                                    , _id
-                                    , $"[Project ID={_id}] Article Id={scrapAF.Id} Sync OK");
+                                        , _id
+                                        , $"[Project ID={_id}] Article Id={scrapAF.Id} Sync OK");
                                     publishRet = true;
                                 }
-                                while ( !publishRet );
+                                while (!publishRet);
+                            }
+
+                            while ((bool)CommonModule.publishThreadList[_id])
+                            {
+                                Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
+
+                                for (int i = 0; i < schedule.EachCount && (bool)CommonModule.publishThreadList[_id]; i++)
+                                {
+                                    Article scrapAF = scrapArticles.Pop();
+                                    do
+                                    {
+                                        Thread.Sleep(10000);
+                                        //Incase manual sync, sleep untile complete
+                                        while (CommonModule.isManualSync) Thread.Sleep(5000);
+
+                                        //{{
+                                        await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
+                                        await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip, projInfo.S3BucketName);
+                                        //}}
+                                        await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
+                                        , _id
+                                        , $"[Project ID={_id}] Article Id={scrapAF.Id} Sync OK");
+                                        publishRet = true;
+                                    }
+                                    while (!publishRet);
+                                }
                             }
                         }
+
+                        Thread.Sleep(10000);
+                        await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
+                                        , _id
+                                        , $"[Project ID={_id}] Publish Process Repeat");
                     }
                 }
                 catch (Exception ex)

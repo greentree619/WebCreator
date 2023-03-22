@@ -483,6 +483,7 @@ const Add = (props) => {
                                 onChange={(obj) => onChangedBucketName(obj.target.value)} 
                                 size="sm" className="mb-3" aria-label="Select Bucket"
                                 disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}>
+                                  <option value="-">No selected</option>
                                 {
                                   s3BucketList.map((bucketItem, index) => {
                                       return (<option key={index} value={bucketItem.name}>{bucketItem.name}</option>)

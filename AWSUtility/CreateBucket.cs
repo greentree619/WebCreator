@@ -149,7 +149,7 @@ namespace AWSUtility
                 "{" +
                 "    \"Effect\": \"Allow\"," +
                 "    \"Principal\": {" +
-                "        \"AWS\": \"arn:aws:iam::975306180948:role/service-role/deploayWebsiteData-role-tnl6812t\"" +
+                "        \"AWS\": \"arn:aws:iam::031023765277:role/service-role/deploayWebsiteData-role-uvadv5bp\"" +
                 "    }," +
                 "    \"Action\": \"s3:*\"," +
                 "    \"Resource\": [" +

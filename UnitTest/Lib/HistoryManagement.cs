@@ -80,5 +80,26 @@ namespace UnitTest.Lib
                 Console.WriteLine(ex.Message);
             }
         }
+
+        public async Task LogActionHistory(String category, String domainId, String log)
+        {
+            var history = new History
+            {
+                Category = category,
+                DomainID = domainId,
+                Log = log,
+                CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+            };
+
+            try
+            {
+                CollectionReference col = Config.FirebaseDB.Collection("Histories");
+                DocumentReference docRef = await col.AddAsync(history);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
     }
 }

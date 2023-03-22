@@ -46,6 +46,10 @@ namespace UnitTest.Lib
         public static DeepLTranslate deepLTranslate = new DeepLTranslate();
         public static String baseLanguage = "EN";
         public static OpenAIAPI manualOpenAI = new OpenAIAPI(Config.OpenAIKey);
+        public static int OpenAIImageHeight = 1024;
+        public static int OpenAIImageWidth = 1024;//1280;
+        public static String PublishCategory = "Publish";
+        public static String ArticleScrapCategory = "ArticleScrap";
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -371,6 +375,7 @@ namespace UnitTest.Lib
                     foreach (DocumentSnapshot document in projectsSnapshot.Documents)
                     {
                         var article = document.ConvertTo<Article>();
+                        article.Id = document.Id;
                         if (!article.IsScrapping && article.Progress == 100) continue;
 
                         int prog = 0;
@@ -393,6 +398,10 @@ namespace UnitTest.Lib
                             update["Content"] = article.Content;
                             update["IsScrapping"] = false;
                             update["Progress"] = 100;
+
+                            await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , article.ProjectId
+                                    , $"[Project ID={article.ProjectId}] AF Article Id={article.Id} Scrapping Done");
                         }
                         else if (article.ArticleId == null)
                         {
@@ -578,6 +587,14 @@ namespace UnitTest.Lib
                     writer.WriteLine("</head>");
                     writer.WriteLine("<body>");
                     writer.WriteLine(article.Content);
+                    if (article.ImageArray != null && article.ImageArray.Count > 0)
+                    {//Image replace
+                        foreach(String url in article.ImageArray)
+                        {
+                            writer.WriteLine("<img src=\"" + url + "\" width=\"100%\">");
+                        }
+                    }
+
                     if (article.Footer != null && article.Footer.Length > 0)
                     {
                         writer.WriteLine("<footer>");
@@ -1421,7 +1438,7 @@ namespace UnitTest.Lib
             request.ContentType = "application/json";
             request.Headers.Add("Authorization", "Bearer " + Config.OpenAIKey);
 
-            string json = $"{{\"prompt\": \"{question}\",\"n\": 1,\"size\": \"1024x1024\"}}";
+            string json = $"{{\"prompt\": \"{question}\",\"n\": 1,\"size\": \"{OpenAIImageWidth}x{OpenAIImageHeight}\"}}";
             using (var streamWriter = new StreamWriter(request.GetRequestStream()))
             {
                 streamWriter.Write(json);
@@ -1457,7 +1474,7 @@ namespace UnitTest.Lib
             request.ContentType = "application/json";
             request.Headers.Add("Authorization", "Bearer " + Config.OpenAIKey);
 
-            string json = $"{{\"prompt\": \"{question}\",\"n\": {n},\"size\": \"1024x1024\"}}";
+            string json = $"{{\"prompt\": \"{question}\",\"n\": {n},\"size\": \"{OpenAIImageWidth}x{OpenAIImageHeight}\"}}";
             using (var streamWriter = new StreamWriter(request.GetRequestStream()))
             {
                 streamWriter.Write(json);

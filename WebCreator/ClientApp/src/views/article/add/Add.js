@@ -52,7 +52,7 @@ const Add = (props) => {
   const [metaDescription, setMetaDescription] = useState('')
   const [metaKeywords, setMetaKeywords] = useState('')
   const [metaAuthor, setMetaAuthor] = useState('')
-  const [pixabayURL, setPixabayURL] = useState('https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=480&min_height=600&per_page=100&page=1')
+  const [pixabayURL, setPixabayURL] = useState(`https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=${process.env.REACT_APP_PIXABAY_MIN_WIDTH}&min_height=${process.env.REACT_APP_PIXABAY_MIN_HEIGHT}&per_page=100&page=1`)
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const curProjectArticleList = useSelector((state) => state.curProjectArticleList)
@@ -71,8 +71,8 @@ const Add = (props) => {
     let q = title.replaceAll(' ', '+').replaceAll('?', '')
     console.log(q, title)
     setPixabayURL()
-    footEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
-    bodyEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
+    footEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + `&image_type=photo&min_width=${process.env.REACT_APP_PIXABAY_MIN_WIDTH}&min_height=${process.env.REACT_APP_PIXABAY_MIN_HEIGHT}&per_page=100&page=1`
+    bodyEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + `&image_type=photo&min_width=${process.env.REACT_APP_PIXABAY_MIN_WIDTH}&min_height=${process.env.REACT_APP_PIXABAY_MIN_HEIGHT}&per_page=100&page=1`
     console.log(footEditor.current.core.options.imageGalleryLoadURL)
 
   }, [title])
@@ -274,7 +274,7 @@ const Add = (props) => {
                   height: 200,
                   plugins: {...plugins, pixabayImageGallery},
                   katex: katex,
-                  imageGalleryLoadURL: "https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=480&min_height=600&per_page=100&page=1",
+                  imageGalleryLoadURL: `https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=${process.env.REACT_APP_PIXABAY_MIN_WIDTH}&min_height=${process.env.REACT_APP_PIXABAY_MIN_HEIGHT}&per_page=100&page=1`,
                   buttonList: [
                       ['undo', 'redo'],
                       ['font', 'fontSize', 'formatBlock'],

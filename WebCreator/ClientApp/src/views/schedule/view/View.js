@@ -21,7 +21,7 @@ import {
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import { Col } from 'reactstrap'
@@ -343,22 +343,26 @@ const View = (props) => {
                 onSubmit={handleSubmit}
               >
                 <div className="mb-3">
-                <CFormLabel htmlFor="scrappingEngine">Scrapping Schedule Mode</CFormLabel>
-                  <CFormSelect id="scrappingEngine" value={scrappingScheduleMode} disabled={location.state.isOnAFScrapping == 'true'} 
-                  onChange={(obj) => setScrappingScheduleMode(obj.target.value)} size="sm" className="mb-3" aria-label="Small select example">
-                    <option value="0">Article Forege</option>
-                    <option value="1">OpenAI</option>
-                  </CFormSelect>
-                </div>
-                <div className="mb-3">
-                  <CFormLabel htmlFor="exampleFormControlInput1">Scrapping Count for just now</CFormLabel>
-                  <CFormInput
-                    type="number"
-                    id="justNowCountFormControlInput"
-                    aria-label="countForNow"
-                    value={countForNow}
-                    onChange={(e) => setCountForNow(e.target.value)}
-                  />
+                  <CRow>
+                    <CCol>
+                      <CFormLabel htmlFor="scrappingEngine">Scrapping Schedule Mode</CFormLabel>
+                      <CFormSelect id="scrappingEngine" value={scrappingScheduleMode} disabled={location.state.isOnAFScrapping == 'true'} 
+                      onChange={(obj) => setScrappingScheduleMode(obj.target.value)} size="sm" className="mb-3" aria-label="Small select example">
+                        <option value="0">Article Forege</option>
+                        <option value="1">OpenAI</option>
+                      </CFormSelect>
+                    </CCol>
+                    <CCol>
+                      <CFormLabel htmlFor="exampleFormControlInput1">Scrapping Count for just now</CFormLabel>
+                      <CFormInput
+                        type="number"
+                        id="justNowCountFormControlInput"
+                        aria-label="countForNow"
+                        value={countForNow}
+                        onChange={(e) => setCountForNow(e.target.value)}
+                      />
+                    </CCol>
+                  </CRow>
                 </div>
                 <div className="mb-3">
                   <CFormLabel>Scrapping Count</CFormLabel>
@@ -408,6 +412,10 @@ const View = (props) => {
                   <CButton type="submit">Update</CButton>
                   &nbsp;
                   <CButton type="button" onClick={() => startScrapping(projectId)}>{scrapCommand}</CButton>
+                  &nbsp;
+                  <Link to={`/history/view/?category=ArticleScrap&projectId=${projectId}`}>
+                    <CButton type="button">History View</CButton>
+                  </Link>
                 </div>
               </CForm>
             </CCardBody>
@@ -480,6 +488,10 @@ const View = (props) => {
                   <CButton type="submit">Update</CButton>
                   &nbsp;
                   <CButton type="button" onClick={() => startPublish(projectId)}>{publishCommand}</CButton>
+                  &nbsp;
+                  <Link to={`/history/view/?category=Publish&projectId=${projectId}`}>
+                    <CButton type="button">History View</CButton>
+                  </Link>
                 </div>
               </CForm>
             </CCardBody>

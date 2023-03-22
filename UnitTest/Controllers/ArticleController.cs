@@ -261,6 +261,7 @@ namespace WebCreator.Controllers
                 DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
                 if (articleSnapshot.Exists) {
                     article = articleSnapshot.ConvertTo<Article>();
+                    article.Id = articleSnapshot.Id;
                     article.Content = CommonModule.PreAdjustForTitleImage(article.Content);
                 }
 #if false
@@ -318,6 +319,10 @@ namespace WebCreator.Controllers
                             { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                         };
                         docRef.UpdateAsync(update);
+
+                        await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , article.ProjectId
+                                    , $"[Project ID={article.ProjectId}] AF Article Id={article.Id} Scrapping Done");
                     }
                     else article.Content = "Article Forge process : " + prog + "%";
                 }

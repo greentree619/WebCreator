@@ -225,7 +225,7 @@ const pixabayImageGallery = {
         const pixabayKeyword = modal.querySelector(".pixabayKeyword");
         //console.log(pixabayKeyword.value.replaceAll(' ', "+").replaceAll('?', ''));
         const keyword = pixabayKeyword.value.replaceAll(' ', "+").replaceAll('?', '');
-        this.context.option.imageGalleryLoadURL = 'https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=' + keyword + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
+        this.context.option.imageGalleryLoadURL = 'https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=' + keyword + `&image_type=photo&min_width=${process.env.REACT_APP_PIXABAY_MIN_WIDTH}&min_height=${process.env.REACT_APP_PIXABAY_MIN_HEIGHT}&per_page=100&page=1`
         this.plugins.pixabayImageGallery.loadImages.call(this, this.context);
         break;
       }

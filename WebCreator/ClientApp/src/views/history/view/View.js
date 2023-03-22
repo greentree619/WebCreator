@@ -10,6 +10,7 @@ import {
   CCardBody,
   CPagination,
   CPaginationItem,
+  CContainer,
 } from '@coreui/react'
 import { rgbToHex } from '@coreui/utils'
 import { DocsLink } from 'src/components'
@@ -24,6 +25,7 @@ const View = (props) => {
   const [logs, setLogs] = useState([])
   const [curPage, setCurPage] = useState(1)
   const [totalPage, setTotalPage] = useState(1)
+  const [refreshFlag, setRefreshFlag] = useState(false)
 
   if (location.state == null && location.search.length > 0) {
     location.state = {
@@ -34,7 +36,7 @@ const View = (props) => {
 
   useEffect(() => {
     populateHistoryData(1)
-  }, [])
+  }, [refreshFlag])
 
   const renderLogsTable = (logs) => {
     let pageButtonCount = 3
@@ -134,7 +136,18 @@ const View = (props) => {
   return (
     <>
       <CCard className="mb-4">
-        <CCardHeader>{location.state.category} History View</CCardHeader>
+        <CCardHeader>
+          <CContainer>
+            <CRow>
+              <CCol className="align-self-start">
+                {location.state.category} History View                
+              </CCol>
+              <CCol className="align-self-end" xs="auto">
+                <CButton color="primary" onClick={() => setRefreshFlag(!refreshFlag)}>Refresh</CButton>                
+              </CCol>
+            </CRow>
+          </CContainer>
+        </CCardHeader>
         <CCardBody>
           {loading ? (
             <p>

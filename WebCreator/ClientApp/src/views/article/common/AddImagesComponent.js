@@ -74,7 +74,8 @@ const AddImagesComponent = forwardRef((props, ref) => {
       const requestOptions = {
         method: 'GET',
       }
-      const response = await fetch(`https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=${keyword}&image_type=photo&min_width=480&min_height=600&per_page=100&page=1`, requestOptions)
+      //console.log(process.env, process.env.REACT_APP_PIXABAY_MIN_WIDTH, process.env.REACT_APP_PIXABAY_MIN_HEIGHT)
+      const response = await fetch(`https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=${keyword}&image_type=photo&min_width=${process.env.REACT_APP_PIXABAY_MIN_WIDTH}&min_height=${process.env.REACT_APP_PIXABAY_MIN_HEIGHT}&per_page=100&page=1`, requestOptions)
       let ret = await response.json()
       if (response.status === 200 && ret) {
         //console.log(ret.hits[0])
@@ -93,7 +94,7 @@ const AddImagesComponent = forwardRef((props, ref) => {
       const requestOptions = {
         method: 'GET',
       }
-      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}openAI/image/10?prompt=${keyword}`, requestOptions)
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}openAI/image/3?prompt=${keyword}`, requestOptions)
       let ret = await response.json()
       if (response.status === 200 && ret) {
         //console.log(ret)

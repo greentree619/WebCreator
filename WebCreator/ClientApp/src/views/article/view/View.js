@@ -69,7 +69,7 @@ const View = (props) => {
   const [metaDescription, setMetaDescription] = useState('')
   const [metaKeywords, setMetaKeywords] = useState('')
   const [metaAuthor, setMetaAuthor] = useState('')
-  const [pixabayURL, setPixabayURL] = useState('https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=480&min_height=600&per_page=100&page=1')
+  const [pixabayURL, setPixabayURL] = useState(`https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=&image_type=photo&min_width=${process.env.REACT_APP_PIXABAY_MIN_WIDTH}&min_height=${process.env.REACT_APP_PIXABAY_MIN_HEIGHT}&per_page=100&page=1`)
   const [useTitleByBrandname, setUseTitleByBrandname] = useState(activeProject.contactInfo.useTitleByBrandname)
   const [addImgVisible, setAddImgVisible] = useState(false)
   const [imageGallery, setImageGallery] = useState([])
@@ -107,8 +107,8 @@ const View = (props) => {
       let openAIKeyword = data.data.title.replaceAll('?', '')
       console.log(data.data.title, openAIKeyword)
       setPixabayURL()
-      footEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
-      bodyEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + '&image_type=photo&min_width=480&min_height=600&per_page=100&page=1'
+      footEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + `&image_type=photo&min_width=${process.env.REACT_APP_PIXABAY_MIN_WIDTH}&min_height=${process.env.REACT_APP_PIXABAY_MIN_HEIGHT}&per_page=100&page=1`
+      bodyEditor.current.core.options.imageGalleryLoadURL = 'https://pixabay.com/api/?key=27944002-ca9bbda02c769f32ad5769e81&q=' + q + `&image_type=photo&min_width=${process.env.REACT_APP_PIXABAY_MIN_WIDTH}&min_height=${process.env.REACT_APP_PIXABAY_MIN_HEIGHT}&per_page=100&page=1`
       footEditor.current.core.options.openAIImageLoadURL = `${process.env.REACT_APP_SERVER_URL}openAI/image/10?prompt=${openAIKeyword}`;
       bodyEditor.current.core.options.openAIImageLoadURL = `${process.env.REACT_APP_SERVER_URL}openAI/image/10?prompt=${openAIKeyword}`;
       footEditor.current.core.options.openAIVideoLoadURL = `${process.env.REACT_APP_SERVER_URL}openAI/video/10?prompt=${openAIKeyword}`;

@@ -59,6 +59,9 @@ namespace UnitTest.Lib
             //Omitted JObject scrapStatus = (JObject)await CommonModule.IsDomainScrappingAsync(_id);
             //Omitted             bool isScrapping = (bool)scrapStatus["afapi"];
             //Omitted if (!isScrapping)
+            await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , _id
+                                    , $"[Project ID={_id}] AF Scrapping Thread Start");
             {
                 CommonModule.SetDomainAFScrappingAsync(_id, true);
                 try
@@ -95,6 +98,9 @@ namespace UnitTest.Lib
                                 while( CommonModule.isManualAFScrapping ) Thread.Sleep(5000);
                                 //}}In case start manual scrap, sleep untile complete
                                 afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
+                                await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , _id
+                                    , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start");
                             }
                             while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
                         }
@@ -112,6 +118,9 @@ namespace UnitTest.Lib
                                     while (CommonModule.isManualAFScrapping) Thread.Sleep(5000);
                                     //}}In case start manual scrap, sleep untile complete
                                     afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
+                                    await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                        , _id
+                                        , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start");
                                 }
                                 while ( !afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
                                 
@@ -128,12 +137,18 @@ namespace UnitTest.Lib
 
                 CommonModule.SetDomainAFScrappingAsync(_id, false);
                 CommonModule.articleScrappingThreadList[_id] = false;
+                await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , _id
+                                    , $"[Project ID={_id}] AF Scrapping Thread Stop");
             }
         }
 
         public async Task ScrappingOpenAIThreadAsync(String _id, String scheduleId)
         {
             {
+                await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , _id
+                                    , $"[Project ID={_id}] OpenAI Scrapping Thread Start");
                 CommonModule.SetDomainOpenAIScrappingAsync(_id, true);
                 try
                 {
@@ -170,6 +185,9 @@ namespace UnitTest.Lib
                                 while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
                                 //}}In case start manual scrap, sleep untile complete
                                 afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , _id
+                                    , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok");
                             }
                             while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
                         }
@@ -188,6 +206,9 @@ namespace UnitTest.Lib
                                     while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
                                     //}}In case start manual scrap, sleep untile complete
                                     afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                    await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                        , _id
+                                        , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok");
                                 }
                                 while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
 
@@ -204,6 +225,9 @@ namespace UnitTest.Lib
 
                 CommonModule.SetDomainOpenAIScrappingAsync(_id, false);
                 CommonModule.articleScrappingThreadList[_id] = false;
+                await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , _id
+                                    , $"[Project ID={_id}] OpenAI Scrapping Thread Stop");
             }
         }
 
@@ -263,6 +287,9 @@ namespace UnitTest.Lib
         public async Task PublishThreadAsync(String _id, String scheduleId)
         {
             {
+                await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
+                    , _id
+                    , $"[Project ID={_id}] Publish Thread Start");
                 CommonModule.SetDomainPublishScheduleAsync(_id, true);
                 try
                 {
@@ -308,6 +335,9 @@ namespace UnitTest.Lib
                                 await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
                                 await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip, projInfo.S3BucketName);
                                 //}}
+                                await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
+                                    , _id
+                                    , $"[Project ID={_id}] Article Id={scrapAF.Id} Sync OK");
                                 publishRet = true;
                             }
                             while ( !publishRet );
@@ -330,6 +360,9 @@ namespace UnitTest.Lib
                                     await CommonModule.BuildArticlePageThreadAsync(_id, projInfo.Name, scrapAF.Id, CommonModule.isAWSHosting(projInfo.Ip), projInfo.S3BucketName, projInfo.S3BucketRegion);
                                     await CommonModule.SyncWithServerThreadAsync(_id, projInfo.Name, projInfo.Ip, projInfo.S3BucketName);
                                     //}}
+                                    await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
+                                    , _id
+                                    , $"[Project ID={_id}] Article Id={scrapAF.Id} Sync OK");
                                     publishRet = true;
                                 }
                                 while ( !publishRet );
@@ -344,6 +377,9 @@ namespace UnitTest.Lib
 
                 CommonModule.SetDomainPublishScheduleAsync(_id, false);
                 CommonModule.publishThreadList[_id] = false;
+                await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
+                    , _id
+                    , $"[Project ID={_id}] Publish Thread Stop");
             }
         }
 

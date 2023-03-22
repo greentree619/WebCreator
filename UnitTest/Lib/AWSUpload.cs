@@ -12,7 +12,7 @@ namespace UnitTest.Lib
 {
     internal class AWSUpload
     {
-        public String uploadURL = "https://e7bkawidfg.execute-api.us-east-2.amazonaws.com/prod/";
+        public String uploadURL = "https://u7xal5o551.execute-api.us-east-2.amazonaws.com/prod/";
         public bool useTransferAcceleration = true;
         public int chunkSize = 1024 * 1024 * 5;
         public int threadsQuantity = 5;

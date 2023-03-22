@@ -1,0 +1,231 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "IsScrapping",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "CreatedTime",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "IsScrapping",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Progress",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ProjectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "CreatedTime",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "IsScrapping",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Progress",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ProjectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "CreatedTime",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ProjectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "CreatedTime",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ProjectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "State",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ProjectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "State",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "CreatedTime",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ProjectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "State",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Title",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ProjectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "State",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdateTime",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ProjectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "State",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "CreatedTime",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ProjectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Title",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "CreatedTime",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "State",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Title",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Histories",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Category",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "DomainID",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "CreatedTime",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Projects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Name",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "CreatedTime",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": [],
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes"
+  }
+}

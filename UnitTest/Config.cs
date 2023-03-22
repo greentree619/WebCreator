@@ -27,8 +27,8 @@ namespace WebCreator
         public static String CloudFlareAPIEmail= "uniqtop@gmail.com";
         public static String OpenAIKey = "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";
 
-        public static String AWSAccessKey = "AKIA6GFGHJFKCHWFMUWX";
-        public static String AWSSecretKey = "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";
+        public static String AWSAccessKey = "AKIAQOOJJC4OURJMH4OU";
+        public static String AWSSecretKey = "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";
     }
 
     public class FirebaseSettings

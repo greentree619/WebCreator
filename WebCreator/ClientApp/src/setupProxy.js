@@ -27,6 +27,7 @@ const context =  [
   "/article/UpdateBatchState",
   "/article/addArticlesByTitle",
   "/article/scrapArticleManual",
+  "/EC2IPAddress",
   "/dns",
   "/dns/byname",
   "/dns/deleteZone",

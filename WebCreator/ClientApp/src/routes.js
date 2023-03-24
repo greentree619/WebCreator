@@ -22,6 +22,7 @@ const Sync = React.lazy(() => import('./views/sync/view/View'))
 const History = React.lazy(() => import('./views/history/view/View'))
 const S3Bucket = React.lazy(() => import('./views/amazone/bucket/Bucket'))
 const S3Contents = React.lazy(() => import('./views/amazone/contents/Contents'))
+const EC2Ipaddress = React.lazy(() => import('./views/amazone/ec2/EC2Ipaddress'))
 const SyncWithDomain = () => {
       const location = useLocation()
       //console.log(new URLSearchParams(location.search).get('url'));
@@ -99,6 +100,7 @@ const routes = [
   { path: '/cloudflare/dns', name: 'Dns List View', element: AllDnsList },
   { path: '/amazone/bucket', name: 'Amazone S3 Bucket Management', element: S3Bucket },
   { path: '/amazone/contents', name: 'Amazone S3 Bucket Contents', element: S3Contents },  
+  { path: '/amazone/ec2', name: 'Amazone EC2 IP Address Management', element: EC2Ipaddress },
   { path: '/build/build', name: 'Build & SYNC', element: BuildSync },
   { path: '/schedule/view', name: 'Article Forge Schedule', element: AFSchedule},
   { path: '/sync/view', name: 'Sync with domain', element: Sync},

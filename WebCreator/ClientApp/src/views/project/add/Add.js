@@ -124,13 +124,15 @@ const Add = (props) => {
   const [isOnAFScrapping, setIsOnAFScrapping] = useState(false)
   const [isOnPublish, setIsOnPublish] = useState(false)
   const [disabledUpdate, setDisabledUpdate] = useState(false)
-
-  let ipAddressMap = [
+  const [ipAddressMap, setIpAddressMap] = useState([
     { ip: 'AWS S3 Bucket', value: '0.0.0.0' },
-    { ip: '3.14.14.86', value: '3.14.14.86' },
-    { ip: '3.131.110.136', value: '3.131.110.136' },
-    { ip: '3.142.69.221', value: '3.142.69.221' },
-  ]
+    ])
+  // let ipAddressMap = [
+  //   { ip: 'AWS S3 Bucket', value: '0.0.0.0' },
+  //   { ip: '3.14.14.86', value: '3.14.14.86' },
+  //   { ip: '3.131.110.136', value: '3.131.110.136' },
+  //   { ip: '3.142.69.221', value: '3.142.69.221' },
+  // ]
 
   const handleSubmit = (event) => {
     const form = event.currentTarget
@@ -333,6 +335,7 @@ const Add = (props) => {
     //  }
     //  var refreshIntervalId = setInterval(loadScrappingStatus, 1000);
     
+    populateEC2IPList()
     populateBucketNameList()
 
     console.log("location.search.length = " + location.search.length)
@@ -367,6 +370,20 @@ const Add = (props) => {
     if (response.status === 200) {
       setS3BucketList(data.result);
     }
+  }
+
+  const populateEC2IPList = async () => {
+    const response = await fetch(
+      `${process.env.REACT_APP_SERVER_URL}EC2IPAddress/`,
+    )
+    const data = await response.json()
+    var tmpMap = [{ ip: 'AWS S3 Bucket', value: '0.0.0.0' },]
+    await data.data.map((item, index) => {
+      var tmp2Map = [...tmpMap, { ip: item.ipAddress, value: item.ipAddress }]
+      tmpMap = tmp2Map
+      //console.log(ids, "<--", articleDocumentIds);
+    });
+    setIpAddressMap(tmpMap)
   }
 
   const readKeyFile = async (e) => {

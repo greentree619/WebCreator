@@ -10,7 +10,6 @@ namespace WebCreator
         //public static KeyValuePair<string, object> Application { get; set; }
         public static String FirebaseAuthSecret = "5cGJIcs3WRWYyu8XTFyjy8zW87Ql2ey44IOZvIRO";
         public static String FirebaseBasePath = "https://websitecreator-94452-default-rtdb.firebaseio.com";
-        public static String FirebaseProjectID = "websitecreator-94452";
         public static String FirebaseCredentialJson = "";
         public static FirestoreDb FirebaseDB = null;
         public static IFirebaseConfig firebaseConfig = new FirebaseConfig
@@ -27,8 +26,25 @@ namespace WebCreator
         public static String CloudFlareAPIEmail= "uniqtop@gmail.com";
         public static String OpenAIKey = "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";
 
-        public static String AWSAccessKey = "AKIA6GFGHJFKCHWFMUWX";
-        public static String AWSSecretKey = "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";
+#if true //As default, let stage
+        //Stage
+        /*1*/public static String Principal = "arn:aws:iam::975306180948:role/service-role/deploayWebsiteData-role-tnl6812t";//Stage
+        /*2*/public static String UploadURL = "https://e7bkawidfg.execute-api.us-east-2.amazonaws.com/prod/";
+        /*3*/public static String FirebaseCredential = "websitecreator-94452-firebase-adminsdk-l9yoo-962812244e.json";
+        /*4*/public static String FirebaseProjectId = "websitecreator-94452";
+        /*5*/public static String FrontendForCORS = "http://18.222.223.99";
+        /*6*/public static String AWSAccessKey = "AKIA6GFGHJFKCHWFMUWX";
+        /*7*/public static String AWSSecretKey = "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";
+#else
+        //Live
+        /*1*/public static String Principal = "arn:aws:iam::031023765277:role/service-role/deploayWebsiteData-role-uvadv5bp";//Live
+        /*2*/public static String UploadURL = "https://u7xal5o551.execute-api.us-east-2.amazonaws.com/prod/";
+        /*3*/public static String FirebaseCredential = "webcreator-dc8f8-35607d000566.json";
+        /*4*/public static String FirebaseProjectId = "webcreator-dc8f8";
+        /*5*/public static String FrontendForCORS = "http://3.138.165.211";
+        /*6*/public static String AWSAccessKey = "AKIAQOOJJC4OURJMH4OU";
+        /*7*/public static String AWSSecretKey = "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";
+#endif
     }
 
     public class FirebaseSettings

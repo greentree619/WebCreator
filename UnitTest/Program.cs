@@ -19,10 +19,10 @@ using UnitTest.Lib;
 using UnitTest.Services;
 using WebCreator;
 
-WebCreator.Config.FirebaseCredentialJson = File.ReadAllText("websitecreator-94452-firebase-adminsdk-l9yoo-962812244e.json");
+WebCreator.Config.FirebaseCredentialJson = File.ReadAllText(Config.FirebaseCredential/*"websitecreator-94452-firebase-adminsdk-l9yoo-962812244e.json"*/);
 try
 {
-    Config.FirebaseDB = FirestoreDb.Create("websitecreator-94452"
+    Config.FirebaseDB = FirestoreDb.Create(Config.FirebaseProjectId/*"websitecreator-94452"*/
         , (new FirestoreClientBuilder { JsonCredentials = Config.FirebaseCredentialJson }).Build());
 }
 catch (Exception ex)
@@ -197,7 +197,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://18.222.223.99", "https://localhost:44496", "http://localhost:44496")
+                          policy.WithOrigins( /*"http://18.222.223.99"*/Config.FrontendForCORS, "https://localhost:44496", "http://localhost:44496")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                       });

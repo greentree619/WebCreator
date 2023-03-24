@@ -7,12 +7,13 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Razor.Parser.SyntaxTree;
+using WebCreator;
 
 namespace UnitTest.Lib
 {
     internal class AWSUpload
     {
-        public String uploadURL = "https://e7bkawidfg.execute-api.us-east-2.amazonaws.com/prod/";
+        public String uploadURL = Config.UploadURL;//"https://e7bkawidfg.execute-api.us-east-2.amazonaws.com/prod/";
         public bool useTransferAcceleration = true;
         public int chunkSize = 1024 * 1024 * 5;
         public int threadsQuantity = 5;

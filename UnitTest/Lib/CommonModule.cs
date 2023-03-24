@@ -1206,7 +1206,7 @@ namespace UnitTest.Lib
             var success = await CreateBucket.CreateBucketAsync(s3Client, (string)domain, region);
 
             if( success )
-                success = await CreateBucket.SetBucketPublicAsync(s3Client, (string)domain);
+                success = await CreateBucket.SetBucketPublicAsync(s3Client, (string)domain, Config.Principal);
 
             if (success)
                 success = await CreateBucket.AddWebsiteConfigurationAsync(s3Client, (string)domain, "index.html", "error.html");

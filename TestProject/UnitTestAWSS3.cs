@@ -26,7 +26,7 @@ namespace TestProject
         public async Task Test1Async()
         {
             var success = await CreateBucket.CreateBucketAsync(client, (string)"onlineshop893418736419873649187349187.com");
-            success = await CreateBucket.SetBucketPublicAsync(client, (string)"onlineshop893418736419873649187349187.com");
+            //Omitted success = await CreateBucket.SetBucketPublicAsync(client, (string)"onlineshop893418736419873649187349187.com");
             success = await CreateBucket.AddWebsiteConfigurationAsync(client, (string)"onlineshop893418736419873649187349187.com", "index.html", "error.html");
             if (success)
             {

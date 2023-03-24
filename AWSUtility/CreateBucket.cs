@@ -141,7 +141,7 @@ namespace AWSUtility
             return response.AccessControlList;
         }
 
-        static public async Task<bool> SetBucketPublicAsync(AmazonS3Client client, string bucketName)
+        static public async Task<bool> SetBucketPublicAsync(AmazonS3Client client, string bucketName, string principal)
         {
             bool bret = false;
             string publicPolicy = "{" +
@@ -149,7 +149,7 @@ namespace AWSUtility
                 "{" +
                 "    \"Effect\": \"Allow\"," +
                 "    \"Principal\": {" +
-                "        \"AWS\": \"arn:aws:iam::975306180948:role/service-role/deploayWebsiteData-role-tnl6812t\"" +
+                $"        \"AWS\": \"{principal}\"" +
                 "    }," +
                 "    \"Action\": \"s3:*\"," +
                 "    \"Resource\": [" +

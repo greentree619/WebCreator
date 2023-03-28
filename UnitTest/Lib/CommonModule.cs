@@ -307,7 +307,7 @@ namespace UnitTest.Lib
                 {
                     var project = document.ConvertTo<Project>();
                     project2LanguageMap[document.Id] = project.Language.ToUpper();
-                    project2UseHttpsMap[document.Id] = project.UseHttps;
+                    project2UseHttpsMap[document.Id] = (project.UseHttps == null ? false : project.UseHttps);
                 }
 
                 Task.Run(() => UpdateArticleScrappingProgress());//Refresh Article Forge Scrapping status.

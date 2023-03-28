@@ -18,6 +18,7 @@ const context =  [
   "/project/allDownload",
   "/project/translateKeyword",
   "/article",
+  "/article/add",
   "/article/scrap",
   "/article/fromid",
   "/article/sync_status",

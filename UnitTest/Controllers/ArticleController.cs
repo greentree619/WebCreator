@@ -448,7 +448,7 @@ namespace WebCreator.Controllers
             return Ok(ret);
         }
 
-        [HttpPut("add")]
+        [HttpPost("add")]
         public async Task<IActionResult> AddArticleAsync([FromBody] Article article)
         {
             await CommonModule.historyLog.LogKeywordAction(article.ProjectId, article.Title, true, true);

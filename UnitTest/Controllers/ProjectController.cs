@@ -360,7 +360,7 @@ namespace WebCreator.Controllers
                     DocumentReference docRef = await projectsCol.AddAsync(project);
 
                     CommonModule.project2LanguageMap[docRef.Id] = project.Language;
-                    CommonModule.project2UseHttpsMap[docRef.Id] = project.UseHttps;
+                    CommonModule.project2UseHttpsMap[docRef.Id] = (project.UseHttps == null ? false : project.UseHttps);
                     await addDefaultSchedule(docRef.Id);
                     addOK = true;
                 }

@@ -91,7 +91,9 @@ namespace UnitTest.Lib
                         {
                             schedule = scheduleSnapshot.ConvertTo<Schedule>();
 
-                            for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                            for (int i = 0; i < schedule.JustNowCount 
+                                            && (bool)CommonModule.articleScrappingThreadList[_id]
+                                            && scrapArticles.Count > 0; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
                                 do
@@ -103,16 +105,19 @@ namespace UnitTest.Lib
                                     afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
                                     await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                         , _id
-                                        , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start");
+                                        , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start[{afRet}]");
                                 }
                                 while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
                             }
 
-                            while ((bool)CommonModule.articleScrappingThreadList[_id])
+                            while ((bool)CommonModule.articleScrappingThreadList[_id]
+                                && scrapArticles.Count > 0)
                             {
                                 Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
-                                for (int i = 0; i < schedule.EachCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                                for (int i = 0; i < schedule.EachCount 
+                                    && (bool)CommonModule.articleScrappingThreadList[_id]
+                                    && scrapArticles.Count > 0; i++)
                                 {
                                     Article scrapAF = scrapArticles.Pop();
                                     do
@@ -124,7 +129,7 @@ namespace UnitTest.Lib
                                         afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
                                         await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                             , _id
-                                            , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start");
+                                            , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start[{afRet}]");
                                     }
                                     while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
 
@@ -140,7 +145,10 @@ namespace UnitTest.Lib
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    //Console.WriteLine(ex.Message);
+                    await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , _id
+                                    , $"[Project ID={_id}] Exception {ex.Message}");
                 }
                 
                 Console.WriteLine("AF scrapping All done.");
@@ -187,7 +195,9 @@ namespace UnitTest.Lib
                         {
                             schedule = scheduleSnapshot.ConvertTo<Schedule>();
 
-                            for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                            for (int i = 0; i < schedule.JustNowCount 
+                                && (bool)CommonModule.articleScrappingThreadList[_id]
+                                && scrapArticles.Count > 0; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
                                 do
@@ -199,16 +209,18 @@ namespace UnitTest.Lib
                                     afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
                                     await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                         , _id
-                                        , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok");
+                                        , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok[{afRet}]");
                                 }
                                 while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
                             }
 
-                            while ((bool)CommonModule.articleScrappingThreadList[_id])
+                            while ((bool)CommonModule.articleScrappingThreadList[_id] && scrapArticles.Count > 0)
                             {
                                 Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
-                                for (int i = 0; i < schedule.EachCount && (bool)CommonModule.articleScrappingThreadList[_id]; i++)
+                                for (int i = 0; i < schedule.EachCount 
+                                    && (bool)CommonModule.articleScrappingThreadList[_id]
+                                    && scrapArticles.Count > 0; i++)
                                 {
                                     Article scrapAF = scrapArticles.Pop();
                                     do
@@ -220,7 +232,7 @@ namespace UnitTest.Lib
                                         afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
                                         await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                             , _id
-                                            , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok");
+                                            , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok[{afRet}]");
                                     }
                                     while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
 
@@ -236,7 +248,10 @@ namespace UnitTest.Lib
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    //Console.WriteLine(ex.Message);
+                    await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , _id
+                                    , $"[Project ID={_id}] Exception {ex.Message}");
                 }
 
                 Console.WriteLine("OpenAI scrapping All done.");
@@ -341,7 +356,9 @@ namespace UnitTest.Lib
                         {
                             schedule = scheduleSnapshot.ConvertTo<PublishSchedule>();
 
-                            for (int i = 0; i < schedule.JustNowCount && (bool)CommonModule.publishThreadList[_id]; i++)
+                            for (int i = 0; i < schedule.JustNowCount 
+                                && (bool)CommonModule.publishThreadList[_id]
+                                && scrapArticles.Count > 0; i++)
                             {
                                 Article scrapAF = scrapArticles.Pop();
                                 do
@@ -363,11 +380,13 @@ namespace UnitTest.Lib
                                 while (!publishRet);
                             }
 
-                            while ((bool)CommonModule.publishThreadList[_id])
+                            while ((bool)CommonModule.publishThreadList[_id] && scrapArticles.Count > 0)
                             {
                                 Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
-                                for (int i = 0; i < schedule.EachCount && (bool)CommonModule.publishThreadList[_id]; i++)
+                                for (int i = 0; i < schedule.EachCount 
+                                    && (bool)CommonModule.publishThreadList[_id]
+                                    && scrapArticles.Count > 0; i++)
                                 {
                                     Article scrapAF = scrapArticles.Pop();
                                     do
@@ -398,7 +417,10 @@ namespace UnitTest.Lib
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    //Console.WriteLine(ex.Message);
+                    await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
+                    , _id
+                    , $"[Project ID={_id}] Exception {ex.Message}");
                 }
 
                 CommonModule.SetDomainPublishScheduleAsync(_id, false);

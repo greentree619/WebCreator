@@ -931,7 +931,7 @@ namespace UnitTest.Lib
 
                     if (ipaddr.CompareTo("0.0.0.0") != 0)
                     {
-                        String cmd = $"pscp -i {exeFolder}\\searchsystem.ppk {tmpFolder}\\{domain}.zip ubuntu@{ipaddr}:/home/ubuntu";
+                        String cmd = $"pscp -i {exeFolder}\\{Config.EC2UploadKey} {tmpFolder}\\{domain}.zip ubuntu@{ipaddr}:/home/ubuntu";
 
                         Console.WriteLine("SyncWithServerThreadAsync --> " + cmd);
                         ExecuteCmd.ExecuteCommandAsync(cmd);
@@ -960,7 +960,7 @@ namespace UnitTest.Lib
                 {
                     if (!CommonModule.isAWSHosting(ipaddr))
                     {
-                        String cmd = $"pscp -i {exeFolder}\\searchsystem.ppk {curFolder} ubuntu@{ipaddr}:/home/ubuntu";
+                        String cmd = $"pscp -i {exeFolder}\\{Config.EC2UploadKey} {curFolder} ubuntu@{ipaddr}:/home/ubuntu";
 
                         Console.WriteLine("SyncWithServerThreadAsync --> " + cmd);
                         ExecuteCmd.ExecuteCommandAsync(cmd);

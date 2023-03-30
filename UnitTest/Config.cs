@@ -35,6 +35,7 @@ namespace WebCreator
         /*5*/public static String FrontendForCORS = "http://18.222.223.99";
         /*6*/public static String AWSAccessKey = "AKIA6GFGHJFKCHWFMUWX";
         /*7*/public static String AWSSecretKey = "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";
+        /*8*/public static String EC2UploadKey = "searchsystem.ppk";
 #else
         //Live
         /*1*/public static String Principal = "arn:aws:iam::031023765277:role/service-role/deploayWebsiteData-role-uvadv5bp";//Live
@@ -44,6 +45,7 @@ namespace WebCreator
         /*5*/public static String FrontendForCORS = "http://3.138.165.211";
         /*6*/public static String AWSAccessKey = "AKIAQOOJJC4OURJMH4OU";
         /*7*/public static String AWSSecretKey = "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";
+        /*8*/public static String EC2UploadKey = "live-article-server.ppk";
 #endif
     }
 

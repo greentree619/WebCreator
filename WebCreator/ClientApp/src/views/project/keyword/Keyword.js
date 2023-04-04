@@ -121,7 +121,8 @@ const Keyword = (props) => {
 
   async function updateProject() {
     var s3Host = loadFromLocalStorage('s3host')
-    var s3Name = (s3Host.name == null || s3Host.name.length == 0) ? this.state.projectInfo.projectDomain : s3Host.name;
+    //console.log("location.state=>", location.state)
+    var s3Name = (s3Host.name == null || s3Host.name.length == 0) ? location.state.project.name : s3Host.name;
     var s3Region = s3Host.region == null ? "us-east-2" : s3Host.region;
 
     const requestOptions = {

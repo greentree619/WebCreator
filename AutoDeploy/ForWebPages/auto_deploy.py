@@ -3,6 +3,7 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 import os
 import zipfile
+import subprocess
 
 # {{Global Setting Value
 # targetPath = "D:\\Workstation\\AutoUploadPy\\path"
@@ -32,6 +33,24 @@ def on_created(event):
             pass
     #print("create file okay!!!")
     ##}}
+
+    dnsInfo = os.path.basename(event.src_path)
+    dnsInfo = dnsInfo.replace(".zip", "")
+    #print("domain=", dnsInfo)#DELME
+
+    #check
+    output = subprocess.getoutput("sudo certbot certificates")
+    certificateOK = output.find(dnsInfo)
+    #print("certificateOK=", certificateOK)#DELME
+    if certificateOK == -1:
+        os.system(f"sudo apt update")
+        os.system(f"sudo apt install snapd")
+        os.system(f"sudo snap install core; sudo snap refresh core")
+        os.system(f"sudo apt-get remove certbot")
+        os.system(f"sudo snap install --classic certbot")
+        os.system(f"sudo ln -s /snap/bin/certbot /usr/bin/certbot")
+        os.system(f"sudo certbot --nginx --noninteractive --agree-tos -m greentree619@outlook.com -d {dnsInfo}")
+        os.system(f"sudo certbot renew --dry-run")
 
     with zipfile.ZipFile(event.src_path, 'r') as zip_ref:
         zip_ref.extractall(extractPath)

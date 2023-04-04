@@ -423,6 +423,14 @@ namespace WebCreator.Controllers
                 {
                     var prevProj = snapshot.ConvertTo<Project>();
                     Task.Run(() => new CloudFlareAPI().UpdateDnsThreadAsync(prevProj.Name, project.Name, project.Ip));
+
+                    if (projectInput.UseHttps == true
+                        && prevProj.UseHttps != projectInput.UseHttps
+                        && projectInput.Ip.CompareTo("0.0.0.0") != 0)
+                    { //Configure https on ec2 erver.
+                        await CommonModule.BuildArticlePageAsEmptyThreadAsync( projectInput.Id, projectInput.Name );
+                        await CommonModule.SyncWithServerThreadAsync(projectInput.Id, projectInput.Name, projectInput.Ip, projectInput.S3BucketName);
+                    }
                 }
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()

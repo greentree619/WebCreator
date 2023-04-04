@@ -666,6 +666,27 @@ namespace UnitTest.Lib
             }
         }
 
+        static public async Task BuildArticlePageAsEmptyThreadAsync(String domainid, String domain)
+        {
+            try
+            {
+                String curFolder = Directory.GetCurrentDirectory();
+                curFolder += $"\\Build\\{domain}";
+                if (!Directory.Exists(curFolder))
+                {
+                    Directory.CreateDirectory(curFolder);
+                }
+                else
+                {
+                    CommonModule.DeleteAllContentInFolder(curFolder);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         static public async Task BuildArticlePageThreadAsync(String domainid, String domain, String articleId, bool isAWSHost, String s3Name, String region)
         {
             try

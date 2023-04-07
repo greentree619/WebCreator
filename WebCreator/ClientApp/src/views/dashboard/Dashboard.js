@@ -109,7 +109,7 @@ const Dashboard = () => {
 
     var prevAllProjects = ReactSession.get("allProjects")
     //console.log("prevAllProjects 1", prevAllProjects)
-    if(prevAllProjects === undefined)
+    if(prevAllProjects === undefined || prevAllProjects === "0")
     {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/1/200`)
       const data = await response.json()

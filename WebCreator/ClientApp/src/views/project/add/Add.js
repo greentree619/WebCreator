@@ -32,6 +32,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import {saveToLocalStorage, globalRegionMap, loadFromLocalStorage, clearLocalStorage, alertConfirmOption } from 'src/utility/common'
 import {languageMap} from 'src/utility/LanguageCode'
 import {countryMap} from 'src/utility/CountryCode'
+import { ReactSession }  from 'react-client-session'
 
 const Add = (props) => {
   const location = useLocation()
@@ -218,6 +219,7 @@ const Add = (props) => {
 
       if (simpleMode)
       {
+        ReactSession.set("allProjects", "0")
         clearLocalStorage('allProjects')
         navigate('/dashboard')
       }

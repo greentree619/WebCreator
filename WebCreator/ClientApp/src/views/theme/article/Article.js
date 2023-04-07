@@ -89,7 +89,8 @@ const Article = (props) => {
     }
     else
     {
-      toast.error('Theme upload is failed, unfortunatley.', alertConfirmOption);
+      toast.error('Theme upload is failed, unfortunatley. Maybe this theme zip file can include subfolder.'
+      +'\nPlease compress as zip "index.html", "articlepage.html" files and "assets" Folder without sub folder in zip file.', alertConfirmOption);
     }
     // setAlarmVisible(true);
   }

@@ -222,6 +222,7 @@ namespace WebCreator.Controllers
         [DisableFormValueModelBinding]
         public async Task<IActionResult> themeUpload(String domainId, String domainName, String ipaddr, String? s3Name="", String? region="")
         {
+            bool ret = true;
             try
             {
                 if (CommonModule.onThemeUpdateCash[domainId] == null || (bool)CommonModule.onThemeUpdateCash[domainId] == false)
@@ -265,7 +266,7 @@ namespace WebCreator.Controllers
 
                     if (System.IO.File.Exists(curFolder + "/theme.zip"))
                     {
-                        if(System.IO.Directory.Exists(curFolder + "/theme"))
+                        if (System.IO.Directory.Exists(curFolder + "/theme"))
                             CommonModule.DeleteAllContentInFolder(curFolder + "/theme");
                         System.IO.Compression.ZipFile.ExtractToDirectory(curFolder + "/theme.zip", curFolder + "/theme", true);
                         //using (ZipArchive archive = ZipFile.OpenRead(curFolder + "/theme.zip"))
@@ -275,7 +276,14 @@ namespace WebCreator.Controllers
                         //        entry.ExtractToFile(Path.Combine(curFolder + "/theme", entry.FullName));
                         //    }
                         //}
-                    }   
+
+                        String templ = CommonModule.GetArticleTemplate(domainName);
+                        if (templ.Length == 0)
+                        {
+                            ret = false;
+                        }
+                    }
+                    else ret = false;
 
                     CommonModule.onThemeUpdateCash[domainId] = false;
 
@@ -286,7 +294,7 @@ namespace WebCreator.Controllers
             catch (Exception ex)
             {
             }
-            return Ok(true);
+            return Ok(ret);
         }
 
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]

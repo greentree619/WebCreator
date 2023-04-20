@@ -110,6 +110,18 @@ const Add = (props) => {
     location.state != null && !simpleMode ? location.state.project.contactInfo.openingHours : '',
   )
 
+  const [scrappingFrom, setScrappingFrom] = useState(
+    location.state != null && !simpleMode ? location.state.project.imageAutoGenInfo.scrappingFrom : 0,
+  )
+
+  const [imageNumber, setImageNumber] = useState(
+    location.state != null && !simpleMode ? location.state.project.imageAutoGenInfo.imageNumber : 0,
+  )
+
+  const [insteadOfTitle, setInsteadOfTitle] = useState(
+    location.state != null && !simpleMode ? location.state.project.imageAutoGenInfo.insteadOfTitle : '',
+  )
+
   const [alarmVisible, setAlarmVisible] = useState(false)
   const [alertColor, setAlertColor] = useState('success')
   const [alertMsg, setAlertMsg] = useState('')
@@ -181,7 +193,12 @@ const Add = (props) => {
         website: website,
         descriptionOfCompany: descriptionOfCompany,
         openingHours: openingHours,
-      }
+      },
+      imageAutoGenInfo:{
+        scrappingFrom: scrappingFrom,
+        imageNumber: imageNumber,
+        insteadOfTitle: insteadOfTitle,
+      },
     }
 
     const requestOptions = {
@@ -481,18 +498,21 @@ const Add = (props) => {
                         </CRow>
                       </div>
                       <div className={simpleMode ? 'd-none' : 'mb-3'}>
-                        <CFormLabel htmlFor="exampleFormControlInput1">IP Address</CFormLabel>
-                        &nbsp;
-                        <CFormSelect id="ipSelect" value={ipAddress} 
-                          onChange={(obj) => handleIpAddrClick(obj.target.value)} size="sm" 
-                          className="mb-3" aria-label="Small select example"
-                          disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}>
-                          {
-                            ipAddressMap.map((ipAddr, index) => {
-                                return (<option key={index} value={ipAddr.value}>{ipAddr.ip}</option>)
-                              })
-                          }
-                        </CFormSelect>
+                        <CRow>
+                          <CFormLabel htmlFor="ipSelect" className="col-sm-4 col-form-label">IP Address</CFormLabel>
+                          <CCol sm={8} >
+                            <CFormSelect id="ipSelect" value={ipAddress} 
+                              onChange={(obj) => handleIpAddrClick(obj.target.value)} size="sm" 
+                              className="mb-3" aria-label="Small select example"
+                              disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}>
+                              {
+                                ipAddressMap.map((ipAddr, index) => {
+                                    return (<option key={index} value={ipAddr.value}>{ipAddr.ip}</option>)
+                                  })
+                              }
+                            </CFormSelect>
+                          </CCol>
+                        </CRow>
                       </div>
                       {ipAddress === "0.0.0.0" && (
                         <div className={simpleMode ? 'd-none' : 'mb-3'}>
@@ -563,9 +583,8 @@ const Add = (props) => {
                       </div>
                       <div className={simpleMode ? 'd-none' : 'mb-3'}>
                         <CRow>
-                          <CCol>
-                            <CFormLabel htmlFor="exampleFormControlInput1">Language({languageValue})</CFormLabel>
-                            &nbsp;
+                          <CFormLabel htmlFor="exampleFormControlInput1" className="col-sm-4 col-form-label">Language({languageValue})</CFormLabel>
+                          <CCol sm={8}>
                             <CDropdown
                               id="axes-dd"
                               className="float-right mr-0"
@@ -638,10 +657,7 @@ const Add = (props) => {
                       </CRow>
                     </CCol>
                     <CCol className={simpleMode ? 'd-none' : ''}>
-                      <CRow className="mb-3 py-3">
-                        &nbsp;
-                      </CRow>
-                      <CRow className="mb-3 py-0">
+                      <CRow className="mb-3 pt-4">
                         <CFormLabel htmlFor="PostalCode" className="col-sm-4 col-form-label">Postal Code</CFormLabel>
                         <CCol sm={8}>
                           <CFormInput type="text" id="PostalCode" value={postalCode} onChange={(e) => inputChangeHandler(setPostalCode, e)}
@@ -680,6 +696,31 @@ const Add = (props) => {
                         <CFormLabel htmlFor="OpeningHours" className="col-sm-4 col-form-label">Opening Hours</CFormLabel>
                         <CCol sm={8}>
                           <CFormInput type="text" id="OpeningHours" value={openingHours} onChange={(e) => inputChangeHandler(setOpeningHours, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="ArticleImageNumber" className="col-sm-4 col-form-label">Article Image Number</CFormLabel>
+                        <CCol sm={4}>
+                          <CFormInput type="number" id="ArticleImageNumber" value={imageNumber} onChange={(e) => inputChangeHandler(setImageNumber, e)}
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
+                        </CCol>
+                        <CCol sm={4}>
+                          <CFormSelect id="sourceSelect" value={scrappingFrom} 
+                            onChange={(obj) => setScrappingFrom(Number(obj.target.value))} size="sm" 
+                            className="mb-3" aria-label="Small select example"
+                            disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}>
+                            <option value='0'>Pixabay</option>
+                            <option value='1'>OpenAI</option>
+                            <option value='2'>Pixabay & OpenAI</option>
+                          </CFormSelect>
+                        </CCol>
+                      </CRow>
+                      <CRow className="mb-3 py-0">
+                        <CFormLabel htmlFor="insteadOfTitle" className="col-sm-4 col-form-label">Article Image Keyword Instead of Title</CFormLabel>
+                        <CCol sm={8}>
+                          <CFormInput type="text" id="insteadOfTitle" value={insteadOfTitle} placeholder='Split each keyword by ";"'
+                            onChange={(e) => inputChangeHandler(setInsteadOfTitle, e)}
                             disabled={location.state != null && !simpleMode && location.state.mode == 'VIEW'}/>
                         </CCol>
                       </CRow>

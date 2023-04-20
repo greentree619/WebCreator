@@ -33,6 +33,7 @@ namespace UnitTest.Lib
         public static Hashtable publishThreadList = new Hashtable();
         public static Hashtable project2LanguageMap = new Hashtable();
         public static Hashtable project2UseHttpsMap = new Hashtable();
+        public static Hashtable project2ImageAutoGenInfoMap = new Hashtable();
         public static Hashtable refKeyCash = new Hashtable();
         public static Hashtable onThemeUpdateCash = new Hashtable();
         public static Hashtable domainScrappingScheduleStatus = new Hashtable();
@@ -48,6 +49,7 @@ namespace UnitTest.Lib
         public static OpenAIAPI manualOpenAI = new OpenAIAPI(Config.OpenAIKey);
         public static int OpenAIImageHeight = 1024;
         public static int OpenAIImageWidth = 1024;//1280;
+        public static int PixabayImageWidth = 1280;
         public static String PublishCategory = "Publish";
         public static String ArticleScrapCategory = "ArticleScrap";
 
@@ -182,12 +184,24 @@ namespace UnitTest.Lib
                 jsonObjectParam.quality = (Int32)CommonModule.afSetting.setInf.Quality;
 
                 String ref_key = af.initiateArticle(jsonObjectParam);
+                List<String> imageArray = new List<String>();
+                List<String> thumbImageArray = new List<String>();
                 if (ref_key != null)
                 {
                     CommonModule.refKeyCash[articleid] = ref_key;
                     CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                     DocumentReference docRef = articlesCol.Document(articleid);
+                    DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
+                    var article = articleSnapshot.ConvertTo<Article>();
+                    _ImageAutoGenInfo imageAutoGenInfo = (_ImageAutoGenInfo)project2ImageAutoGenInfoMap[article.ProjectId];
+                    String InsteadOfTitle = imageAutoGenInfo.InsteadOfTitle;
+                    if ( InsteadOfTitle.Length > 0 
+                        && language.ToUpper().CompareTo(CommonModule.baseLanguage) != 0 )
+                    {
+                        InsteadOfTitle = await deepLTranslate.Translate(InsteadOfTitle);
+                    }
 
+                    ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray);//Image auto generation
                     Console.WriteLine($"ScrapArticleAsync ref_key={ref_key}");
 
                     Dictionary<string, object> userUpdate = new Dictionary<string, object>()
@@ -195,6 +209,8 @@ namespace UnitTest.Lib
                         { "ArticleId", ref_key },
                         { "Progress", 0 },
                         { "IsScrapping", true },
+                        { "ImageArray", imageArray },
+                        { "ThumbImageArray", thumbImageArray },
                         { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                     };
                     await docRef.UpdateAsync(userUpdate);
@@ -209,11 +225,85 @@ namespace UnitTest.Lib
             return status;
         }
 
+        public static void ScrapArticleImages(String projectId, String question, String InsteadOfTitle, ref List<String> imageArray, ref List<String> thumbImageArray)
+        {
+            String imageGenToken = question;
+            Int32 pixabayPageSize = 100;
+            _ImageAutoGenInfo imageAutoGenInfo = (_ImageAutoGenInfo)project2ImageAutoGenInfoMap[projectId];
+            String pixabayUrl = "https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=" +question.Replace(" ", "+").Replace("?", "")+"&image_type=photo&min_width=" 
+                + PixabayImageWidth + "&min_height=" + OpenAIImageHeight + "&per_page="+ pixabayPageSize + "&page=1";
+
+             String pixabay2thUrl = "https://pixabay.com/api/?key=14748885-e58fd7b3b1c4bf5ae18c651f6&q=" + InsteadOfTitle.Replace(";", "+") + "&image_type=photo&min_width="
+                + PixabayImageWidth + "&min_height=" + OpenAIImageHeight + "&per_page="+ pixabayPageSize + "&page=1";
+
+            if ((imageAutoGenInfo.ScrappingFrom == _ImageAutoGenInfo.ImageScrapingFrom.Pixabay
+                || imageAutoGenInfo.ScrappingFrom == _ImageAutoGenInfo.ImageScrapingFrom.Pixabay_OpenAI)
+                && imageAutoGenInfo.ImageNumber > 0)
+            {
+                try
+                {
+                    using (var client = new HttpClient())
+                    {
+                        var response = client.GetAsync(pixabayUrl).Result;
+                        string content = response.Content.ReadAsStringAsync().Result;
+                        JObject json = JObject.Parse(content);
+                        Int32 totalHits = Convert.ToInt32(json["totalHits"].ToString());
+                        JArray hitsArray = (JArray)json["hits"];
+                        if (totalHits <= 0 && InsteadOfTitle.Length > 0)
+                        {
+                            response = client.GetAsync(pixabay2thUrl).Result;
+                            content = response.Content.ReadAsStringAsync().Result;
+                            json = JObject.Parse(content);
+                            totalHits = Convert.ToInt32(json["totalHits"].ToString());
+                            hitsArray = (JArray)json["hits"];
+                        }
+
+                        totalHits = (totalHits > pixabayPageSize ? pixabayPageSize : totalHits);
+                        if (totalHits > 0)
+                        {
+                            var random = new Random();
+                            while (imageArray.Count < imageAutoGenInfo.ImageNumber)
+                            {
+                                int imgNo = random.Next(totalHits);
+                                imageArray.Add(hitsArray[imgNo]["largeImageURL"].ToString());
+                                thumbImageArray.Add(hitsArray[imgNo]["previewURL"].ToString());
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Console.WriteLine(ex.Message);
+                }
+            }
+
+            if ((imageAutoGenInfo.ScrappingFrom == _ImageAutoGenInfo.ImageScrapingFrom.OpenAI
+                || imageAutoGenInfo.ScrappingFrom == _ImageAutoGenInfo.ImageScrapingFrom.Pixabay_OpenAI)
+                && imageAutoGenInfo.ImageNumber > 0
+                && imageArray.Count < imageAutoGenInfo.ImageNumber)
+            {
+                String thumbFolder = Directory.GetCurrentDirectory() + "\\Thumbnails";
+                List<Hashtable> urls = GetImageFromOpenAI(imageGenToken, imageAutoGenInfo.ImageNumber, thumbFolder);
+                if (urls.Count <= 0 && InsteadOfTitle.Length > 0)
+                {
+                    urls = GetImageFromOpenAI("Images for " + InsteadOfTitle.Replace(";", " "), imageAutoGenInfo.ImageNumber, thumbFolder);
+                }
+
+                foreach (var img in urls)
+                {
+                    imageArray.Add(img["url"].ToString());
+                    thumbImageArray.Add(img["thumb"].ToString());
+                }
+            }
+        }
+
         public static async Task<bool> ScrapArticleByOpenAIAsync(OpenAIAPI openAI, String question, String articleid)
         {
             bool status = false;
             String orgLangQuetion = question;
             String articleContent = "";
+            List<String> imageArray = new List<string>();
+            List<String> thumbImageArray = new List<string>();
             CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
             DocumentReference docRef = articlesCol.Document(articleid);
             try
@@ -221,7 +311,16 @@ namespace UnitTest.Lib
                 DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
                 var article = articleSnapshot.ConvertTo<Article>();
 
-                if (CommonModule.project2LanguageMap[article.ProjectId].ToString()
+                _ImageAutoGenInfo imageAutoGenInfo = (_ImageAutoGenInfo)project2ImageAutoGenInfoMap[article.ProjectId];
+                String InsteadOfTitle = imageAutoGenInfo.InsteadOfTitle;
+                if (InsteadOfTitle.Length > 0
+                    && project2LanguageMap[article.ProjectId].ToString().ToUpper()
+                    .CompareTo(CommonModule.baseLanguage) != 0)
+                {
+                    InsteadOfTitle = await deepLTranslate.Translate(InsteadOfTitle);
+                }
+
+                if (project2LanguageMap[article.ProjectId].ToString()
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
                     question = await CommonModule.deepLTranslate.Translate(question);
@@ -246,6 +345,8 @@ namespace UnitTest.Lib
                 }
                 articleContent += "<br>" + content;
                 status = true;
+
+                ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray);//Image auto generation
             }
             catch (Exception ex)
             {
@@ -257,6 +358,8 @@ namespace UnitTest.Lib
                 { "ArticleId", "55555" },
                 { "Progress", 100 },
                 { "Content", articleContent },
+                { "ImageArray", imageArray },
+                { "ThumbImageArray", thumbImageArray },
                 { "IsScrapping", false },
                 { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
             };
@@ -308,6 +411,7 @@ namespace UnitTest.Lib
                     var project = document.ConvertTo<Project>();
                     project2LanguageMap[document.Id] = project.Language.ToUpper();
                     project2UseHttpsMap[document.Id] = (project.UseHttps == null ? false : project.UseHttps);
+                    project2ImageAutoGenInfoMap[document.Id] = (project.ImageAutoGenInfo == null ? new _ImageAutoGenInfo() : project.ImageAutoGenInfo);
                 }
 
                 Task.Run(() => UpdateArticleScrappingProgress());//Refresh Article Forge Scrapping status.
@@ -907,12 +1011,13 @@ namespace UnitTest.Lib
                 String exeFolder = curFolder;
                 curFolder += $"\\Build\\{domain}";
 
-                String tmpFolder = Directory.GetCurrentDirectory();
-                tmpFolder += $"\\Temp";
-                if (!Directory.Exists(tmpFolder))
-                {
-                    Directory.CreateDirectory(tmpFolder);
-                }
+                //Omitted
+                String tmpFolder = Directory.GetCurrentDirectory() + "\\Temp";
+                //tmpFolder += $"\\Temp";
+                //if (!Directory.Exists(tmpFolder))
+                //{
+                //    Directory.CreateDirectory(tmpFolder);
+                //}
 
                 Console.WriteLine("SyncWithServerThreadAsync Zip starting...");
 

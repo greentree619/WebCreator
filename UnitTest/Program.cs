@@ -30,6 +30,15 @@ catch (Exception ex)
     Console.WriteLine(ex.Message);
 }
 
+//Create Project Directories.
+String thumbFolder = Directory.GetCurrentDirectory() + "\\Thumbnails";
+if (!Directory.Exists(thumbFolder)) Directory.CreateDirectory(thumbFolder);
+String tmpFolder = Directory.GetCurrentDirectory() + "\\Temp";
+if (!Directory.Exists(tmpFolder)) Directory.CreateDirectory(tmpFolder);
+String uploadFolder = Directory.GetCurrentDirectory() + "\\Upload";
+if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
+
+
 //{{Article Forge UnitTest
 //ArticleForge af = new ArticleForge();
 //af.viewArticles();

@@ -45,6 +45,32 @@ namespace WebCreator.Models
     }
 
     [FirestoreData]
+    public class _ImageAutoGenInfo
+    {
+        public enum ImageScrapingFrom
+        {
+            Pixabay,
+            OpenAI,
+            Pixabay_OpenAI,
+            None = -1
+        }
+
+        public _ImageAutoGenInfo()
+        {
+            ScrappingFrom = ImageScrapingFrom.Pixabay_OpenAI;
+            ImageNumber = 1;
+            InsteadOfTitle = "";
+        }
+
+        [FirestoreProperty]
+        public ImageScrapingFrom ScrappingFrom { get; set; }
+        [FirestoreProperty]
+        public Int32 ImageNumber { get; set; }
+        [FirestoreProperty]
+        public String InsteadOfTitle { get; set; }
+    }
+
+    [FirestoreData]
     public class Project
     {
         public String? Id { get; set; } // firebase unique id
@@ -78,6 +104,8 @@ namespace WebCreator.Models
         public String LanguageString { get; set; }
         [FirestoreProperty]
         public _ContactInfo? ContactInfo { get; set; }
+        [FirestoreProperty]
+        public _ImageAutoGenInfo? ImageAutoGenInfo { get; set; }
         [FirestoreProperty]
         public DateTime CreatedTime { get; set; }
         [FirestoreProperty]

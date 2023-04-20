@@ -74,6 +74,7 @@ namespace WebCreator.Controllers
                     var project = document.ConvertTo<Project>();
                     project.Id = document.Id;
                     if (project.ContactInfo == null) project.ContactInfo = new _ContactInfo();
+                    if (project.ImageAutoGenInfo == null) project.ImageAutoGenInfo = new _ImageAutoGenInfo();
                     list.Add(project);
                 }
             }
@@ -145,12 +146,13 @@ namespace WebCreator.Controllers
             }
             catch (Exception e) { }
 
-            String tmpFolder = Directory.GetCurrentDirectory();
-            tmpFolder += $"\\Temp";
-            if (!Directory.Exists(tmpFolder))
-            {
-                Directory.CreateDirectory(tmpFolder);
-            }
+            //Omitted
+            String tmpFolder = Directory.GetCurrentDirectory() + "\\Temp";
+            //tmpFolder += $"\\Temp";
+            //if (!Directory.Exists(tmpFolder))
+            //{
+            //    Directory.CreateDirectory(tmpFolder);
+            //}
 
             string dirRoot = curFolder;
             string[] filesToZip = Directory.GetFiles(dirRoot, "*.*", System.IO.SearchOption.AllDirectories);
@@ -354,6 +356,7 @@ namespace WebCreator.Controllers
                 OnPublishSchedule = false,
                 LanguageString = projectInput.LanguageString,
                 ContactInfo = projectInput.ContactInfo,
+                ImageAutoGenInfo = projectInput.ImageAutoGenInfo,
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
                 UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             };
@@ -369,6 +372,7 @@ namespace WebCreator.Controllers
 
                     CommonModule.project2LanguageMap[docRef.Id] = project.Language;
                     CommonModule.project2UseHttpsMap[docRef.Id] = (project.UseHttps == null ? false : project.UseHttps);
+                    CommonModule.project2ImageAutoGenInfoMap[docRef.Id] = (project.ImageAutoGenInfo == null ? new _ImageAutoGenInfo() : project.ImageAutoGenInfo);
                     await addDefaultSchedule(docRef.Id);
                     addOK = true;
                 }
@@ -418,6 +422,7 @@ namespace WebCreator.Controllers
                 Language = projectInput.Language,
                 LanguageString = projectInput.LanguageString,
                 ContactInfo = projectInput.ContactInfo,
+                ImageAutoGenInfo = projectInput.ImageAutoGenInfo,
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             };
 
@@ -453,11 +458,13 @@ namespace WebCreator.Controllers
                     { "Language", projectInput.Language },
                     { "LanguageString", projectInput.LanguageString },
                     { "ContactInfo", projectInput.ContactInfo },
+                    { "ImageAutoGenInfo", projectInput.ImageAutoGenInfo },
                     { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                 };
                 await docRef.UpdateAsync(userUpdate);
                 CommonModule.project2LanguageMap[docRef.Id] = projectInput.Language;
                 CommonModule.project2UseHttpsMap[docRef.Id] = projectInput.UseHttps;
+                CommonModule.project2ImageAutoGenInfoMap[docRef.Id] = projectInput.ImageAutoGenInfo;
 
                 if (projectInput.Ip.CompareTo("0.0.0.0") == 0)
                     Task.Run(() => new CommonModule().CreateHostBucketThreadAsync(projectInput.Name));

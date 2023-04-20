@@ -50,15 +50,9 @@ namespace UnitTest.Controllers
         [HttpGet("image/{n}")]
         public async Task<IActionResult> GetImageAsync(int n, String? prompt="")
         {
-            String thumbFolder = Directory.GetCurrentDirectory();
-            thumbFolder += $"\\Thumbnails";
-            if (!Directory.Exists(thumbFolder))
-            {
-                Directory.CreateDirectory(thumbFolder);
-            }
-
             if (prompt == null || prompt.Length == 0) return Ok(new { data = new List<String>() });
 
+            String thumbFolder = Directory.GetCurrentDirectory() + "\\Thumbnails";
             List<Hashtable> urls = CommonModule.GetImageFromOpenAI(prompt, n, thumbFolder);
             return Ok(new { data = urls });
         }
@@ -66,13 +60,6 @@ namespace UnitTest.Controllers
         [HttpGet("video/{n}")]
         public async Task<IActionResult> GetVideoAsync(int n, String? prompt = "")
         {
-            String thumbFolder = Directory.GetCurrentDirectory();
-            thumbFolder += $"\\Thumbnails";
-            if (!Directory.Exists(thumbFolder))
-            {
-                Directory.CreateDirectory(thumbFolder);
-            }
-
             if (prompt == null || prompt.Length == 0) return Ok(new { data = new List<String>() });
             return Ok(new { data = new List<String>() });
 

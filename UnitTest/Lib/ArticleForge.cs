@@ -20,7 +20,7 @@ namespace UnitTest.Lib
         private String key = Config.ArticleForgeKey;
 
         // String error
-        private String error_message = "";
+        public String error_message = "";
 
         /**
          * Checks the response status, if the error, returns FALSE and writes the error string into a variable
@@ -377,7 +377,7 @@ namespace UnitTest.Lib
                 content = result["article"].ToString();
             }
 
-            if (language.ToUpper().CompareTo(CommonModule.baseLanguage) != 0)
+            if (content.Length > 0 && language.ToUpper().CompareTo(CommonModule.baseLanguage) != 0)
             {
                 content = await CommonModule.deepLTranslate.Translate(content, language.ToUpper());
             }

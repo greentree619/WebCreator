@@ -52,6 +52,8 @@ namespace UnitTest.Lib
         public static int PixabayImageWidth = 1280;
         public static String PublishCategory = "Publish";
         public static String ArticleScrapCategory = "ArticleScrap";
+        public static String OpenAIScrapCategory = "OpenAIScrap";
+        public static Hashtable questionTransMap = new Hashtable();
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -166,10 +168,7 @@ namespace UnitTest.Lib
             bool status = false;
             try
             {
-                if (language.ToUpper().CompareTo(CommonModule.baseLanguage) != 0)
-                {
-                    question = await deepLTranslate.Translate(question);
-                }
+                question = await deepLTranslate.TranslateForQuestion(question, language);
 
                 dynamic jsonObjectParam = new JObject();
                 jsonObjectParam.keyword = question;
@@ -195,10 +194,10 @@ namespace UnitTest.Lib
                     var article = articleSnapshot.ConvertTo<Article>();
                     _ImageAutoGenInfo imageAutoGenInfo = (_ImageAutoGenInfo)project2ImageAutoGenInfoMap[article.ProjectId];
                     String InsteadOfTitle = imageAutoGenInfo.InsteadOfTitle;
-                    if ( InsteadOfTitle.Length > 0 
-                        && language.ToUpper().CompareTo(CommonModule.baseLanguage) != 0 )
+                    if (InsteadOfTitle.Length > 0
+                        && language.ToUpper().CompareTo(CommonModule.baseLanguage) != 0)
                     {
-                        InsteadOfTitle = await deepLTranslate.Translate(InsteadOfTitle);
+                        InsteadOfTitle = await deepLTranslate.TranslateForQuestion(InsteadOfTitle, language);
                     }
 
                     ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray);//Image auto generation
@@ -317,13 +316,15 @@ namespace UnitTest.Lib
                     && project2LanguageMap[article.ProjectId].ToString().ToUpper()
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
-                    InsteadOfTitle = await deepLTranslate.Translate(InsteadOfTitle);
+                    InsteadOfTitle = await deepLTranslate.TranslateForQuestion(InsteadOfTitle
+                        , project2LanguageMap[article.ProjectId].ToString().ToUpper());
                 }
 
                 if (project2LanguageMap[article.ProjectId].ToString()
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
-                    question = await CommonModule.deepLTranslate.Translate(question);
+                    question = await CommonModule.deepLTranslate.TranslateForQuestion(question
+                        , project2LanguageMap[article.ProjectId].ToString());
                 }
 
                 var result = await openAI.Completions.CreateCompletionAsync(
@@ -337,34 +338,33 @@ namespace UnitTest.Lib
                     , frequencyPenalty: CommonModule.openAISetting.setInf.FrequencyPenalty));
 
                 String content = result.ToString();
-                if (CommonModule.project2LanguageMap[article.ProjectId].ToString()
+                if (content.Length > 0 && CommonModule.project2LanguageMap[article.ProjectId].ToString()
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
                     content = await CommonModule.deepLTranslate.Translate(content
                         , CommonModule.project2LanguageMap[article.ProjectId].ToString());
                 }
                 articleContent += "<br>" + content;
-                status = true;
-
                 ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray);//Image auto generation
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                {
+                    { "ArticleId", "55555" },
+                    { "Progress", 100 },
+                    { "Content", articleContent },
+                    { "ImageArray", imageArray },
+                    { "ThumbImageArray", thumbImageArray },
+                    { "IsScrapping", false },
+                    { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
+                };
+                await docRef.UpdateAsync(userUpdate);
+
+                status = true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-
-            Dictionary<string, object> userUpdate = new Dictionary<string, object>()
-            {
-                { "ArticleId", "55555" },
-                { "Progress", 100 },
-                { "Content", articleContent },
-                { "ImageArray", imageArray },
-                { "ThumbImageArray", thumbImageArray },
-                { "IsScrapping", false },
-                { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
-            };
-            await docRef.UpdateAsync(userUpdate);
-
             return status;
         }
 

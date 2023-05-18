@@ -103,9 +103,18 @@ namespace UnitTest.Lib
                                     while (CommonModule.isManualAFScrapping) Thread.Sleep(5000);
                                     //}}In case start manual scrap, sleep untile complete
                                     afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
-                                    await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    if (afRet)
+                                    {
+                                        await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                         , _id
                                         , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start[{afRet}]");
+                                    }
+                                    else
+                                    {
+                                        await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                        , _id
+                                        , $"AF Error {af.error_message}");
+                                    }
                                 }
                                 while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
                             }
@@ -127,9 +136,18 @@ namespace UnitTest.Lib
                                         while (CommonModule.isManualAFScrapping) Thread.Sleep(5000);
                                         //}}In case start manual scrap, sleep untile complete
                                         afRet = await CommonModule.ScrapArticleAsync(af, scrapAF.Title, scrapAF.Id, lang);
-                                        await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                        if (afRet)
+                                        {
+                                            await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                                , _id
+                                                , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start[{afRet}]");
+                                        }
+                                        else
+                                        {
+                                            await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                             , _id
-                                            , $"[Project ID={_id}] AF Article Id={scrapAF.Id} Scrapping Start[{afRet}]");
+                                            , $"AF Error {af.error_message}");
+                                        }
                                     }
                                     while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
 
@@ -292,6 +310,12 @@ namespace UnitTest.Lib
                             case "0"://AF
                                 Thread.Sleep(10000);
                                 afRet = await CommonModule.ScrapArticleAsync(manualAF, scrapAF.Title, scrapAF.Id, lang);
+                                if (!afRet)
+                                {
+                                    await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
+                                    , scrapAF.ProjectId
+                                    , $"AF Error {manualAF.error_message}");
+                                }
                                 break;
                             case "1"://OpenAI
                                 afRet = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);

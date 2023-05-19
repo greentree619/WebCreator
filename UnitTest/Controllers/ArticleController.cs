@@ -346,10 +346,10 @@ namespace WebCreator.Controllers
             switch (mode)
             {
                 case 0://AF
-                    ret = await CommonModule.ScrapArticleAsync(af, question, articleid, lang);
+                    ret = await CommonModule.ScrapArticleAsync("", af, question, articleid, lang);
                     break;
                 case 1://OpenAI
-                    ret = await CommonModule.ScrapArticleByOpenAIAsync(CommonModule.manualOpenAI, question, articleid);
+                    ret = await CommonModule.ScrapArticleByOpenAIAsync("", CommonModule.manualOpenAI, question, articleid);
                     break;
             }
 

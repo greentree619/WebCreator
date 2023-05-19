@@ -53,5 +53,42 @@ namespace WebCreator.Controllers
 
             return Ok(new { curPage = page, total = total, data = list });
         }
+
+        [HttpGet("Read/{projectId}/{category}/{lineCount}")]
+        public async Task<IActionResult> ReadAsync(String projectId, String category, int lineCount)
+        {
+            List<String> logLines = new List<String>();
+            String logFile = Directory.GetCurrentDirectory() + $"\\Log\\{projectId}-{category}.log";
+            if (System.IO.File.Exists(logFile)) {
+                string[] linesFromFile = System.IO.File.ReadAllLines(logFile);
+                int startLn = linesFromFile.Length - lineCount;
+                if (startLn < 0) startLn = 0;
+
+                for (int i = startLn; i < linesFromFile.Length; i++)
+                {
+                    logLines.Add(linesFromFile[i]);
+                }
+            }
+
+            return Ok(new { result = logLines });
+        }
+
+        [HttpGet("Delete/{projectId}/{category}")]
+        public async Task<IActionResult> DeleteAsync(String projectId, String category)
+        {
+            bool isDelete = false;
+            List<String> logLines = new List<String>();
+            String logFile = Directory.GetCurrentDirectory() + $"\\Log\\{projectId}-{category}.log";
+            if (System.IO.File.Exists(logFile))
+            {
+                try
+                {
+                    System.IO.File.Delete(logFile);
+                    isDelete = true;
+                }
+                catch { }
+            }
+            return Ok(new { result = isDelete });
+        }
     }
 }

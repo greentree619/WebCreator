@@ -164,8 +164,9 @@ namespace UnitTest.Lib
         //    return res;
         //}
 
-        public static async Task<bool> ScrapArticleAsync(ArticleForge af, String question, String articleid, String language) {
+        public static async Task<bool> ScrapArticleAsync(String domainId, ArticleForge af, String question, String articleid, String language) {
             bool status = false;
+            CommonModule.Log(domainId.ToString(), $"ScrapArticleAsync Start", "scrap");
             try
             {
                 question = await deepLTranslate.TranslateForQuestion(question, language);
@@ -183,6 +184,8 @@ namespace UnitTest.Lib
                 jsonObjectParam.quality = (Int32)CommonModule.afSetting.setInf.Quality;
 
                 String ref_key = af.initiateArticle(jsonObjectParam);
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleAsync ref_key:{ref_key}", "scrap");
+
                 List<String> imageArray = new List<String>();
                 List<String> thumbImageArray = new List<String>();
                 if (ref_key != null)
@@ -219,8 +222,10 @@ namespace UnitTest.Lib
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleAsync Exception: {ex.Message}", "scrap");
             }
 
+            CommonModule.Log(domainId.ToString(), $"ScrapArticleAsync End", "scrap");
             return status;
         }
 
@@ -296,7 +301,7 @@ namespace UnitTest.Lib
             }
         }
 
-        public static async Task<bool> ScrapArticleByOpenAIAsync(OpenAIAPI openAI, String question, String articleid)
+        public static async Task<bool> ScrapArticleByOpenAIAsync(String domainId, OpenAIAPI openAI, String question, String articleid)
         {
             bool status = false;
             String orgLangQuetion = question;
@@ -305,6 +310,8 @@ namespace UnitTest.Lib
             List<String> thumbImageArray = new List<string>();
             CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
             DocumentReference docRef = articlesCol.Document(articleid);
+
+            CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync start\n", "scrap");
             try
             {   
                 DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
@@ -327,6 +334,7 @@ namespace UnitTest.Lib
                         , project2LanguageMap[article.ProjectId].ToString());
                 }
 
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync step 1/2\n", "scrap");
                 var result = await openAI.Completions.CreateCompletionAsync(
                     new CompletionRequest(CommonModule.openAISetting.GetPrompt(question)
                     , model: CommonModule.openAISetting.setInf.Model
@@ -338,6 +346,7 @@ namespace UnitTest.Lib
                     , frequencyPenalty: CommonModule.openAISetting.setInf.FrequencyPenalty));
 
                 String content = result.ToString();
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync step 2/2 content len: {content.Length.ToString()}\n", "scrap");
                 if (content.Length > 0 && CommonModule.project2LanguageMap[article.ProjectId].ToString()
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
@@ -345,7 +354,10 @@ namespace UnitTest.Lib
                         , CommonModule.project2LanguageMap[article.ProjectId].ToString());
                 }
                 articleContent += "<br>" + content;
+
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync > scrap image\n", "scrap");
                 ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray);//Image auto generation
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync > scrap image end\n", "scrap");
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                 {
@@ -364,7 +376,10 @@ namespace UnitTest.Lib
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync exception: {ex.Message}\n", "scrap");
             }
+
+            CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync end\n", "scrap");
             return status;
         }
 
@@ -1692,6 +1707,15 @@ namespace UnitTest.Lib
                 schedule.Id = projectsSnapshot.Documents[0].Id;
             }
             return schedule;
+        }
+
+        public static void Log(String domainId, String log, String tag)
+        {
+            if (domainId.Length == 0) return;
+
+            String logFile = Directory.GetCurrentDirectory() + $"\\Log\\{domainId}-{tag}.log";
+            String logContent = $"[{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")}] {log}\n";
+            File.AppendAllText(logFile, logContent);
         }
     }
 }

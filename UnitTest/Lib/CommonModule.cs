@@ -311,7 +311,7 @@ namespace UnitTest.Lib
             CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
             DocumentReference docRef = articlesCol.Document(articleid);
 
-            CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync start\n", "scrap");
+            CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync start", "scrap");
             try
             {   
                 DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
@@ -334,7 +334,7 @@ namespace UnitTest.Lib
                         , project2LanguageMap[article.ProjectId].ToString());
                 }
 
-                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync step 1/2\n", "scrap");
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync step 1/2", "scrap");
                 var result = await openAI.Completions.CreateCompletionAsync(
                     new CompletionRequest(CommonModule.openAISetting.GetPrompt(question)
                     , model: CommonModule.openAISetting.setInf.Model
@@ -346,7 +346,7 @@ namespace UnitTest.Lib
                     , frequencyPenalty: CommonModule.openAISetting.setInf.FrequencyPenalty));
 
                 String content = result.ToString();
-                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync step 2/2 content len: {content.Length.ToString()}\n", "scrap");
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync step 2/2 content len: {content.Length.ToString()}", "scrap");
                 if (content.Length > 0 && CommonModule.project2LanguageMap[article.ProjectId].ToString()
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
@@ -355,9 +355,9 @@ namespace UnitTest.Lib
                 }
                 articleContent += "<br>" + content;
 
-                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync > scrap image\n", "scrap");
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync > scrap image", "scrap");
                 ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray);//Image auto generation
-                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync > scrap image end\n", "scrap");
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync > scrap image end", "scrap");
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                 {
@@ -376,10 +376,10 @@ namespace UnitTest.Lib
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync exception: {ex.Message}\n", "scrap");
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync exception: {ex.Message}", "scrap");
             }
 
-            CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync end\n", "scrap");
+            CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync end", "scrap");
             return status;
         }
 
@@ -808,6 +808,7 @@ namespace UnitTest.Lib
 
         static public async Task BuildArticlePageThreadAsync(String domainid, String domain, String articleId, bool isAWSHost, String s3Name, String region)
         {
+            CommonModule.Log(domainid.ToString(), $"BuildArticlePageThreadAsync start", "publish");
             try
             {
                 String httpPrefix = (((bool)project2UseHttpsMap[domainid]) ? "https" : "http");
@@ -877,7 +878,9 @@ namespace UnitTest.Lib
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                CommonModule.Log(domainid.ToString(), $"BuildArticlePageThreadAsync Exception: {ex.Message}", "publish");
             }
+            CommonModule.Log(domainid.ToString(), $"BuildArticlePageThreadAsync start", "publish");
         }
 
         static public async Task BuildPagesThreadAsync(String domainid, String domain, bool isAWSHost, String s3Name, String region, int defaultState =2, bool force = true)
@@ -1020,6 +1023,7 @@ namespace UnitTest.Lib
 
         static public async Task SyncWithServerThreadAsync(String domainid, String domain, String ipaddr, String s3Name)
         {
+            CommonModule.Log(domainid.ToString(), $"SyncWithServerThreadAsync start", "publish");
             try
             {
                 String curFolder = Directory.GetCurrentDirectory();
@@ -1070,23 +1074,28 @@ namespace UnitTest.Lib
                         }
                     }
 
+                    CommonModule.Log(domainid.ToString(), $"SyncWithServerThreadAsync upload zip", "publish");
                     if (ipaddr.CompareTo("0.0.0.0") != 0)
                     {
                         String cmd = $"pscp -i {exeFolder}\\{Config.EC2UploadKey} {tmpFolder}\\{domain}.zip ubuntu@{ipaddr}:/home/ubuntu";
 
                         Console.WriteLine("SyncWithServerThreadAsync --> " + cmd);
                         ExecuteCmd.ExecuteCommandAsync(cmd);
+                        CommonModule.Log(domainid.ToString(), $"SyncWithServerThreadAsync EC2 upload OK", "publish");
                     }
                     else
                     {
                         await new AWSUpload().start(s3Name, $"{domain}.zip", $"{tmpFolder}\\");
+                        CommonModule.Log(domainid.ToString(), $"SyncWithServerThreadAsync S3 upload OK", "publish");
                     }
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                CommonModule.Log(domainid.ToString(), $"SyncWithServerThreadAsync Exception: {ex.Message}", "publish");
             }
+            CommonModule.Log(domainid.ToString(), $"SyncWithServerThreadAsync end", "publish");
         }
 
         static public async Task SyncThemeWithServerThreadAsync(String domain, String ipaddr)

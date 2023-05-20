@@ -81,12 +81,15 @@ namespace WebCreator.Controllers
             String logFile = Directory.GetCurrentDirectory() + $"\\Log\\{projectId}-{category}.log";
             if (System.IO.File.Exists(logFile))
             {
-                try
+                for(int i=0; i<5 && !isDelete; i++)
                 {
-                    System.IO.File.Delete(logFile);
-                    isDelete = true;
+                    try
+                    {
+                        System.IO.File.Delete(logFile);
+                        isDelete = true;
+                    }
+                    catch { }
                 }
-                catch { }
             }
             return Ok(new { result = isDelete });
         }

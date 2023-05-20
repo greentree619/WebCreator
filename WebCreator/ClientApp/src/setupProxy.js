@@ -43,6 +43,9 @@ const context =  [
   "/buildsync/sync",
   "/setting/afsetting",
   "/setting/openAISetting",
+  "/log",
+  "/log/Read",
+  "/log/Delete",
   "OpenAI/image",
   "OpenAI/video",
 ];

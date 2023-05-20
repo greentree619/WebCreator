@@ -10,6 +10,7 @@ const Keyword = React.lazy(() => import('./views/project/keyword/Keyword'))
 const ListProject = React.lazy(() => import('./views/project/list/List'))
 const AllArticles = React.lazy(() => import('./views/article/list/List'))
 const NewArticle = React.lazy(() => import('./views/article/add/Add'))
+const LogView = React.lazy(() => import('./views/log/View'))
 const ArticleView = React.lazy(() => import('./views/article/view/View'))
 const ApprovalArticle = React.lazy(() => import('./views/article/approval/Approval'))
 const AFSetting = React.lazy(() => import('./views/article/setting/Setting'))
@@ -94,6 +95,7 @@ const routes = [
   { path: '/article/view', name: 'Article View', element: ArticleView },
   { path: '/article/add', name: 'Create New Article', element: NewArticle },
   { path: '/article/approval', name: 'Approval Article', element: ApprovalArticle },
+  { path: '/log/view', name: 'Log View', element: LogView },
   { path: '/article/setting', name: 'Article Forge Setting', element: AFSetting },
   { path: '/openai/setting', name: 'OpenAI API Setting', element: OpenAISetting },
   { path: '/cloudflare/zone', name: 'Zone List View', element: AllZoneList },

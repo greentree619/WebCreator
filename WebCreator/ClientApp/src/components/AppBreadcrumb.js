@@ -178,6 +178,11 @@ const AppBreadcrumb = () => {
                         Sync
                       </CNavLink>
                     </CNavItem>
+                    <CNavItem className="px-1">
+                      <CNavLink className={isSelctedTab("log_view")} href={'#/log/view?tab=log_view&domainId=' + activeDomainId + '&domain=' + activeDomainName + '&domainIp=' + activeDomainIp}>
+                        Log
+                      </CNavLink>
+                    </CNavItem>
                     {/* <CNavItem className="px-1">
                       <CNavLink className="btn btn-light" href="#" disabled>
                         Article Theme

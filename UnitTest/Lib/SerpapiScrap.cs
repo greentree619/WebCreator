@@ -128,6 +128,7 @@ namespace UnitTest.Lib
                             while ((bool)CommonModule.articleScrappingThreadList[_id]
                                 && scrapArticles.Count > 0)
                             {
+                                CommonModule.Log(_id.ToString(), $"ScrappingAFThreadAsync > main-proc step 3/3 > waiting for:{(schedule.SpanTime * schedule.SpanUnit).ToString()}", "scrap");
                                 Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
                                 for (int i = 0; i < schedule.EachCount 
@@ -137,6 +138,7 @@ namespace UnitTest.Lib
                                     Article scrapAF = scrapArticles.Pop();
                                     do
                                     {
+                                        CommonModule.Log(_id.ToString(), $"ScrappingAFThreadAsync > main-proc step 3/3 > waiting for: 10 secs", "scrap");
                                         Thread.Sleep(10000);
                                         //{{In case start manual scrap, sleep untile complete
                                         while (CommonModule.isManualAFScrapping) Thread.Sleep(5000);
@@ -161,6 +163,7 @@ namespace UnitTest.Lib
                             }
                         }
 
+                        CommonModule.Log(_id.ToString(), $"ScrappingAFThreadAsync > Repeat", "scrap");
                         await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                             , _id
                                             , $"[Project ID={_id}] AF Article Scrapping Repeat");
@@ -246,6 +249,7 @@ namespace UnitTest.Lib
                             CommonModule.Log(_id.ToString(), $"ScrappingOpenAIThreadAsync step 3/3\n", "scrap");
                             while ((bool)CommonModule.articleScrappingThreadList[_id] && scrapArticles.Count > 0)
                             {
+                                CommonModule.Log(_id.ToString(), $"ScrappingOpenAIThreadAsync step 3/3 > waiting for:{(schedule.SpanTime * schedule.SpanUnit).ToString()}\n", "scrap");
                                 Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
                                 for (int i = 0; i < schedule.EachCount 
@@ -270,6 +274,7 @@ namespace UnitTest.Lib
                             }
                         }
 
+                        CommonModule.Log(_id.ToString(), $"ScrappingOpenAIThreadAsync Repeat", "scrap");
                         await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                             , _id
                                             , $"[Project ID={_id}] OpenAI Article Scrapping Repeat");
@@ -282,7 +287,7 @@ namespace UnitTest.Lib
                     await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                     , _id
                                     , $"[Project ID={_id}] Exception {ex.Message}");
-                    CommonModule.Log(_id.ToString(), $"ScrappingOpenAIThreadAsync Exception: {ex.Message}\n", "scrap");
+                    CommonModule.Log(_id.ToString(), $"ScrappingOpenAIThreadAsync Exception: {ex.Message}", "scrap");
                 }
 
                 Console.WriteLine("OpenAI scrapping All done.");
@@ -298,6 +303,7 @@ namespace UnitTest.Lib
 
         public async Task ScrappingManualThreadAsync(String mode, String _id, String articleIds)
         {
+            CommonModule.Log(_id.ToString(), $"ScrappingManualThreadAsync start", "scrap");
             try
             {
                 String lang = CommonModule.project2LanguageMap[_id].ToString();
@@ -344,7 +350,8 @@ namespace UnitTest.Lib
                 Console.WriteLine(ex.Message);
             }
 
-            if(mode == "0") CommonModule.isManualAFScrapping = false;
+            CommonModule.Log(_id.ToString(), $"ScrappingManualThreadAsync end", "scrap");
+            if (mode == "0") CommonModule.isManualAFScrapping = false;
             else if (mode == "1") CommonModule.isManualOpenAIScrapping = false;
         }
 
@@ -357,6 +364,7 @@ namespace UnitTest.Lib
 
         public async Task PublishThreadAsync(String _id, String scheduleId)
         {
+            CommonModule.Log(_id.ToString(), $"PublishThreadAsync start", "publish");
             {
                 await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
                     , _id
@@ -377,6 +385,7 @@ namespace UnitTest.Lib
 
                     while ( (bool)CommonModule.publishThreadList[_id] )
                     {
+                        CommonModule.Log(_id.ToString(), $"PublishThreadAsync loop start", "publish");
                         CollectionReference col = Config.FirebaseDB.Collection("Articles");
                         Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("State", 2).OrderBy("UpdateTime");
                         QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
@@ -389,11 +398,13 @@ namespace UnitTest.Lib
                             scrapArticles.Push(article);
                         }
 
+                        CommonModule.Log(_id.ToString(), $"PublishThreadAsync publish ready", "publish");
                         ArticleForge af = new ArticleForge();
                         if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
                         {
                             schedule = scheduleSnapshot.ConvertTo<PublishSchedule>();
 
+                            CommonModule.Log(_id.ToString(), $"PublishThreadAsync publish for just now: {schedule.JustNowCount }", "publish");
                             for (int i = 0; i < schedule.JustNowCount 
                                 && (bool)CommonModule.publishThreadList[_id]
                                 && scrapArticles.Count > 0; i++)
@@ -418,8 +429,10 @@ namespace UnitTest.Lib
                                 while (!publishRet);
                             }
 
+                            CommonModule.Log(_id.ToString(), $"PublishThreadAsync publish align with schedule: {scrapArticles.Count}", "publish");
                             while ((bool)CommonModule.publishThreadList[_id] && scrapArticles.Count > 0)
                             {
+                                CommonModule.Log(_id.ToString(), $"PublishThreadAsync publish align with schedule > waiting: {schedule.SpanTime * schedule.SpanUnit}", "publish");
                                 Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
                                 for (int i = 0; i < schedule.EachCount 
@@ -451,6 +464,7 @@ namespace UnitTest.Lib
                         await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
                                         , _id
                                         , $"[Project ID={_id}] Publish Process Repeat");
+                        CommonModule.Log(_id.ToString(), $"PublishThreadAsync loop end", "publish");
                     }
                 }
                 catch (Exception ex)
@@ -459,6 +473,7 @@ namespace UnitTest.Lib
                     await CommonModule.historyLog.LogActionHistory(CommonModule.PublishCategory
                     , _id
                     , $"[Project ID={_id}] Exception {ex.Message}");
+                    CommonModule.Log(_id.ToString(), $"PublishThreadAsync Exception: {ex.Message}", "publish");
                 }
 
                 CommonModule.SetDomainPublishScheduleAsync(_id, false);
@@ -467,6 +482,7 @@ namespace UnitTest.Lib
                     , _id
                     , $"[Project ID={_id}] Publish Thread Stop");
             }
+            CommonModule.Log(_id.ToString(), $"PublishThreadAsync end", "publish");
         }
 
         //_id: domain id

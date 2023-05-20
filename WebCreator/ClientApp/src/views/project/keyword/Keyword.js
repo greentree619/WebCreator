@@ -290,7 +290,8 @@ const Keyword = (props) => {
                     >
                       From File
                     </CNavLink>
-                  </CNavItem>                  
+                  </CNavItem>
+                  <CNavItem className='flex-grow-1'></CNavItem>
                   <CNavItem>
                     &nbsp;
                     <Link to={`/history/view/?category=Keyword&projectId=${location.state.project.id}`}>

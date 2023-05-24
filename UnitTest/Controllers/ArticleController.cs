@@ -224,12 +224,13 @@ namespace WebCreator.Controllers
         }
 
         [HttpGet("sync_status/{domain}/{articleids}/{isAWS}")]
-        public async Task<IActionResult> GetArticleSyncAsync(string domain, String articleids, int isAWS,String? s3Name="", String? region="")
+        public async Task<IActionResult> GetArticleSyncAsync(string domain, String articleids, int isAWS,String? s3Name="", String? region="", String? domainActivate = "", String? domainIP = "")
         {
             string[] articleList = articleids.Split(',');
             Dictionary<string, bool> syncStatus = new Dictionary<string, bool>();
             try
             {
+                if (domainActivate != "active") domain = domainIP;
                 String hostDomain = CommonModule.GetDomain(domain, (isAWS == 1), s3Name, region);
                 CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
                 Query query = articlesCol.WhereIn(FieldPath.DocumentId, articleList);

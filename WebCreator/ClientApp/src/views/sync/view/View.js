@@ -67,6 +67,9 @@ class ListBase extends Component {
         && this.state.projectInfo.activeProject.useHttps ) httpPrefix = "https"
 
     var url = `${httpPrefix}://${this.state.projectInfo.projectDomain}/${title}.html`;
+    if( this.props.activeZoneStatus != 'active' ){
+      url = `${httpPrefix}://${this.state.projectInfo.domainIp}/${title}.html`;
+    }
 
     //http://www.traepiller123.info.s3-website.us-east-2.amazonaws.com
     if(this.state.projectInfo.domainIp == "0.0.0.0"){
@@ -86,12 +89,13 @@ class ListBase extends Component {
         headers: { 'Content-Type': 'application/json' },
       }
 
+      //console.log("activeZoneStatus", activeZoneStatus == 'active')
       var isAWS = (this.state.projectInfo.domainIp == "0.0.0.0" ? 1 : 0)
 
       var s3Host = loadFromLocalStorage('s3host')
       var s3Name = s3Host.name == null ? "" : s3Host.name;
       var s3Region = s3Host.region == null ? "" : s3Host.region;
-      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/sync_status/${this.state.projectInfo.projectDomain}/${ids}/${isAWS}?s3Name=${s3Name}&region=${s3Region}`, requestOptions)
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}article/sync_status/${this.state.projectInfo.projectDomain}/${ids}/${isAWS}?s3Name=${s3Name}&region=${s3Region}&domainActivate=${this.props.activeZoneStatus}&domainIP=${this.state.projectInfo.domainIp}`, requestOptions)
       let ret = await response.json()
       if (response.status === 200 && ret) {
         //console.log(ret);
@@ -272,6 +276,7 @@ ListBase.propTypes = {
   isLoadingAllArticle: PropTypes.bool,
   curProjectArticleList: PropTypes.array,
   curSearchArticleList: PropTypes.array,
+  activeZoneStatus: PropTypes.bool,
 }
 
 const List = (props) => {
@@ -281,6 +286,7 @@ const List = (props) => {
   const curProjectArticleList = useSelector((state) => state.curProjectArticleList)
   const curSearchArticleList = useSelector((state) => state.curSearchArticleList)
   const isLoadingAllArticle = useSelector((state) => state.isLoadingAllArticle)
+  const activeZoneStatus = useSelector((state) => state.activeZoneStatus)
 
   if (location.state == null && location.search.length > 0) {
     location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
@@ -293,6 +299,6 @@ const List = (props) => {
     dispatch({ type: 'set', activeTab: 'sync_view' })
   }, [])
 
-  return <ListBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} curSearchArticleList ={curSearchArticleList} {...props} />
+  return <ListBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} curSearchArticleList ={curSearchArticleList} activeZoneStatus = {activeZoneStatus} {...props} />
 }
 export default List

@@ -433,6 +433,8 @@ class ApprovalBase extends Component {
             {this.state.articles.map((article) => {
               //if (article.content != null && article.content.length > 0)
               {
+                if(this.state.checkedItem[article.id] == null) return
+
                 return (<tr key={article.id}>
                   <td className='text-center'><CFormCheck id={article.id} label={article.id}
                       checked={this.state.checkedItem[article.id].checked}

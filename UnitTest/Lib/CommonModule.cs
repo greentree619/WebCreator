@@ -1640,25 +1640,45 @@ namespace UnitTest.Lib
                     sResult = (streamReader.ReadToEnd());
                 dynamic jResult = JsonConvert.DeserializeObject(sResult);
                 JArray imgUrls = (JArray)jResult.data;
-                foreach (JObject imgUrl in imgUrls)
+                
+                using (HttpClient client = new HttpClient())
                 {
-                    Hashtable hashTbl = new Hashtable();
-                    hashTbl["url"] = imgUrl["url"].ToString();
-                    using (WebClient wc = new WebClient())
+                    foreach (JObject imgUrl in imgUrls)
                     {
-                        using (Stream s = wc.OpenRead( imgUrl["url"].ToString() ))
+                        try
                         {
-                            using (Bitmap bmp = new Bitmap(s))
+                            string apiUrl = "https://ogtwrgbanrh3blva5t7j4susri0akzxf.lambda-url.us-east-2.on.aws/";
+                            string jsonData = $"{{\"url\":\"{imgUrl["url"].ToString()}\"}}";
+
+                            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                            HttpResponseMessage response = client.PostAsync(apiUrl, content).GetAwaiter().GetResult();
+                            if (response.IsSuccessStatusCode)
                             {
-                                String fileName = question.Trim().Replace(" ", "").Replace("?", "");
-                                fileName = $"{thumbFolder}\\{fileName}.jpg";
-                                bmp.Save(fileName);
-                                hashTbl["thumb"] = ThumbnailBase64Image(bmp, 256, 256);
+                                // Read the response content as a string
+                                string responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                                var body = JObject.Parse(responseContent);
+                                String key = body["key"].ToString();
+                                String imgS3Url = $"https:////article-image-bucket-live.s3.us-east-2.amazonaws.com/{key}";
+                                String thumbS3Url = $"https:////article-image-thumbnails-bucket-live.s3.us-east-2.amazonaws.com/{key}";
+
+                                // Process the response data
+                                Console.WriteLine("Response: " + responseContent);
+                                Hashtable hashTbl = new Hashtable();
+                                hashTbl["url"] = imgS3Url;
+                                hashTbl["thumb"] = thumbS3Url;
+                                list.Add(hashTbl);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Error: " + response.StatusCode);
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            //Console.WriteLine("An error occurred: " + ex.Message);
+                        }
                     }
-                    list.Add( hashTbl );
-                }
+                }    
             }
             catch (WebException e)
             { }

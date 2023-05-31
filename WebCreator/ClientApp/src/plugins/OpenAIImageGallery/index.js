@@ -137,7 +137,7 @@ const openAIImageGallery = {
           obj.util.addClass(anchor, "wrapperImage loading");
 
           const image = document.createElement("img");
-          image.src = "data:image/jpeg;base64," + thumb;
+          image.src = thumb;
           image.orgsrc = url;
 
           const imgCaption = document.createElement("DIV");

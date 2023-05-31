@@ -101,7 +101,7 @@ const AddImagesComponent = forwardRef((props, ref) => {
         var tmpGallery = []
         ret.data.map((img, idx) => {
           tmpGallery.push({url:img.url
-            , thumb:"data:image/jpeg;base64," + img.thumb})
+            , thumb: img.thumb})
         })
         setImageGallery(tmpGallery)
         //console.log(imageGallery)

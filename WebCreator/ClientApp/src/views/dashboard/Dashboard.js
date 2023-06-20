@@ -61,13 +61,14 @@ import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import Truncate from 'react-truncate'
 import { useDispatch, useSelector } from 'react-redux'
-import { loadFromLocalStorage, saveToLocalStorage, clearLocalStorage } from 'src/utility/common'
+import { loadFromLocalStorage, saveToLocalStorage, clearLocalStorage, getProjectState } from 'src/utility/common'
 import { ReactSession }  from 'react-client-session'
 
 const Dashboard = () => {
   const dispatch = useDispatch()
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
   const [projects, setProjects] = useState([])
+  const [prjState, setPrjState] = useState({})
 
   const progressExample = [
     { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
@@ -117,6 +118,7 @@ const Dashboard = () => {
       console.log(data.data)
       saveToLocalStorage(data.data, 'allProjects')
       setProjects(data.data)
+      getAllProjectState( data.data )
 
       ReactSession.set("allProjects", "1")
       //prevAllProjects = ReactSession.get("allProjects")
@@ -127,8 +129,25 @@ const Dashboard = () => {
       if(allProjects != null && allProjects != undefined && allProjects.length > 0)
       {
         setProjects( allProjects )
+        getAllProjectState( allProjects )
       }
     }
+  }
+
+  async function getAllProjectState(projects) {
+    console.log("getAllProjectState", projects)
+    var tmpPrjState = await Promise.all(
+      projects.map(async (project) => {
+        var prjState = await getProjectState(project.id)
+        //console.log("tmpPrjState", prjState)
+        return [
+          project.id,
+          {isOnScrapping: prjState.isOnScrapping, isOnAFScrapping: prjState.isOnAFScrapping, isOnPublish: prjState.isOnPublish}
+        ]
+      })
+    )
+    //console.log("tmpPrj: ", tmpPrjState, Object.fromEntries(tmpPrjState))
+    setPrjState(Object.fromEntries(tmpPrjState))
   }
 
   return (
@@ -151,9 +170,9 @@ const Dashboard = () => {
               className="lb-3"
               icon={<CIcon width={24} icon={cilWindow} size="xl" />}
               title={project.name}
-              value={<><CBadge color="secondary" size="sm">keywords</CBadge>
-                        <CBadge color="secondary" size="sm">articles</CBadge>
-                        <CBadge color="secondary" size="sm">publish</CBadge></>}
+              value={<><CBadge color={(prjState[project.id] != null && prjState[project.id].isOnScrapping) ? "success" : "secondary"} size="sm">keywords</CBadge>
+                        <CBadge color={(prjState[project.id] != null && prjState[project.id].isOnAFScrapping) ? "success" : "secondary"} size="sm">articles</CBadge>
+                        <CBadge color={(prjState[project.id] != null && prjState[project.id].isOnPublish) ? "success" : "secondary"} size="sm">publish</CBadge></>}
               color="primary"
             />
           </Link>

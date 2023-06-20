@@ -93,7 +93,7 @@ export const globalRegionMap = [
     theme: "colored",
     }
 
-export const getProjectState = async (domainId) => {
+export async function getProjectState(domainId) {
     var isOnScrapping = false
     var isOnAFScrapping = false
     var isOnPublish = false
@@ -121,10 +121,10 @@ export const getProjectState = async (domainId) => {
         //setIsOnAFScrapping(false);
     }
 
-    return [
+    return {
         isOnScrapping,
         isOnAFScrapping,
         isOnPublish,
         scrappingMode
-    ]
+    }
 }

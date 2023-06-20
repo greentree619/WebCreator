@@ -409,6 +409,7 @@ namespace WebCreator.Controllers
         public async Task<ActionResult> UpdateProjectAsync([FromBody] Project projectInput)
         {
             bool addOK = false;
+            String error = "";
             var project = new Project
             {
                 Id = projectInput.Id,
@@ -425,6 +426,13 @@ namespace WebCreator.Controllers
                 ImageAutoGenInfo = projectInput.ImageAutoGenInfo,
                 CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             };
+
+            if (projectInput.Ip.CompareTo("0.0.0.0") == 0
+                && (projectInput.UseHttps == null || projectInput.UseHttps == false))
+            {
+                error = "You have incorrect setting with HTTPS. Maybe you can't deploy to S3 Bukect.";
+                CommonModule.Notification(projectInput.Id, error);
+            }
 
             try
             {
@@ -475,7 +483,7 @@ namespace WebCreator.Controllers
                 Console.WriteLine(ex.Message);
             }
 
-            return Ok(addOK);
+            return Ok(new { result = addOK, error = error });
         }
 
         [HttpPut("updateSchedule")]

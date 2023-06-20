@@ -18,6 +18,7 @@ import {
   CTableHeaderCell,
   CTableRow,
   CWidgetStatsF,
+  CBadge,
 } from '@coreui/react'
 import { CChartLine } from '@coreui/react-chartjs'
 import { getStyle, hexToRgba } from '@coreui/utils'
@@ -150,7 +151,9 @@ const Dashboard = () => {
               className="lb-3"
               icon={<CIcon width={24} icon={cilWindow} size="xl" />}
               title={project.name}
-              value=""
+              value={<><CBadge color="secondary" size="sm">keywords</CBadge>
+                        <CBadge color="secondary" size="sm">articles</CBadge>
+                        <CBadge color="secondary" size="sm">publish</CBadge></>}
               color="primary"
             />
           </Link>

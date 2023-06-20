@@ -39,6 +39,8 @@ String uploadFolder = Directory.GetCurrentDirectory() + "\\Upload";
 if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
 String logFolder = Directory.GetCurrentDirectory() + "\\Log";
 if (!Directory.Exists(logFolder)) Directory.CreateDirectory(logFolder);
+String notificationFolder = Directory.GetCurrentDirectory() + "\\Notification";
+if (!Directory.Exists(notificationFolder)) Directory.CreateDirectory(notificationFolder);
 
 //{{Article Forge UnitTest
 //ArticleForge af = new ArticleForge();

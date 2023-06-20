@@ -137,7 +137,7 @@ const View = (props) => {
             <CCard className="mb-4">
               <CCardHeader>Log View</CCardHeader>
               <CCardBody>
-                <ToastContainer
+                {/* <ToastContainer
                   position="top-right"
                   autoClose={5000}
                   hideProgressBar={false}
@@ -148,7 +148,7 @@ const View = (props) => {
                   draggable
                   pauseOnHover
                   theme="colored"
-                />
+                /> */}
                 <CNav className='d-flex' variant="tabs" role="tablist">
                   <CNavItem>
                     <CNavLink

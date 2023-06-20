@@ -14,8 +14,9 @@ const initialState = {
   isOnAFScrapping: false,
   isOnPublish: false,
   curProjectArticleList: [],
-  curSearchArticleList: [],
+  curSearchArticleList: [],  
   isLoadingAllArticle: false,
+  notification: [],
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {

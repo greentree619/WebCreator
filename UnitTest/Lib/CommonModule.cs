@@ -1746,5 +1746,14 @@ namespace UnitTest.Lib
             String logContent = $"[{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")}] {log}\n";
             File.AppendAllText(logFile, logContent);
         }
+
+        public static void Notification(String domainId, String notification)
+        {
+            if (domainId.Length == 0) return;
+
+            String logFile = Directory.GetCurrentDirectory() + $"\\Notification\\{domainId}.log";
+            String logContent = $"[{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")}] {notification}\n";
+            File.AppendAllText(logFile, logContent);
+        }
     }
 }

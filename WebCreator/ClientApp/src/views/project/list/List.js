@@ -193,7 +193,7 @@ export default class List extends Component {
         >
           {state.alertMsg}
         </CAlert>
-        <ToastContainer
+        {/* <ToastContainer
             position="top-right"
             autoClose={5000}
             hideProgressBar={false}
@@ -204,7 +204,7 @@ export default class List extends Component {
             draggable
             pauseOnHover
             theme="colored"
-          />
+          /> */}
         <table className="table">
           <thead>
             <tr>

@@ -407,7 +407,7 @@ class ApprovalBase extends Component {
         >
           {this.state.alertMsg}
         </CAlert>
-        <ToastContainer
+        {/* <ToastContainer
             position="top-right"
             autoClose={5000}
             hideProgressBar={false}
@@ -418,7 +418,7 @@ class ApprovalBase extends Component {
             draggable
             pauseOnHover
             theme="colored"
-          />
+          /> */}
         <table className="table">
           <thead>
             <tr>

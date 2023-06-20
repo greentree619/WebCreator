@@ -172,7 +172,7 @@ const Bucket = (props) => {
 
   return (
     <>
-      <ToastContainer
+      {/* <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
@@ -183,7 +183,7 @@ const Bucket = (props) => {
         draggable
         pauseOnHover
         theme="colored"
-      />
+      /> */}
       <CRow>
         <CCol>
           <CCard className="mb-4">

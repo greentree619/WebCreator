@@ -211,10 +211,15 @@ const Add = (props) => {
     // setAlertColor('danger')
     // setAlertMsg('Faild to create/update new domain unfortunatley.')
     let ret = await response.json()
-    if (response.status === 200 && ret) {
+    if (response.status === 200 && ret.result) {
       // setAlertMsg('Created/Updated new domain successfully.')
       // setAlertColor('success')
       toast.success('Created/Updated new domain successfully.', alertConfirmOption);
+
+      console.log("ret.error", ret.error)
+      if (ret.error.length > 0) {
+        dispatch({ type: 'set', notification: [ret.error] })
+      }
 
       location.state.project = projInfo
       dispatch({ type: 'set', activeDomainName: location.state.project.name })
@@ -314,13 +319,19 @@ const Add = (props) => {
         && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT')) {
         const response = await fetch(`${process.env.REACT_APP_SERVER_URL}dns/byname/${location.state.project.name}`)
         const data = await response.json()
-        //console.log(data.result);
+        console.log("getZoneInformation", data.result);
         if (data.result.length > 0) {
           //console.log(data.result[0].name);
           //console.log(data.result[0].id);
           dispatch({ type: 'set', activeZoneName: data.result[0].name })
           dispatch({ type: 'set', activeZoneId: data.result[0].id })
           dispatch({ type: 'set', activeZoneStatus: data.result[0].status })
+        }
+        else
+        {
+          dispatch({ type: 'set', activeZoneName: "" })
+          dispatch({ type: 'set', activeZoneId: "" })
+          dispatch({ type: 'set', activeZoneStatus: (location.state.project.ip === "0.0.0.0" ? "active": "") })
         }
       }
     } catch (e) {
@@ -357,7 +368,7 @@ const Add = (props) => {
     populateEC2IPList()
     populateBucketNameList()
 
-    console.log("location.search.length = " + location.search.length)
+    //Omitted console.log("location.search.length = " + location.search.length, location.state.project)
     dispatch({ type: 'set', activeTab: "project_add" })
     if (location.search.length == 0
       && (location.state != null && (location.state.mode == 'VIEW' || location.state.mode == 'EDIT'))) {
@@ -432,7 +443,7 @@ const Add = (props) => {
 
   return (
     <>
-      <ToastContainer
+      {/* <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
@@ -443,7 +454,7 @@ const Add = (props) => {
         draggable
         pauseOnHover
         theme="colored"
-      />
+      /> */}
       <CContainer className="px-4">
         <CRow xs={{ gutterX: 5 }}>
           <CCol>

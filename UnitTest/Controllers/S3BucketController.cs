@@ -40,13 +40,15 @@ namespace UnitTest.Controllers
                 response.Buckets
                     .ForEach(b =>
                     {
-                        index++;
-                        var bucket = new Hashtable();
-                        bucket["index"] = index;
-                        bucket["name"] = b.BucketName;
-                        bucket["createDate"] = b.CreationDate;
-                        list.Add(bucket);
-                        //Console.WriteLine($"Bucket name: {b.BucketName}, created on: {b.CreationDate}");
+                        if (!IsExclude(b.BucketName)) {
+                            index++;
+                            var bucket = new Hashtable();
+                            bucket["index"] = index;
+                            bucket["name"] = b.BucketName;
+                            bucket["createDate"] = b.CreationDate;
+                            list.Add(bucket);
+                            //Console.WriteLine($"Bucket name: {b.BucketName}, created on: {b.CreationDate}");
+                        }
                     });
             }
             catch (AmazonS3Exception ex)
@@ -77,13 +79,16 @@ namespace UnitTest.Controllers
                 response.Buckets
                     .ForEach(b =>
                     {
-                        index++;
-                        var bucket = new Hashtable();
-                        bucket["index"] = index;
-                        bucket["name"] = b.BucketName;
-                        bucket["createDate"] = b.CreationDate;
-                        list.Add(bucket);
-                        //Console.WriteLine($"Bucket name: {b.BucketName}, created on: {b.CreationDate}");
+                        if (!IsExclude(b.BucketName))
+                        {
+                            index++;
+                            var bucket = new Hashtable();
+                            bucket["index"] = index;
+                            bucket["name"] = b.BucketName;
+                            bucket["createDate"] = b.CreationDate;
+                            list.Add(bucket);
+                            //Console.WriteLine($"Bucket name: {b.BucketName}, created on: {b.CreationDate}");
+                        }
                     });
             }
             catch (AmazonS3Exception ex)
@@ -242,6 +247,18 @@ namespace UnitTest.Controllers
             {
             }
             return Ok(true);
+        }
+
+        bool IsExclude(String bucketName)
+        {
+            bool ret = false;
+            String[] excludeTokens = new string[] { "cdk-", "website-upload-bucket" };
+            foreach (var token in excludeTokens) {
+                if (bucketName.IndexOf(token) == 0) {
+                    ret = true;
+                }
+            }
+            return ret;
         }
     }
 }

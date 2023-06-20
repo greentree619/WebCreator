@@ -104,7 +104,7 @@ const Article = (props) => {
       <CCard className="mb-4">
         <CCardHeader>Theme Upload</CCardHeader>
         <CCardBody>
-          <ToastContainer
+          {/* <ToastContainer
             position="top-right"
             autoClose={5000}
             hideProgressBar={false}
@@ -115,7 +115,7 @@ const Article = (props) => {
             draggable
             pauseOnHover
             theme="colored"
-          />
+          /> */}
           <CAlert
             color={alertColor}
             dismissible

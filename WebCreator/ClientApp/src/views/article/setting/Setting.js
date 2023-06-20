@@ -119,7 +119,7 @@ const Setting = (props) => {
       <CCard className="mb-4">
         <CCardHeader>Article Forge Setting</CCardHeader>
         <CCardBody>
-          <ToastContainer
+          {/* <ToastContainer
             position="top-right"
             autoClose={5000}
             hideProgressBar={false}
@@ -130,7 +130,7 @@ const Setting = (props) => {
             draggable
             pauseOnHover
             theme="colored"
-          />
+          /> */}
           <CAlert
             color={alertColor}
             dismissible

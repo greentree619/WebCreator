@@ -13,14 +13,17 @@ import {
   CCol,
   CBadge,
   CButton,
+  CAvatar,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilBell, cilEnvelopeOpen, cilList, cilMenu } from '@coreui/icons'
+import { cilBell, cilBellExclamation, cilEnvelopeOpen, cilList, cilMenu } from '@coreui/icons'
 
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
 import { logo } from 'src/assets/brand/logo'
-import { loadFromLocalStorage } from 'src/utility/common'
+import { loadFromLocalStorage, alertConfirmOption, getProjectState } from 'src/utility/common'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AppHeader = () => {
   const dispatch = useDispatch()
@@ -37,6 +40,7 @@ const AppHeader = () => {
   const activeProject= useSelector((state) => state.activeProject)
   const curProjectArticleList= useSelector((state) => state.curProjectArticleList)
   const isLoadingAllArticle= useSelector((state) => state.isLoadingAllArticle)
+  const notification = useSelector((state) => state.notification)
   const [curDomainName, setCurDomainName] = useState(activeDomainName)
 
   let preLoadAsyncId = 0
@@ -98,59 +102,80 @@ const AppHeader = () => {
     preLoadAsyncId = 0
   }
 
+  const showNotification = () => {
+    notification.map((item, index) => {
+      toast.info(item, alertConfirmOption);
+      // console.log(item)
+    })
+    dispatch({ type: 'set', notification: [] })
+  }
+
   return (
-    <CHeader position="sticky" className="mb-4">
-      <CContainer fluid>
-        <CHeaderToggler
-          className="ps-1"
-          onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}
-        >
-          <CIcon icon={cilMenu} size="lg" />
-        </CHeaderToggler>
-        <CHeaderBrand className="mx-auto d-md-none" to="/">
-          <CIcon icon={logo} height={48} alt="Logo" />
-        </CHeaderBrand>
-        <CHeaderNav className="d-none d-md-flex me-auto">
-          <CNavItem>
-            <CNavLink to="/dashboard" component={NavLink}>
-              Dashboard
-            </CNavLink>
-          </CNavItem>
-          {/* <CNavItem>
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+      <CHeader position="sticky" className="mb-4">
+        <CContainer fluid>
+          <CHeaderToggler
+            className="ps-1"
+            onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}
+          >
+            <CIcon icon={cilMenu} size="lg" />
+          </CHeaderToggler>
+          <CHeaderBrand className="mx-auto d-md-none" to="/">
+            <CIcon icon={logo} height={48} alt="Logo" />
+          </CHeaderBrand>
+          <CHeaderNav className="d-none d-md-flex me-auto">
+            <CNavItem>
+              <CNavLink to="/dashboard" component={NavLink}>
+                Dashboard
+              </CNavLink>
+            </CNavItem>
+            {/* <CNavItem>
             <CNavLink href="#">Users</CNavLink>
           </CNavItem>
           <CNavItem>
             <CNavLink href="#">Settings</CNavLink>
           </CNavItem> */}
-          <CNavItem>
-          <CNavLink href={'#/article/setting/?domainId=' + activeDomainId}>
-            AF Setting
-          </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href={'#/openai/setting/?domainId=' + activeDomainId}>
-            OpenAI Setting
-          </CNavLink>
-        </CNavItem>
-        </CHeaderNav>
-        <CHeaderNav>
-        {activeDomainName.length > 0 && (
-          <CCol xs="auto">
-            <CBadge color={activeZoneStatus == 'active' ? "success" : "dark"} shape="rounded-pill">{curDomainName}</CBadge>
-            &nbsp;
-            <CBadge color={isOnScrapping ? "success" : "dark"} shape="rounded-pill">Query Scrap</CBadge>
-            &nbsp;
-            <CBadge color={isOnAFScrapping ? "success" : "dark"} shape="rounded-pill">Scrapping</CBadge>
-            &nbsp;
-            <CBadge color={isOnPublish ? "success" : "dark"} shape="rounded-pill">Publish</CBadge>
-          </CCol>
-          )}
-          {/* <CNavItem>
+            <CNavItem>
+              <CNavLink href={'#/article/setting/?domainId=' + activeDomainId}>
+                AF Setting
+              </CNavLink>
+            </CNavItem>
+            <CNavItem>
+              <CNavLink href={'#/openai/setting/?domainId=' + activeDomainId}>
+                OpenAI Setting
+              </CNavLink>
+            </CNavItem>
+          </CHeaderNav>
+          <CHeaderNav>
+            {activeDomainName.length > 0 && (
+              <CCol xs="auto">
+                <CBadge color={activeZoneStatus == 'active' ? "success" : "dark"} shape="rounded-pill">{curDomainName}</CBadge>
+                &nbsp;
+                <CBadge color={isOnScrapping ? "success" : "dark"} shape="rounded-pill">Query Scrap</CBadge>
+                &nbsp;
+                <CBadge color={isOnAFScrapping ? "success" : "dark"} shape="rounded-pill">Scrapping</CBadge>
+                &nbsp;
+                <CBadge color={isOnPublish ? "success" : "dark"} shape="rounded-pill">Publish</CBadge>
+              </CCol>
+            )}
+            {/* <CNavItem>
             <CNavLink href={void(0)}>
               <CIcon icon={cilBell} size="lg" />
             </CNavLink>
           </CNavItem> */}
-          {/* <CNavItem>
+            {/* <CNavItem>
             <CNavLink href="#">
               <CIcon icon={cilList} size="lg" />
             </CNavLink>
@@ -160,26 +185,29 @@ const AppHeader = () => {
               <CIcon icon={cilEnvelopeOpen} size="lg" />
             </CNavLink>
           </CNavItem> */}
-        </CHeaderNav>
-        <CHeaderNav>
-          <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilBell} size="lg" />
-            </CNavLink>
-          </CNavItem>
-        </CHeaderNav>
-        <CHeaderNav className="ms-3">
-          <AppHeaderDropdown />
-        </CHeaderNav>
-      </CContainer>
-      <CHeaderDivider />
-      {activeDomainName.length > 0 && (
-        <CContainer fluid>
-          <AppBreadcrumb />
+          </CHeaderNav>
+          <CHeaderNav>
+            <CNavItem>
+              <CNavLink href={void (0)} onClick={() => showNotification()}>
+                {notification.length > 0 ? (<CAvatar color="danger" textColor="white">
+                  <CIcon icon={cilBell} size="lg" />
+                </CAvatar>) : (<CIcon icon={cilBell} size="lg" />)}
+              </CNavLink>
+            </CNavItem>
+          </CHeaderNav>
+          <CHeaderNav className="ms-3">
+            <AppHeaderDropdown />
+          </CHeaderNav>
         </CContainer>
-      )}
-      
-    </CHeader>
+        <CHeaderDivider />
+        {activeDomainName.length > 0 && (
+          <CContainer fluid>
+            <AppBreadcrumb />
+          </CContainer>
+        )}
+
+      </CHeader>
+    </>
   )
 }
 

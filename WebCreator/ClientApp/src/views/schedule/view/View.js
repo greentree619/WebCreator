@@ -312,7 +312,7 @@ const View = (props) => {
 
   return (
     <>
-      <ToastContainer
+      {/* <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
@@ -323,7 +323,7 @@ const View = (props) => {
         draggable
         pauseOnHover
         theme="colored"
-      />
+      /> */}
       <CAlert
         color={alertColor}
         dismissible

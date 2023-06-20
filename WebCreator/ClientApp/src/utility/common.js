@@ -92,3 +92,39 @@ export const globalRegionMap = [
     progress: undefined,
     theme: "colored",
     }
+
+export const getProjectState = async (domainId) => {
+    var isOnScrapping = false
+    var isOnAFScrapping = false
+    var isOnPublish = false
+    var scrappingMode = 0
+    //console.log("getProjectState", domainId)
+    try {
+        if (domainId.length > 0) {
+            const requestOptions = {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            }
+
+            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}project/isscrapping/${domainId}`, requestOptions)
+            let ret = await response.json()
+            if (response.status === 200 && ret) {
+                isOnScrapping = ret.serpapi
+                isOnAFScrapping = ret.afapi
+                isOnPublish = ret.publish
+                scrappingMode = ret.scrappingScheduleMode
+            }
+        }
+    } catch (e) {
+        console.log(e);
+        //setIsOnScrapping(false);
+        //setIsOnAFScrapping(false);
+    }
+
+    return [
+        isOnScrapping,
+        isOnAFScrapping,
+        isOnPublish,
+        scrappingMode
+    ]
+}

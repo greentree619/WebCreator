@@ -147,7 +147,7 @@ const Keyword = (props) => {
     // setAlertColor('danger')
     // setAlertMsg('Faild to update unfortunatley.')
     let ret = await response.json()
-    if (response.status === 200 && ret) {
+    if (response.status === 200 && ret.result) {
       // setAlertMsg('Updated scrap information successfully.')
       // setAlertColor('success')
 
@@ -243,7 +243,7 @@ const Keyword = (props) => {
             <CCard className="mb-4">
               <CCardHeader>Keyword Management</CCardHeader>
               <CCardBody>
-                <ToastContainer
+                {/* <ToastContainer
                   position="top-right"
                   autoClose={5000}
                   hideProgressBar={false}
@@ -254,7 +254,7 @@ const Keyword = (props) => {
                   draggable
                   pauseOnHover
                   theme="colored"
-                />
+                /> */}
                 <CAlert
                   color={alertColor}
                   dismissible

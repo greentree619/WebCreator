@@ -168,7 +168,7 @@ const Add = (props) => {
           >
             {alertMsg}
           </CAlert>
-          <ToastContainer
+          {/* <ToastContainer
             position="top-right"
             autoClose={5000}
             hideProgressBar={false}
@@ -179,7 +179,7 @@ const Add = (props) => {
             draggable
             pauseOnHover
             theme="colored"
-          />
+          /> */}
           <CForm className="row g-3 needs-validation">
           <div className="mb-3">
               <CFormLabel htmlFor="exampleFormControlInput1">Title</CFormLabel>

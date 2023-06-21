@@ -106,15 +106,15 @@ const AppBreadcrumb = () => {
 
   const isSelctedTab = (urlToken) => {
     //console.log(activeTab);
-    var activeClass = "btn-secondary";
-    if(activeTab == urlToken) activeClass = "btn-primary";
-    return "btn " + activeClass + " text-white";
+    var activeClass = "";
+    if(activeTab == urlToken) activeClass = "active border-bottom border-bottom-primary border-2";
+    return "" + activeClass + "";
   }
 
   return (
     <>
       <CContainer>
-        <CRow className="align-items-center">
+        <CRow className="align-items-center border-bottom border-bottom-light border-2">
           <CCol xs="auto" className="me-auto">
             <CBreadcrumb className="m-0 ms-2">
               {/* <CBreadcrumbItem href="/">Home</CBreadcrumbItem>
@@ -129,7 +129,7 @@ const AppBreadcrumb = () => {
                 )
               })} */}
 
-              <CHeaderNav className="d-md-flex me-auto">
+              <CHeaderNav className="d-md-flex me-auto main-menu">
                 <CNavItem className="px-1">
                   <CNavLink href="#/project/add?mode=view&tab=project_add" className={isSelctedTab("project_add")}>
                     {'Website'}

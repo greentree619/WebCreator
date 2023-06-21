@@ -101,7 +101,7 @@ const Dashboard = () => {
   ]
 
   useEffect(() => {
-    dispatch({ type: 'set', activeDomainName: '', activeProject: {}, activeDomainId: '' })
+    dispatch({ type: 'set', activeDomainName: '', activeProject: {}, activeDomainId: '', activeMainTab: 'dashboard' })
     getAllProject()
   }, [])
 

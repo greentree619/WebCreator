@@ -12,3 +12,17 @@
         -ms-hyphens: auto;
             hyphens: auto;
 }
+
+.root-menu>.nav-item>.nav-link.active {
+    font-size: 14px;
+    font-weight: 500;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    color: #1a73e8;
+}
+
+.root-menu>.nav-item>.nav-link {
+    font-size: 14px;
+    font-weight: 500;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    color: rgba(0,0,0,0.6);
+}

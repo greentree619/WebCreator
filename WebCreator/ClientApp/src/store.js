@@ -10,6 +10,7 @@ const initialState = {
   activeZoneStatus: '',
   activeProject: {},
   activeTab: 'project_add',
+  activeMainTab: 'dashboard',
   isOnScrapping: false,
   isOnAFScrapping: false,
   isOnPublish: false,

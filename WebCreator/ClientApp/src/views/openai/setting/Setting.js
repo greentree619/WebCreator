@@ -29,8 +29,10 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { alertConfirmOption } from 'src/utility/common'
+import { useDispatch, useSelector } from 'react-redux'
 
 const Setting = (props) => {
+  const dispatch = useDispatch()
   const location = useLocation()
   const [alarmVisible, setAlarmVisible] = useState(false)
   const [alertColor, setAlertColor] = useState('success')
@@ -66,6 +68,7 @@ const Setting = (props) => {
   }
 
   useEffect(() => {
+    dispatch({ type: 'set', activeMainTab: 'openai' })
     getAFSettingInfo()
   }, [])
 

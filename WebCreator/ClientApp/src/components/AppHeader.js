@@ -30,6 +30,7 @@ const AppHeader = () => {
   const sidebarShow = useSelector((state) => state.sidebarShow)
   const activeDomainName = useSelector((state) => state.activeDomainName)
   const activeDomainIp = useSelector((state) => state.activeDomainIp)
+  const activeMainTab = useSelector((state) => state.activeMainTab)
   const activeDomainId = useSelector((state) => state.activeDomainId)
   const activeZoneId = useSelector((state) => state.activeZoneId)
   const activeZoneName = useSelector((state) => state.activeZoneName)
@@ -135,9 +136,9 @@ const AppHeader = () => {
           <CHeaderBrand className="mx-auto d-md-none" to="/">
             <CIcon icon={logo} height={48} alt="Logo" />
           </CHeaderBrand>
-          <CHeaderNav className="d-none d-md-flex me-auto">
+          <CHeaderNav className="d-none d-md-flex me-auto root-menu">
             <CNavItem>
-              <CNavLink to="/dashboard" component={NavLink}>
+              <CNavLink to="/dashboard" component={NavLink} className={((activeMainTab == "dashboard") ? "active" : "")}>
                 Dashboard
               </CNavLink>
             </CNavItem>
@@ -148,12 +149,12 @@ const AppHeader = () => {
             <CNavLink href="#">Settings</CNavLink>
           </CNavItem> */}
             <CNavItem>
-              <CNavLink href={'#/article/setting/?domainId=' + activeDomainId}>
+              <CNavLink href={'#/article/setting/?domainId=' + activeDomainId} className={((activeMainTab == "article-forge") ? "active" : "")}>
                 AF Setting
               </CNavLink>
             </CNavItem>
             <CNavItem>
-              <CNavLink href={'#/openai/setting/?domainId=' + activeDomainId}>
+              <CNavLink href={'#/openai/setting/?domainId=' + activeDomainId} className={((activeMainTab == "openai") ? "active" : "")}>
                 OpenAI Setting
               </CNavLink>
             </CNavItem>

@@ -23,6 +23,7 @@ using Amazon.S3.Model;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Diagnostics;
 
 namespace UnitTest.Lib
 {
@@ -54,6 +55,13 @@ namespace UnitTest.Lib
         public static String ArticleScrapCategory = "ArticleScrap";
         public static String OpenAIScrapCategory = "OpenAIScrap";
         public static Hashtable questionTransMap = new Hashtable();
+        public static String thumbFolder = Directory.GetCurrentDirectory() + "\\Thumbnails";
+        public static String tmpFolder = Directory.GetCurrentDirectory() + "\\Temp";
+        public static String uploadFolder = Directory.GetCurrentDirectory() + "\\Upload";
+        public static String logFolder = Directory.GetCurrentDirectory() + "\\Log";
+        public static String notificationFolder = Directory.GetCurrentDirectory() + "\\Notification";
+        public static String stupidVideoFolder = Directory.GetCurrentDirectory() + "\\StupidVideo";
+        public static OpenAIVideoGen stupidVideoGen = new OpenAIVideoGen();
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -188,6 +196,7 @@ namespace UnitTest.Lib
 
                 List<String> imageArray = new List<String>();
                 List<String> thumbImageArray = new List<String>();
+                List<String> orgImageArray = new List<String>();
                 if (ref_key != null)
                 {
                     CommonModule.refKeyCash[articleid] = ref_key;
@@ -203,7 +212,7 @@ namespace UnitTest.Lib
                         InsteadOfTitle = await deepLTranslate.TranslateForQuestion(InsteadOfTitle, language);
                     }
 
-                    ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray);//Image auto generation
+                    ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray, ref orgImageArray);//Image auto generation
                     Console.WriteLine($"ScrapArticleAsync ref_key={ref_key}");
 
                     Dictionary<string, object> userUpdate = new Dictionary<string, object>()
@@ -229,7 +238,7 @@ namespace UnitTest.Lib
             return status;
         }
 
-        public static void ScrapArticleImages(String projectId, String question, String InsteadOfTitle, ref List<String> imageArray, ref List<String> thumbImageArray)
+        public static void ScrapArticleImages(String projectId, String question, String InsteadOfTitle, ref List<String> imageArray, ref List<String> thumbImageArray, ref List<String> orgImageArray)
         {
             String imageGenToken = question;
             Int32 pixabayPageSize = 100;
@@ -271,6 +280,7 @@ namespace UnitTest.Lib
                                 int imgNo = random.Next(totalHits);
                                 imageArray.Add(hitsArray[imgNo]["largeImageURL"].ToString());
                                 thumbImageArray.Add(hitsArray[imgNo]["previewURL"].ToString());
+                                orgImageArray.Add(hitsArray[imgNo]["largeImageURL"].ToString());
                             }
                         }
                     }
@@ -297,6 +307,7 @@ namespace UnitTest.Lib
                 {
                     imageArray.Add(img["url"].ToString());
                     thumbImageArray.Add(img["thumb"].ToString());
+                    orgImageArray.Add(img["orgUrl"].ToString());
                 }
             }
         }
@@ -308,6 +319,7 @@ namespace UnitTest.Lib
             String articleContent = "";
             List<String> imageArray = new List<string>();
             List<String> thumbImageArray = new List<string>();
+            List<String> orgImageArray = new List<string>();
             CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
             DocumentReference docRef = articlesCol.Document(articleid);
 
@@ -356,8 +368,33 @@ namespace UnitTest.Lib
                 articleContent += "<br>" + content;
 
                 CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync > scrap image", "scrap");
-                ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray);//Image auto generation
+                ScrapArticleImages(article.ProjectId, question, InsteadOfTitle, ref imageArray, ref thumbImageArray, ref orgImageArray);//Image auto generation
                 CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync > scrap image end", "scrap");
+
+                //{{Video Generate
+                result = await openAI.Completions.CreateCompletionAsync(
+                    new CompletionRequest(CommonModule.openAISetting.GetVideoScriptPrompt(question)
+                    , model: CommonModule.openAISetting.setInf.Model
+                    , temperature: CommonModule.openAISetting.setInf.Temperature
+                    , max_tokens: CommonModule.openAISetting.setInf.MaxTokens
+                    , top_p: CommonModule.openAISetting.setInf.TopP
+                    , numOutputs: CommonModule.openAISetting.setInf.N
+                    , presencePenalty: CommonModule.openAISetting.setInf.PresencePenalty
+                    , frequencyPenalty: CommonModule.openAISetting.setInf.FrequencyPenalty));
+                String script = result.ToString();
+                CommonModule.Log(domainId.ToString(), $"ScrapArticleByOpenAIAsync step 2/2 script len: {script.Length.ToString()}", "scrap");
+                if (script.Length > 0 && CommonModule.project2LanguageMap[article.ProjectId].ToString()
+                    .CompareTo(CommonModule.baseLanguage) != 0)
+                {
+                    script = await CommonModule.deepLTranslate.Translate(script
+                        , CommonModule.project2LanguageMap[article.ProjectId].ToString());
+                }
+
+                if (imageArray.Count > 0 && script.Length > 0){
+                    String url = await CommonModule.stupidVideoGen.GenerateStupidVideo(script, orgImageArray.Last());
+                    if(url.Length > 0) articleContent += "<br/><video width=\"400\" controls> <source src=\"" + url + "\" type=\"video/mp4\"></video>";
+                }
+                //}}Video Generate
 
                 Dictionary<string, object> userUpdate = new Dictionary<string, object>()
                 {
@@ -1664,6 +1701,7 @@ namespace UnitTest.Lib
                                 // Process the response data
                                 Console.WriteLine("Response: " + responseContent);
                                 Hashtable hashTbl = new Hashtable();
+                                hashTbl["orgUrl"] = imgUrl["url"].ToString();
                                 hashTbl["url"] = imgS3Url;
                                 hashTbl["thumb"] = thumbS3Url;
                                 list.Add(hashTbl);
@@ -1754,6 +1792,54 @@ namespace UnitTest.Lib
             String logFile = Directory.GetCurrentDirectory() + $"\\Notification\\{domainId}.log";
             String logContent = $"[{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")}] {notification}\n";
             File.AppendAllText(logFile, logContent);
+        }
+
+        public static bool CheckIfFFmpegInstalled()
+        {
+            // Create a new process to execute the FFmpeg command
+            using (Process process = new Process())
+            {
+                // Set the FFmpeg command
+                process.StartInfo.FileName = "./FFmpeg/ffmpeg";
+                process.StartInfo.Arguments = "-version";
+
+                // Disable the creation of a new window
+                process.StartInfo.CreateNoWindow = true;
+                process.StartInfo.UseShellExecute = false;
+
+                // Redirect the standard output and error streams
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
+
+                // Start the process
+                process.Start();
+
+                // Wait for the process to exit
+                process.WaitForExit();
+
+                // Check the exit code
+                int exitCode = process.ExitCode;
+
+                // Return true if FFmpeg is installed (exit code 0), otherwise false
+                return exitCode == 0;
+            }
+        }
+        
+        public static string GenerateRandomString(int length)
+        {
+            const string characterPool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            Random random = new Random();
+
+            char[] buffer = new char[length];
+            for (int i = 0; i < length; i++)
+            {
+                int randomIndex = random.Next(characterPool.Length);
+                buffer[i] = characterPool[randomIndex];
+            }
+
+            string randomString = new string(buffer);
+
+            return randomString;
         }
     }
 }

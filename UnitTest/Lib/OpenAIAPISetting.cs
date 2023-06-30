@@ -101,6 +101,13 @@ namespace UnitTest.Lib
             return prompt;
         }
 
+        public String GetVideoScriptPrompt(String question)
+        {
+            String prompt = "Write a youtube video script with interesting facts include 40~50 words packed about: {{Q}}";
+            prompt = prompt.Replace("{{Q}}", question);
+            return prompt;
+        }
+
         public async Task<OpenAISetting> GetSettingAsync()
         {
             await initOpenAISettingFromFirebase();

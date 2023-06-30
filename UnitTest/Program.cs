@@ -30,17 +30,21 @@ catch (Exception ex)
     Console.WriteLine(ex.Message);
 }
 
+//Check ffmpeg
+bool isFFmpegInstalled = CommonModule.CheckIfFFmpegInstalled();
+if (!isFFmpegInstalled)
+{
+    Console.WriteLine("FFmpeg is not installed.");
+    return;
+}
+
 //Create Project Directories.
-String thumbFolder = Directory.GetCurrentDirectory() + "\\Thumbnails";
-if (!Directory.Exists(thumbFolder)) Directory.CreateDirectory(thumbFolder);
-String tmpFolder = Directory.GetCurrentDirectory() + "\\Temp";
-if (!Directory.Exists(tmpFolder)) Directory.CreateDirectory(tmpFolder);
-String uploadFolder = Directory.GetCurrentDirectory() + "\\Upload";
-if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
-String logFolder = Directory.GetCurrentDirectory() + "\\Log";
-if (!Directory.Exists(logFolder)) Directory.CreateDirectory(logFolder);
-String notificationFolder = Directory.GetCurrentDirectory() + "\\Notification";
-if (!Directory.Exists(notificationFolder)) Directory.CreateDirectory(notificationFolder);
+if (!Directory.Exists(CommonModule.thumbFolder)) Directory.CreateDirectory(CommonModule.thumbFolder);
+if (!Directory.Exists(CommonModule.tmpFolder)) Directory.CreateDirectory(CommonModule.tmpFolder);
+if (!Directory.Exists(CommonModule.uploadFolder)) Directory.CreateDirectory(CommonModule.uploadFolder);
+if (!Directory.Exists(CommonModule.logFolder)) Directory.CreateDirectory(CommonModule.logFolder);
+if (!Directory.Exists(CommonModule.notificationFolder)) Directory.CreateDirectory(CommonModule.notificationFolder);
+if (!Directory.Exists(CommonModule.stupidVideoFolder)) Directory.CreateDirectory(CommonModule.stupidVideoFolder);
 
 //{{Article Forge UnitTest
 //ArticleForge af = new ArticleForge();
@@ -161,6 +165,27 @@ if (!Directory.Exists(notificationFolder)) Directory.CreateDirectory(notificatio
 //new AWSUpload().start();
 //return;
 ////}}AWS Upload Test
+
+
+//{{Youtube Upload Test
+//// Define the scope for YouTube API access
+
+//YoutubeUpload ytU = new YoutubeUpload("REFRESH", "SECRET", "CLIENT_ID");
+//using (HttpClient client = new HttpClient()) // Use dependency injection to get the HttpClient in your application!
+//{
+//    const string url = "https://www.youtube.com/embed/BoRwlKmi6-Q";
+//    using (var Stream = await client.GetStreamAsync(url))
+//    {
+//        var vID = ytU.UploadVideo(Stream, "videoName", "videoDesc", "22", false);
+//    }
+//}
+//return;
+////}}Youtube Upload Test
+
+////{{OpenAIVideoGen Test
+//var videoGen = new OpenAIVideoGen();
+//String url = await videoGen.GenerateStupidVideo();
+////}}OpenAIVideoGen Test
 
 var commonModule = new CommonModule();
 try

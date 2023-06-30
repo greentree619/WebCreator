@@ -19,12 +19,13 @@
     <PackageReference Include="FirebaseSharp" Version="2.0.4" />
     <PackageReference Include="FireSharp" Version="2.0.4" />
     <PackageReference Include="google-search-results-dotnet" Version="2.0.1" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.61.0.3064" />
     <PackageReference Include="Google.Cloud.Firestore" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNet.WebHelpers" Version="3.2.9" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Migamake.API.CloudFlare" Version="3.0.104" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NOW.FeatureFlagExtensions.FeatureManagement" Version="1.1.0-preview" />
     <PackageReference Include="OpenAI" Version="1.3.0" />
     <PackageReference Include="RestSharp" Version="109.0.0-preview.1" />
@@ -40,6 +41,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="client_secret_863136570251-i28otmjbk57b280m56af2a6o7onchp36.apps.googleusercontent.com.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="FFmpeg\ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="live-article-server.ppk">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

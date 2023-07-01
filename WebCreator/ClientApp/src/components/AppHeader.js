@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
@@ -27,6 +27,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const AppHeader = () => {
   const dispatch = useDispatch()
+  const headerRef = useRef()
   const sidebarShow = useSelector((state) => state.sidebarShow)
   const activeDomainName = useSelector((state) => state.activeDomainName)
   const activeDomainIp = useSelector((state) => state.activeDomainIp)
@@ -43,12 +44,12 @@ const AppHeader = () => {
   const isLoadingAllArticle= useSelector((state) => state.isLoadingAllArticle)
   const notification = useSelector((state) => state.notification)
   const [curDomainName, setCurDomainName] = useState(activeDomainName)
-
+  
   let preLoadAsyncId = 0
   let prevDomainId = ''
 
   useEffect(() => {
-    console.log("AppHeader ->", isOnScrapping, isOnAFScrapping, isOnPublish, activeDomainName, activeDomainIp)
+    //console.log("AppHeader ->", isOnScrapping, isOnAFScrapping, isOnPublish, activeDomainName, activeDomainIp)
 
     if(activeDomainIp == "0.0.0.0"){
       var s3Host = loadFromLocalStorage('s3host')
@@ -58,7 +59,9 @@ const AppHeader = () => {
     }
     else setCurDomainName(activeDomainName)
 
-    console.log( "AppHeader ->", activeDomainId, prevDomainId )
+    console.log( "AppHeader hieght ->", headerRef.current.getBoundingClientRect().height )
+    dispatch({ type: 'set', headerHeight: headerRef.current.getBoundingClientRect().height })
+
     if(prevDomainId != activeDomainId)
     {
         if(preLoadAsyncId != 0) clearTimeout( preLoadAsyncId )
@@ -125,7 +128,7 @@ const AppHeader = () => {
         pauseOnHover
         theme="colored"
       />
-      <CHeader position="sticky" className="mb-4">
+      <CHeader position="sticky" className="mb-4" ref={headerRef}>
         <CContainer fluid>
           <CHeaderToggler
             className="ps-1"
@@ -206,7 +209,6 @@ const AppHeader = () => {
             <AppBreadcrumb />
           </CContainer>
         )}
-
       </CHeader>
     </>
   )

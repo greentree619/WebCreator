@@ -1,4 +1,4 @@
-import React, { useEffect, Component } from 'react'
+import React, { useEffect, Component, useRef, useState } from 'react'
 import {
   CCard,
   CCardHeader,
@@ -16,6 +16,7 @@ import {
   CLink,
   CBadge,
   CFormInput,
+  CCollapse,
 } from '@coreui/react'
 import { DocsLink } from 'src/components'
 import { useLocation } from 'react-router-dom'
@@ -24,7 +25,7 @@ import { Outlet, Link } from 'react-router-dom'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useDispatch, useSelector } from 'react-redux'
-import {saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray, deleteFromArray } from 'src/utility/common.js'
+import { saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, alertConfirmOption, getPageFromArray, deleteFromArray } from 'src/utility/common.js'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -34,9 +35,9 @@ class ApprovalBase extends Component {
     super(props)
     this.state = {
       articles: [],
-      sync:{},
-      checkedItem:{},
-      indexMap:{},
+      sync: {},
+      checkedItem: {},
+      indexMap: {},
       loading: true,
       curPage: 1,
       totalPage: 1,
@@ -50,9 +51,11 @@ class ApprovalBase extends Component {
   }
 
   savePageState = () => {
-    saveToLocalStorage({articles: this.state.articles, sync: this.state.sync, checkedItem: this.state.checkedItem
-                      , indexMap: this.state.indexMap, curPage: this.state.curPage
-                      , totalPage: this.state.totalPage, articleState: this.state.articleState})
+    saveToLocalStorage({
+      articles: this.state.articles, sync: this.state.sync, checkedItem: this.state.checkedItem
+      , indexMap: this.state.indexMap, curPage: this.state.curPage
+      , totalPage: this.state.totalPage, articleState: this.state.articleState
+    })
   }
 
   componentDidMount() {
@@ -60,14 +63,14 @@ class ApprovalBase extends Component {
     console.log('child props: ', this.props.isLoadingAllArticle)
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
   }
 
   componentDidUpdate(prevProps) {
     // do something
     //console.log("componentDidUpdate", prevProps, this.props)
-    if( prevProps.isLoadingAllArticle && !this.props.isLoadingAllArticle )
-      // || (prevProps.isLoadingAllArticle && this.props.isLoadingAllArticle) )
+    if (prevProps.isLoadingAllArticle && !this.props.isLoadingAllArticle)
+    // || (prevProps.isLoadingAllArticle && this.props.isLoadingAllArticle) )
     {
       this.populateArticleData(1, this.state.articleState)
     }
@@ -104,7 +107,7 @@ class ApprovalBase extends Component {
         },
         {
           label: 'No',
-          onClick: () => {return false;}
+          onClick: () => { return false; }
         }
       ]
     });
@@ -121,7 +124,7 @@ class ApprovalBase extends Component {
         },
         {
           label: 'No',
-          onClick: () => {return false;}
+          onClick: () => { return false; }
         }
       ]
     });
@@ -131,10 +134,9 @@ class ApprovalBase extends Component {
   scrapFromAPI = async (mode) => {
     var checkedItem = this.state.checkedItem
     var articleIds = ''
-    Object.keys( checkedItem ).map((item)=>{
-      if( checkedItem[item].checked )
-      {
-        if(articleIds.length > 0) articleIds += ","
+    Object.keys(checkedItem).map((item) => {
+      if (checkedItem[item].checked) {
+        if (articleIds.length > 0) articleIds += ","
         articleIds += item
       }
     })
@@ -158,12 +160,11 @@ class ApprovalBase extends Component {
       //   alertMsg: 'Started to scrapping from AF Successfully.',
       //   alertColor: 'success',
       // })
-      toast.success('Started to scrapping from '+ (mode==0 ? "AF" : "OpenAI") +' Successfully.', alertConfirmOption);
+      toast.success('Started to scrapping from ' + (mode == 0 ? "AF" : "OpenAI") + ' Successfully.', alertConfirmOption);
     }
-    else
-    {
-      toast.error('Failed to scrapping from '+ (mode==0 ? "AF" : "OpenAI") +' manually. Please check If Scheduleing is running. To use this feature must be to be off Scheduling'
-      , alertConfirmOption);
+    else {
+      toast.error('Failed to scrapping from ' + (mode == 0 ? "AF" : "OpenAI") + ' manually. Please check If Scheduleing is running. To use this feature must be to be off Scheduling'
+        , alertConfirmOption);
     }
     // this.setState({ alarmVisible: true })    
   };
@@ -196,8 +197,7 @@ class ApprovalBase extends Component {
       .catch((err) => console.log(err))
   }
 
-  async viewArticleByState(val)
-  {
+  async viewArticleByState(val) {
     //console.log("setArticleState", val)
     this.setState({
       articleState: val,
@@ -205,18 +205,16 @@ class ApprovalBase extends Component {
     this.populateArticleData(1, val)
   }
 
-  async setArticleState(articleState)
-  {
+  async setArticleState(articleState) {
     var checkedItem = this.state.checkedItem
     var articles = this.state.articles
     //console.log(Object.keys(checkedItem).length)
     var articleIds = ''
-    Object.keys( checkedItem ).map((item)=>{
-      if( checkedItem[item].checked )
-      {
-        if( articleState == 4 ) deleteFromArray(this.props.curProjectArticleList, item)
+    Object.keys(checkedItem).map((item) => {
+      if (checkedItem[item].checked) {
+        if (articleState == 4) deleteFromArray(this.props.curProjectArticleList, item)
         articles[checkedItem[item].index].state = articleState
-        if(articleIds.length > 0) articleIds += ","
+        if (articleIds.length > 0) articleIds += ","
         articleIds += item
       }
     })
@@ -251,23 +249,19 @@ class ApprovalBase extends Component {
         articles: articles,
       })
     }
-    else
-    {
+    else {
       toast.error('Failed to change State.', alertConfirmOption);
     }
     // this.setState({ alarmVisible: true })
   }
 
-  onDelete()
-  {
+  onDelete() {
     console.log("onDelete");
   }
 
-  getArticleState( articleState )
-  {
+  getArticleState(articleState) {
     //console.log(articleState)
-    switch(articleState)
-    {
+    switch (articleState) {
       case 0: return ("");
       case 1: return ("UnApproved");
       case 2: return ("Approved");
@@ -283,13 +277,12 @@ class ApprovalBase extends Component {
   }
 
   onSearch = (keyCode) => {
-    if(keyCode == 13)
-    {
+    if (keyCode == 13) {
       //console.log("keyCode=>", keyCode)
       this.setState({
         loading: true,
       })
-      
+
       this.populateArticleData(1, this.state.articleState)
     }
   }
@@ -347,25 +340,25 @@ class ApprovalBase extends Component {
     }
 
     const helperBar = (id, len) => {
-      if(len <= 0) return (<></>)
+      if (len <= 0) return (<></>)
       else return (
         <>
           <tr>
             <td colSpan={4}>
-              <table>
+              <table ref={this.props.pannelRef}>
                 <tbody>
                   <tr>
                     <td>
-                      <CFormCheck id={"checkAll" + id} label="Chceck All | Selected" 
+                      <CFormCheck id={"checkAll" + id} label="Chceck All | Selected"
                         onChange={(e) => {
                           var checkedItem = this.state.checkedItem
-                          Object.keys(this.state.checkedItem).map((item)=>{
+                          Object.keys(this.state.checkedItem).map((item) => {
                             checkedItem[item].checked = e.target.checked
                             //console.log(item)
                           })
                           this.setState({
                             checkedItem: checkedItem,
-                          })  
+                          })
                           //console.log(e.target.checked, this.state.checkedItem[article.id])
                         }}
                       />
@@ -433,30 +426,30 @@ class ApprovalBase extends Component {
             {this.state.articles.map((article) => {
               //if (article.content != null && article.content.length > 0)
               {
-                if(this.state.checkedItem[article.id] == null) return
+                if (this.state.checkedItem[article.id] == null) return
 
                 return (<tr key={article.id}>
                   <td className='text-center'><CFormCheck id={article.id} label={article.id}
-                      checked={this.state.checkedItem[article.id].checked}
-                      onChange={(e) => {
-                        var ret = this.state.checkedItem
-                        ret[article.id].checked = e.target.checked
-                        this.setState({
-                          checkedItem: ret,
-                        })  
-                        // console.log(e.target.checked, this.state.checkedItem[article.id])
-                      }}/>
+                    checked={this.state.checkedItem[article.id].checked}
+                    onChange={(e) => {
+                      var ret = this.state.checkedItem
+                      ret[article.id].checked = e.target.checked
+                      this.setState({
+                        checkedItem: ret,
+                      })
+                      // console.log(e.target.checked, this.state.checkedItem[article.id])
+                    }} />
                   </td>
                   <td>{article.title}{((article.articleId != null && article.articleId != '1234567890' && article.articleId != '55555')
-                                                                                        && (<>&nbsp;<CBadge color={
-                                                            (article.content == null || article.content.length == 0) ? "info" : "success"
-                                                            }>AF</CBadge></>) 
-                                      || (article.articleId != null && article.articleId == '55555' && (<>&nbsp;<CBadge color={
-                                                            (article.content == null || article.content.length == 0) ? "info" : "success"
-                                                            }>OpenAI</CBadge></>) ))}
+                    && (<>&nbsp;<CBadge color={
+                      (article.content == null || article.content.length == 0) ? "info" : "success"
+                    }>AF</CBadge></>)
+                    || (article.articleId != null && article.articleId == '55555' && (<>&nbsp;<CBadge color={
+                      (article.content == null || article.content.length == 0) ? "info" : "success"
+                    }>OpenAI</CBadge></>)))}
                   </td>
                   <td className='text-center'>
-                    <Link onClick={()=>this.savePageState()} to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
+                    <Link onClick={() => this.savePageState()} to={`/article/view`} state={{ mode: 'VIEW', article: article, projectInfo: this.state.projectInfo }}>
                       <CButton type="button">View</CButton>
                     </Link>
                     &nbsp;
@@ -487,42 +480,88 @@ class ApprovalBase extends Component {
       this.renderArticlesTable(this.state.articles)
     )
     return (
-      <CCard className="mb-4">
-        <CCardHeader>
-          <CContainer>
-            <CRow>
-              <CCol className="align-self-start">Article List</CCol>
-              <CCol className="align-self-end col-5">
-                <CFormInput
-                  type="text"
-                  id="searchKeyword"
-                  aria-label="keyword"
-                  value={this.state.searchKeyword}
-                  onChange={(e) => this.onChangeKeyword(e.target.value)}
-                  onKeyDown={(e) => this.onSearch(e.keyCode)}
-                  size="sm" className="mb-3"
-                />
-              </CCol>
-              <CCol className="align-self-end" xs="auto">
-                <CFormSelect id="articleState" value={this.state.articleState} onChange={(obj) => this.viewArticleByState(obj.target.value)} size="sm" className="mb-3" aria-label="Small select example">
-                  <option value="0">All Pages</option>
-                  <option value="1">UnApproved</option>
-                  <option value="2">Approved</option>
-                  <option value="3">Online</option>
-                </CFormSelect>
-              </CCol>
-            </CRow>
-          </CContainer>
-        </CCardHeader>
-        <CCardBody>{contents}</CCardBody>
-      </CCard>
+      <>
+        <CCollapse visible={this.props.toolBarVisible} className='position-sticky' style={{top: 130, zIndex: 1}}>
+          <CCard className="mt-3">
+            <CCardBody>
+              <table>
+                <tbody>
+                  <tr>
+                    <td>
+                      <CFormCheck id={"checkAll"} label="Chceck All | Selected"
+                        onChange={(e) => {
+                          var checkedItem = this.state.checkedItem
+                          Object.keys(this.state.checkedItem).map((item) => {
+                            checkedItem[item].checked = e.target.checked
+                            //console.log(item)
+                          })
+                          this.setState({
+                            checkedItem: checkedItem,
+                          })
+                          //console.log(e.target.checked, this.state.checkedItem[article.id])
+                        }}
+                      />
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.setArticleState(2)}>Approval</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.setArticleState(1)}>UnApproval</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.setArticleState(3)}>Online</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.scrapFromAPI(0)}>Scrap From AF</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.scrapFromAPI(1)}>Scrap From OpenAI</CButton>
+                    </td>
+                    <td className='px-2'>
+                      <CButton onClick={() => this.deleteBatchArticleConfirm()}>Delete</CButton>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </CCardBody>
+          </CCard>
+        </CCollapse>
+        <CCard className="mb-4">
+          <CCardHeader>
+            <CContainer>
+              <CRow>
+                <CCol className="align-self-start">Article List</CCol>
+                <CCol className="align-self-end col-5">
+                  <CFormInput
+                    type="text"
+                    id="searchKeyword"
+                    aria-label="keyword"
+                    value={this.state.searchKeyword}
+                    onChange={(e) => this.onChangeKeyword(e.target.value)}
+                    onKeyDown={(e) => this.onSearch(e.keyCode)}
+                    size="sm" className="mb-3"
+                  />
+                </CCol>
+                <CCol className="align-self-end" xs="auto">
+                  <CFormSelect id="articleState" value={this.state.articleState} onChange={(obj) => this.viewArticleByState(obj.target.value)} size="sm" className="mb-3" aria-label="Small select example">
+                    <option value="0">All Pages</option>
+                    <option value="1">UnApproved</option>
+                    <option value="2">Approved</option>
+                    <option value="3">Online</option>
+                  </CFormSelect>
+                </CCol>
+              </CRow>
+            </CContainer>
+          </CCardHeader>
+          <CCardBody>{contents}</CCardBody>
+        </CCard>
+      </>
     )
   }
 
   async populateArticleData(pageNo, articleState) {
     var store = loadFromLocalStorage();
-    if(store != null && store != undefined)
-    {
+    if (store != null && store != undefined) {
       console.log(store)
       this.setState({
         articles: store.articles,
@@ -553,7 +592,7 @@ class ApprovalBase extends Component {
     // )
     // const data = await response.json()
     //==
-    let {_data, _curPage, _total} = getPageFromArray(this.props.curProjectArticleList, 0, 200, this.state.searchKeyword, articleState)
+    let { _data, _curPage, _total } = getPageFromArray(this.props.curProjectArticleList, 0, 200, this.state.searchKeyword, articleState)
     //}}
     this.setState({
       articles: _data,
@@ -565,10 +604,10 @@ class ApprovalBase extends Component {
 
     await _data.map((item, index) => {
       var ret = this.state.checkedItem
-      ret[item.id] = {checked: false, index: index}
+      ret[item.id] = { checked: false, index: index }
       this.setState({
         checkedItem: ret,
-      })      
+      })
       //console.log(ids, "<--", articleDocumentIds);
     });
   }
@@ -579,27 +618,70 @@ ApprovalBase.propTypes = {
   isLoadingAllArticle: PropTypes.bool,
   curProjectArticleList: PropTypes.array,
   curSearchArticleList: PropTypes.array,
+  pannelRef: PropTypes.any,
+  toolBarVisible: PropTypes.bool
 }
 
+var lastScrollY = 0
+var scrollOffset = 0
 const Approval = (props) => {
   const location = useLocation()
   const dispatch = useDispatch()
-  const curProjectArticleList= useSelector((state) => state.curProjectArticleList)
-  const curSearchArticleList= useSelector((state) => state.curSearchArticleList)
-  const isLoadingAllArticle= useSelector((state) => state.isLoadingAllArticle)
+  const pannelRef = useRef()
+  const [toolBarVisibleVal, setToolBarVisibleVal] = useState(false)
+  //Omitted const [lastScrollY, setLastScrollY] = useState(0)
+  const curProjectArticleList = useSelector((state) => state.curProjectArticleList)
+  const curSearchArticleList = useSelector((state) => state.curSearchArticleList)
+  const isLoadingAllArticle = useSelector((state) => state.isLoadingAllArticle)
+  const headerHeight = useSelector((state) => state.headerHeight)
 
   if (location.state == null && location.search.length > 0) {
-    location.state = { projectid: new URLSearchParams(location.search).get('domainId'), 
-    domainName: new URLSearchParams(location.search).get('domainName'), 
-    domainIp: new URLSearchParams(location.search).get('domainIp') }
+    location.state = {
+      projectid: new URLSearchParams(location.search).get('domainId'),
+      domainName: new URLSearchParams(location.search).get('domainName'),
+      domainIp: new URLSearchParams(location.search).get('domainIp')
+    }
   }
 
   useEffect(() => {
     dispatch({ type: 'set', activeTab: 'article_approval' })
+
+    const onScroll = () => changedPannelPos()
+
+    window.addEventListener("scroll", onScroll);
+
+    return () => window.removeEventListener("scroll", onScroll);
   }, [])
+
+  const changedPannelPos = () => {
+    //if((document.body.offsetHeight - 177 - pannelRef.current.getBoundingClientRect().top))
+    
+    var hotElementTop = document.body.offsetHeight - 177 - pannelRef.current.getBoundingClientRect().top
+    console.log(pannelRef.current.getBoundingClientRect().top, headerHeight, document.body.offsetHeight
+      , hotElementTop)
+
+    if(lastScrollY > hotElementTop){
+      console.log("up", lastScrollY)
+      scrollOffset = 100
+    }
+    else{
+      console.log("down", lastScrollY)
+      scrollOffset = 0
+    }
+    if(hotElementTop > headerHeight + scrollOffset){
+      setToolBarVisibleVal(true)
+      console.log("setToolBarVisible-true", toolBarVisibleVal)
+    }
+    else{
+      setToolBarVisibleVal(false)
+      console.log("setToolBarVisible-false", toolBarVisibleVal)
+    }
+
+    lastScrollY = hotElementTop
+  }
   //console.log(location.state)
   //console.log(location.search)
   //console.log(new URLSearchParams(location.search).get('domainId'))
-  return <ApprovalBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList ={curProjectArticleList} curSearchArticleList ={curSearchArticleList} {...props} />
+  return <ApprovalBase location={location} isLoadingAllArticle={isLoadingAllArticle} curProjectArticleList={curProjectArticleList} curSearchArticleList={curSearchArticleList} pannelRef={pannelRef} toolBarVisible={toolBarVisibleVal} {...props} />
 }
 export default Approval

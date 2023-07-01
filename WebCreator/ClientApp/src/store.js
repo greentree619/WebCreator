@@ -18,6 +18,7 @@ const initialState = {
   curSearchArticleList: [],  
   isLoadingAllArticle: false,
   notification: [],
+  headerHeight: 0
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {

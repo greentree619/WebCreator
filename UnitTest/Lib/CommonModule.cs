@@ -83,6 +83,26 @@ namespace UnitTest.Lib
             }
         }
 
+        public static async Task SetVideoScrappingAsync(String domainId, bool isScrapping)
+        {
+            try
+            {
+                CollectionReference articlesCol = Config.FirebaseDB.Collection("VideoProjects");
+                DocumentReference docRef = articlesCol.Document(domainId);
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                {
+                    { "OnScrapping",  isScrapping},
+                    { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
+                };
+                await docRef.UpdateAsync(userUpdate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         public static async Task SetDomainAFScrappingAsync(String domainId, bool isScrapping)
         {
             try

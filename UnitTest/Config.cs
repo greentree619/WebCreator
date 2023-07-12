@@ -28,10 +28,9 @@ namespace WebCreator
         public static String YoutubeUploadCredential = "client_secret_863136570251-i28otmjbk57b280m56af2a6o7onchp36.apps.googleusercontent.com.json";
         public static String YoutubeAPIKey = "AIzaSyAU6kILgFASsoGBwZZH2UwuYUG4Sid6YUY";
 
-#if true //As default, let stage
+#if false //As default, let stage
         //Stage
-        /*1*/
-        public static String Principal = "arn:aws:iam::975306180948:role/service-role/deploayWebsiteData-role-tnl6812t";//Stage
+        /*1*/public static String Principal = "arn:aws:iam::975306180948:role/service-role/deploayWebsiteData-role-tnl6812t";//Stage
         /*2*/public static String UploadURL = "https://e7bkawidfg.execute-api.us-east-2.amazonaws.com/prod/";
         /*3*/public static String FirebaseCredential = "websitecreator-94452-firebase-adminsdk-l9yoo-962812244e.json";
         /*4*/public static String FirebaseProjectId = "websitecreator-94452";

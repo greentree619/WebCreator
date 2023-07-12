@@ -15,6 +15,8 @@ namespace UnitTest.Lib
 {
     internal class SerpapiScrap
     {
+        public delegate Task<bool> AddQuestionCallback(String prjId, String question);
+
         ArticleForge manualAF = new ArticleForge();
         public SerpapiScrap()
         {
@@ -43,7 +45,41 @@ namespace UnitTest.Lib
                     int qCount = eachCount;
                     if (taskIdx == keywords.Length) qCount = count - (eachCount * (taskIdx - 1));
                     //create and start tasks, then add them to the list
-                    tasks.Add(Task.Run(() => new SerpapiScrap().GoogleSearchAsync(_id, kword, qCount)).ContinueWith(LogResult));
+                    tasks.Add(Task.Run(() => new SerpapiScrap().GoogleSearchAsync(_id, kword, qCount, async (id, question) => {
+                        bool ret = false;
+                        var article = new Article
+                        {
+                            ProjectId = id,
+                            Title = question,
+                            IsScrapping = false,
+                            Progress = 0,
+                            State = 0,
+                            UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                            CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                        };
+                        var articleData = article;
+
+                        try
+                        {
+                            CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                            Query query = articlesCol.OrderByDescending("CreatedTime")
+                                .WhereEqualTo("ProjectId", articleData.ProjectId)
+                                .WhereEqualTo("Title", articleData.Title).Limit(1);
+                            QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                            if (projectsSnapshot.Documents.Count == 0)
+                            {
+                                await CommonModule.historyLog.LogScrapKeywordAction(id, articleData.Title);
+                                await articlesCol.AddAsync(articleData);
+                                ret = true;
+                            }
+                            else ret = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                        return ret;
+                    })).ContinueWith(LogResult));
                 }
 
                 await Task.WhenAll(tasks);
@@ -54,7 +90,41 @@ namespace UnitTest.Lib
             }
             CommonModule.Log(_id.ToString(), "ScrappingThreadAsync End", "question");
         }
-        
+
+        public async Task VideoScrappingThreadAsync(String _id, String keyword, Int32 count)
+        {
+            CommonModule.Log(_id.ToString(), "VideoScrappingThreadAsync Start", "question");
+            {
+                CommonModule.SetVideoScrappingAsync(_id, true);
+
+                keyword = keyword.Replace(';', '?');
+                keyword = keyword.Replace('&', ';');
+                String[] keywords = keyword.Split(";");
+
+                Console.WriteLine("Starting up SerpAPI scrapping...");
+                var tasks = new List<Task>();
+                int eachCount = count / keywords.Length;
+                int taskIdx = 0;
+                foreach (String kword in keywords)
+                {
+                    taskIdx++;
+                    int qCount = eachCount;
+                    if (taskIdx == keywords.Length) qCount = count - (eachCount * (taskIdx - 1));
+                    //create and start tasks, then add them to the list
+                    tasks.Add(Task.Run(() => new SerpapiScrap().GoogleSearchAsync(_id, kword, qCount, async (id, question) => { 
+
+                    })).ContinueWith(LogResult));
+                }
+
+                await Task.WhenAll(tasks);
+                Console.WriteLine("All done.");
+
+                CommonModule.SetVideoScrappingAsync(_id, false);
+                CommonModule.threadList[_id] = false;
+            }
+            CommonModule.Log(_id.ToString(), "VideoScrappingThreadAsync End", "question");
+        }
+
         public async Task ScrappingAFThreadAsync(String _id, String scheduleId)
         {
             CommonModule.Log(_id.ToString(), $"ScrappingAFThreadAsync start", "scrap");
@@ -504,7 +574,7 @@ namespace UnitTest.Lib
             Console.WriteLine($"Is Valid: {task.Result}");
         }
 
-        public async Task<string> GoogleSearchAsync(String _id, String keyword, int count)
+        public async Task<string> GoogleSearchAsync(String _id, String keyword, int count, AddQuestionCallback addQuestionCallback)
         {
             CommonModule.Log(_id.ToString(), "GoogleSearchAsync Start", "question");
             Console.WriteLine($"GoogleSearchAsync keyword={keyword} count={count}");
@@ -536,38 +606,42 @@ namespace UnitTest.Lib
 
                         next_page_token = (String)question["next_page_token"];
                         //Console.WriteLine("Question: " + question["question"]);
-                        var article = new Article
-                        {
-                            ProjectId = _id,
-                            Title = (String)question["question"],
-                            IsScrapping = false,
-                            Progress = 0,
-                            State = 0,
-                            UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
-                            CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
-                        };
-                        var articleData = article;
+                        var addRet = await addQuestionCallback(_id, (String)question["question"]);
+                        if (addRet) curCount++;
+                        ////{{ Callback
+                        //var article = new Article
+                        //{
+                        //    ProjectId = _id,
+                        //    Title = (String)question["question"],
+                        //    IsScrapping = false,
+                        //    Progress = 0,
+                        //    State = 0,
+                        //    UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                        //    CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                        //};
+                        //var articleData = article;
 
-                        try
-                        {
-                            CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-                            Query query = articlesCol.OrderByDescending("CreatedTime")
-                                .WhereEqualTo("ProjectId", articleData.ProjectId)
-                                .WhereEqualTo("Title", articleData.Title).Limit(1);
-                            QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
-                            if (projectsSnapshot.Documents.Count == 0)
-                            {
-                                await CommonModule.historyLog.LogScrapKeywordAction(_id, articleData.Title);
+                            //try
+                            //{
+                            //    CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                            //    Query query = articlesCol.OrderByDescending("CreatedTime")
+                            //        .WhereEqualTo("ProjectId", articleData.ProjectId)
+                            //        .WhereEqualTo("Title", articleData.Title).Limit(1);
+                            //    QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                            //    if (projectsSnapshot.Documents.Count == 0)
+                            //    {
+                            //        await CommonModule.historyLog.LogScrapKeywordAction(_id, articleData.Title);
 
-                                await articlesCol.AddAsync(articleData);
-                                curCount++;
-                            }
-                            else curCount += 1;
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.Message);
-                        }
+                            //        await articlesCol.AddAsync(articleData);
+                            //        curCount++;
+                            //    }
+                            //    else curCount += 1;
+                            //}
+                            //catch (Exception ex)
+                            //{
+                            //    Console.WriteLine(ex.Message);
+                            //}
+                            ////}}
                     }
                 }
                     
@@ -595,39 +669,43 @@ namespace UnitTest.Lib
                             if (curCount >= count) break;
 
                             next_page_token = (String)question["next_page_token"];
-                            //Console.WriteLine("Question: " + question["question"]);
-                            var article = new Article
-                            {
-                                ProjectId = _id,
-                                Title = (String)question["question"],
-                                IsScrapping = false,
-                                Progress = 0,
-                                State = 0,
-                                UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
-                                CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
-                            };
-                            var articleData = article;
+                            var addRet = await addQuestionCallback(_id, (String)question["question"]);
+                            if (addRet) curCount++;
+                            ////Console.WriteLine("Question: " + question["question"]);
+                            ////{{
+                            //var article = new Article
+                            //{
+                            //    ProjectId = _id,
+                            //    Title = (String)question["question"],
+                            //    IsScrapping = false,
+                            //    Progress = 0,
+                            //    State = 0,
+                            //    UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                            //    CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                            //};
+                            //var articleData = article;
 
-                            try
-                            {
-                                CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-                                Query query = articlesCol.OrderByDescending("CreatedTime")
-                                    .WhereEqualTo("ProjectId", articleData.ProjectId)
-                                    .WhereEqualTo("Title", articleData.Title).Limit(1);
-                                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
-                                if (projectsSnapshot.Documents.Count == 0)
-                                {
-                                    await CommonModule.historyLog.LogScrapKeywordAction(_id, articleData.Title);
+                            //try
+                            //{
+                            //    CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                            //    Query query = articlesCol.OrderByDescending("CreatedTime")
+                            //        .WhereEqualTo("ProjectId", articleData.ProjectId)
+                            //        .WhereEqualTo("Title", articleData.Title).Limit(1);
+                            //    QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                            //    if (projectsSnapshot.Documents.Count == 0)
+                            //    {
+                            //        await CommonModule.historyLog.LogScrapKeywordAction(_id, articleData.Title);
 
-                                    await articlesCol.AddAsync(articleData);
-                                    curCount++;
-                                }
-                                else curCount += 1;
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex.Message);
-                            }
+                            //        await articlesCol.AddAsync(articleData);
+                            //        curCount++;
+                            //    }
+                            //    else curCount += 1;
+                            //}
+                            //catch (Exception ex)
+                            //{
+                            //    Console.WriteLine(ex.Message);
+                            //}
+                            ////}}
                         }
                     }   
                     // close socket

@@ -1,0 +1,212 @@
+﻿using Amazon;
+using Amazon.S3;
+using Google.Cloud.Firestore;
+using Grpc.Core;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using UnitTest.Lib;
+using WebCreator;
+using WebCreator.Models;
+using static WebCreator.Controllers.ProjectController;
+
+namespace UnitTest.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class VideoController : ControllerBase
+    {
+        private readonly ILogger<VideoController> _logger;
+
+        public VideoController(ILogger<VideoController> logger)
+        {
+            _logger = logger;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAsync()
+        {
+            var list = new List<VideoProject>();
+            int total = 0;
+            try
+            {
+                CollectionReference projectsCol = Config.FirebaseDB.Collection("VideoProjects");
+                QuerySnapshot totalSnapshot = await projectsCol.GetSnapshotAsync();
+                Query query = projectsCol.OrderByDescending("CreatedTime");
+                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot document in projectsSnapshot.Documents)
+                {
+                    var project = document.ConvertTo<VideoProject>();
+                    project.Id = document.Id;
+                    list.Add(project);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            //return list;
+            return Ok(new { total = total, data = list });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> AddProjectAsync([FromBody] VideoProject projectInput)
+        {
+            bool addOK = false;
+            try
+            {
+                CollectionReference projectsCol = Config.FirebaseDB.Collection("VideoProjects");
+                Query query = projectsCol.OrderByDescending("CreatedTime").WhereEqualTo("Name", projectInput.Name).Limit(1);
+                QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                if (projectsSnapshot.Documents.Count == 0)
+                {
+                    DocumentReference docRef = await projectsCol.AddAsync(projectInput);
+                    addOK = true;
+                }
+            }
+            catch (RpcException ex)
+            {
+                if (ex.Status.StatusCode == Grpc.Core.StatusCode.FailedPrecondition) {
+                    Console.WriteLine(ex.Status.Detail);
+                }
+            }
+
+            return Ok(new { result = addOK, error="" });
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> UpdateProjectAsync([FromBody] VideoProject projectInput)
+        {
+            bool updateOK = false;
+            try
+            {
+                CollectionReference projectsCol = Config.FirebaseDB.Collection("VideoProjects");
+                DocumentReference docRef = projectsCol.Document(projectInput.Id);
+
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>()
+                {
+                    { "Name", projectInput.Name },
+                    { "YoutubeChannel", projectInput.YoutubeChannel },
+                    { "Width", projectInput.Width },
+                    { "Height", projectInput.Height },
+                    { "Keyword", projectInput.Keyword },
+                    { "QuesionsCount", projectInput.QuesionsCount },
+                    { "Language", projectInput.Language },
+                    { "LanguageString", projectInput.LanguageString },
+                    { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
+                };
+                await docRef.UpdateAsync(userUpdate);
+                updateOK = true;
+            }
+            catch (RpcException ex)
+            {
+                if (ex.Status.StatusCode == Grpc.Core.StatusCode.FailedPrecondition)
+                {
+                    Console.WriteLine(ex.Status.Detail);
+                }
+            }
+
+            return Ok(new { result = updateOK, error = "" });
+        }
+
+        [HttpDelete("{projectid}")]
+        public async Task<IActionResult> DeleteProjectAsync(String projectid)
+        {
+            try
+            {
+                CollectionReference colRef = Config.FirebaseDB.Collection("VideoProjects");
+                DocumentReference docRef = colRef.Document(projectid);
+                docRef.DeleteAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return Ok();
+        }
+
+        [HttpGet("AddArticlesByTitle/{projectId}/{keywords}")]
+        public async Task<IActionResult> AddVideoDetailsAsync(String projectId, String keywords)
+        {
+            _ = Task.Run(async () =>
+             {
+                 await CommonModule.historyLog.LogKeywordAction(projectId, keywords, true, true);
+
+                 CollectionReference projectCol = Config.FirebaseDB.Collection("VideoProjects");
+                 DocumentReference docRef = projectCol.Document(projectId);
+                 DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
+                 var vCol = new List<VideoDetail>();
+                 VideoProject vPrj = null;
+                 if (articleSnapshot.Exists)
+                 {
+                     vPrj = articleSnapshot.ConvertTo<VideoProject>();
+                     vPrj.Id = articleSnapshot.Id;
+                     if (vPrj.VideoCollection != null)
+                     {
+                         foreach (var vd in vPrj.VideoCollection)
+                         {
+                             vCol.Add(vd);
+                         }
+                     }
+                 }
+
+                 //Console.WriteLine($"GoogleSearchAsync keyword={keywords}");
+                 keywords = keywords.Replace(';', '?');
+                 keywords = keywords.Replace('&', ';');
+                 String[] questions = keywords.Split(";");
+                 try
+                 {
+                     foreach (String question in questions)
+                     {
+                         if (vPrj != null && vPrj.IsContain(question)) continue;
+
+                         var video = new VideoDetail
+                         {
+                             Title = question,
+                             IsScrapping = false,
+                             Progress = 0,
+                             State = 0,
+                             UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                             CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                         };
+
+                         vCol.Add(video);
+                     }
+                 }
+                 catch (Exception ex)
+                 {
+                     Console.WriteLine(ex.Message);
+                 }
+
+                 Dictionary<string, object> userUpdate = new Dictionary<string, object>(){
+                    { "VideoCollection", vCol }
+                 };
+                 await docRef.UpdateAsync(userUpdate);
+
+                 return $"Complted scrapping: DomainID={projectId}";
+             });
+            return Ok(true);
+        }
+
+        [HttpGet("serpapi/{_id}/{keyword}/{count}")]
+        public ActionResult SerpAPI(String _id, String keyword, Int32 count)
+        {
+            if (CommonModule.threadList[_id] == null || (bool)CommonModule.threadList[_id] == false)
+            {
+                CommonModule.threadList[_id] = true;
+                Task.Run(() => new SerpapiScrap().VideoScrappingThreadAsync(_id, keyword, count));
+            }
+            return Ok(true);
+        }
+    }
+}

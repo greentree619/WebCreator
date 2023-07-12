@@ -111,8 +111,44 @@ namespace UnitTest.Lib
                     int qCount = eachCount;
                     if (taskIdx == keywords.Length) qCount = count - (eachCount * (taskIdx - 1));
                     //create and start tasks, then add them to the list
-                    tasks.Add(Task.Run(() => new SerpapiScrap().GoogleSearchAsync(_id, kword, qCount, async (id, question) => { 
+                    tasks.Add(Task.Run(() => new SerpapiScrap().GoogleSearchAsync(_id, kword, qCount, async (id, question) => {
+                        bool ret = false;
+                        CollectionReference projectCol = Config.FirebaseDB.Collection("VideoProjects");
+                        DocumentReference docRef = projectCol.Document( id );
+                        DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
+                        var vCol = new List<VideoDetail>();
+                        if (articleSnapshot.Exists)
+                        {
+                            var vPrj = articleSnapshot.ConvertTo<VideoProject>();
+                            vPrj.Id = articleSnapshot.Id;
+                            if (vPrj.VideoCollection != null)
+                            {
+                                foreach (var vd in vPrj.VideoCollection)
+                                {
+                                    vCol.Add(vd);
+                                }
+                            }
 
+                            if (vPrj != null && !vPrj.IsContain(question)) {
+                                var video = new VideoDetail
+                                {
+                                    Title = question,
+                                    IsScrapping = false,
+                                    Progress = 0,
+                                    State = 0,
+                                    UpdateTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                                    CreatedTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
+                                };
+
+                                vCol.Add(video);
+                                ret = true;
+                            }
+                            Dictionary<string, object> userUpdate = new Dictionary<string, object>(){
+                                { "VideoCollection", vCol }
+                             };
+                            await docRef.UpdateAsync(userUpdate);
+                        }
+                        return ret;
                     })).ContinueWith(LogResult));
                 }
 

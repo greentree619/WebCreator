@@ -58,6 +58,71 @@ namespace UnitTest.Controllers
             return Ok(new { total = total, data = list });
         }
 
+        [HttpGet("{prjId}/{state}/{page}/{count}")]
+        public async Task<IActionResult> GetAsync(String prjId, int state, int page = 1, int count = 5, String? keyword = "")
+        {
+            if (page < 0) page = 1;
+            if (count < 0) count = 5;
+            var list = new List<VideoDetail>();
+            int total = 0;
+            try
+            {
+                CollectionReference projectsCol = Config.FirebaseDB.Collection("VideoProjects");
+                DocumentReference docRef = projectsCol.Document(prjId);
+                DocumentSnapshot prjSnapshot = await docRef.GetSnapshotAsync();
+                if (prjSnapshot.Exists)
+                {
+                    var vPrj = prjSnapshot.ConvertTo<VideoProject>();
+                    if (vPrj.VideoCollection != null)
+                    {
+                        foreach (var vd in vPrj.VideoCollection)
+                        {
+                            if (state != 0 && vd.State != state) continue;
+
+                            list.Add(vd);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return Ok(new { curPage = page, total = total, data = list });
+        }
+
+        [HttpGet("byTitle/{prjId}/{title}")]
+        public async Task<ActionResult> GetVideoByTitleAsync(String prjId, String title)
+        {
+            VideoDetail result = null;
+            try
+            {
+                CollectionReference projectsCol = Config.FirebaseDB.Collection("VideoProjects");
+                DocumentReference docRef = projectsCol.Document(prjId);
+                DocumentSnapshot prjSnapshot = await docRef.GetSnapshotAsync();
+                if (prjSnapshot.Exists)
+                {
+                    var vPrj = prjSnapshot.ConvertTo<VideoProject>();
+                    if (vPrj.VideoCollection != null)
+                    {
+                        foreach (var vd in vPrj.VideoCollection)
+                        {
+                            var titleTmp = vd.Title.Trim('?');
+                            if (titleTmp.CompareTo(title) == 0) 
+                                result = vd;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return Ok(new { data = result });
+        }
+
         [HttpPost]
         public async Task<ActionResult> AddProjectAsync([FromBody] VideoProject projectInput)
         {

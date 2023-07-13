@@ -62,6 +62,7 @@ namespace UnitTest.Lib
         public static String notificationFolder = Directory.GetCurrentDirectory() + "\\Notification";
         public static String stupidVideoFolder = Directory.GetCurrentDirectory() + "\\StupidVideo";
         public static OpenAIVideoGen stupidVideoGen = new OpenAIVideoGen();
+        public static object logLock = new object();
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -1802,7 +1803,10 @@ namespace UnitTest.Lib
 
             String logFile = Directory.GetCurrentDirectory() + $"\\Log\\{domainId}-{tag}.log";
             String logContent = $"[{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")}] {log}\n";
-            File.AppendAllText(logFile, logContent);
+            lock ( logLock )
+            {
+                File.AppendAllText(logFile, logContent);
+            }
         }
 
         public static void Notification(String domainId, String notification)

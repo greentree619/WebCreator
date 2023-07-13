@@ -387,7 +387,7 @@ namespace WebCreator.Controllers
                 Console.WriteLine(ex.Message);
             }
 
-            return Ok(addOK);
+            return Ok(new { result = addOK, error = "" });
         }
 
         private async Task addDefaultSchedule(String projectId) {

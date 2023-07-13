@@ -612,7 +612,7 @@ namespace UnitTest.Lib
 
         public async Task<string> GoogleSearchAsync(String _id, String keyword, int count, AddQuestionCallback addQuestionCallback)
         {
-            CommonModule.Log(_id.ToString(), "GoogleSearchAsync Start", "question");
+            CommonModule.Log(_id.ToString(), $"GoogleSearchAsync Start keyword={keyword}", "question");
             Console.WriteLine($"GoogleSearchAsync keyword={keyword} count={count}");
             // secret api key from https://serpapi.com/dashboard
             String apiKey = Config.SerpApiKey;
@@ -629,13 +629,13 @@ namespace UnitTest.Lib
 
             try
             {
-                CommonModule.Log(_id.ToString(), "GoogleSearchAsync > GoogleSearch", "question");
+                CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > GoogleSearch  keyword={keyword}", "question");
                 GoogleSearch search = new GoogleSearch(ht, apiKey);
                 JObject data = search.GetJson();
                 JArray questions = (JArray)data["related_questions"];
                 if (questions != null)
                 {
-                    CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > GoogleSearch Count: {questions.Count.ToString()}", "question");
+                    CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > GoogleSearch Count: {questions.Count.ToString()} keyword={keyword}", "question");
                     foreach (JObject question in questions)
                     {
                         if (curCount >= count) break;
@@ -657,35 +657,35 @@ namespace UnitTest.Lib
                         //};
                         //var articleData = article;
 
-                            //try
-                            //{
-                            //    CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
-                            //    Query query = articlesCol.OrderByDescending("CreatedTime")
-                            //        .WhereEqualTo("ProjectId", articleData.ProjectId)
-                            //        .WhereEqualTo("Title", articleData.Title).Limit(1);
-                            //    QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
-                            //    if (projectsSnapshot.Documents.Count == 0)
-                            //    {
-                            //        await CommonModule.historyLog.LogScrapKeywordAction(_id, articleData.Title);
+                        //try
+                        //{
+                        //    CollectionReference articlesCol = Config.FirebaseDB.Collection("Articles");
+                        //    Query query = articlesCol.OrderByDescending("CreatedTime")
+                        //        .WhereEqualTo("ProjectId", articleData.ProjectId)
+                        //        .WhereEqualTo("Title", articleData.Title).Limit(1);
+                        //    QuerySnapshot projectsSnapshot = await query.GetSnapshotAsync();
+                        //    if (projectsSnapshot.Documents.Count == 0)
+                        //    {
+                        //        await CommonModule.historyLog.LogScrapKeywordAction(_id, articleData.Title);
 
-                            //        await articlesCol.AddAsync(articleData);
-                            //        curCount++;
-                            //    }
-                            //    else curCount += 1;
-                            //}
-                            //catch (Exception ex)
-                            //{
-                            //    Console.WriteLine(ex.Message);
-                            //}
-                            ////}}
+                        //        await articlesCol.AddAsync(articleData);
+                        //        curCount++;
+                        //    }
+                        //    else curCount += 1;
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Console.WriteLine(ex.Message);
+                        //}
+                        ////}}
                     }
                 }
                     
                 // close socket
                 search.Close();
-                CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > GoogleSearch Close", "question");
+                CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > GoogleSearch Close  keyword={keyword}", "question");
 
-                CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > GoogleSearch next_page_token: {next_page_token.Length.ToString()}", "question");
+                CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > GoogleSearch next_page_token: {next_page_token.Length.ToString()} keyword={keyword}", "question");
                 //Once more questions.
                 while (next_page_token.Length > 0 && curCount < count)
                 {
@@ -693,13 +693,13 @@ namespace UnitTest.Lib
                     htOncemore.Add("engine", "google_related_questions");
                     htOncemore.Add("next_page_token", next_page_token);
 
-                    CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > Next GoogleSearch", "question");
+                    CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > Next GoogleSearch keyword={keyword}", "question");
                     search = new GoogleSearch(htOncemore, apiKey);
                     data = search.GetJson();
                     questions = (JArray)data["related_questions"];
                     if (questions != null)
                     {
-                        CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > Next GoogleSearch count:{questions.Count.ToString()}", "question");
+                        CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > Next GoogleSearch count:{questions.Count.ToString()} keyword={keyword}", "question");
                         foreach (JObject question in questions)
                         {
                             if (curCount >= count) break;
@@ -746,17 +746,17 @@ namespace UnitTest.Lib
                     }   
                     // close socket
                     search.Close();
-                    CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > Next GoogleSearch Close", "question");
+                    CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > Next GoogleSearch Close keyword={keyword}", "question");
                 }
             }
             catch (SerpApiSearchException ex)
             {
                 Console.WriteLine("Exception:");
                 Console.WriteLine(ex.ToString());
-                CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > Exception: {ex.ToString()}", "question");
+                CommonModule.Log(_id.ToString(), $"GoogleSearchAsync > Exception: {ex.ToString()} keyword={keyword}", "question");
             }
 
-            CommonModule.Log(_id.ToString(), "GoogleSearchAsync End", "question");
+            CommonModule.Log(_id.ToString(), $"GoogleSearchAsync End keyword={keyword}", "question");
             return $"Complted scrapping: DomainID={_id} Keyword={keyword} total_count={curCount}";
         }
     }

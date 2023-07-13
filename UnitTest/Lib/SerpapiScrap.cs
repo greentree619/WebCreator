@@ -460,6 +460,52 @@ namespace UnitTest.Lib
             if (mode == "0") CommonModule.isManualAFScrapping = false;
             else if (mode == "1") CommonModule.isManualOpenAIScrapping = false;
         }
+        
+        public async Task ScrappingVideoManualThreadAsync(String mode, String _id, String articleIds)
+        {
+            CommonModule.Log(_id.ToString(), $"ScrappingVideoManualThreadAsync start", "scrap");
+            try
+            {
+                String lang = CommonModule.project2LanguageMap[_id].ToString();
+                CollectionReference col = Config.FirebaseDB.Collection("VideoProjects");
+                Query query = col.WhereIn(FieldPath.DocumentId, articleIds.Split(','));
+                QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
+
+                Stack<Article> scrapArticles = new Stack<Article>();
+                foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                {
+                    var article = document.ConvertTo<Article>();
+                    article.Id = document.Id;
+                    scrapArticles.Push(article);
+                }
+
+                bool afRet = false;
+                while (scrapArticles.Count > 0)
+                {
+                    Article scrapAF = scrapArticles.Pop();
+                    do
+                    {
+                        switch (mode)
+                        {
+                            case "0"://AF
+                                break;
+                            case "1"://OpenAI
+                                afRet = await CommonModule.ScrapArticleByOpenAIAsync(_id, CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                break;
+                        }
+                    }
+                    while (!afRet);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            CommonModule.Log(_id.ToString(), $"ScrappingVideoManualThreadAsync end", "scrap");
+            if (mode == "0") CommonModule.isManualAFScrapping = false;
+            else if (mode == "1") CommonModule.isManualOpenAIScrapping = false;
+        }
 
         public async Task ManualArticlesSyncAsync(String domainId, String domainName, String ipAddr, String s3Name, String region, String articleIds)
         {

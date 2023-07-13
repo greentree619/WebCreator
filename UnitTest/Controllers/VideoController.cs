@@ -273,5 +273,20 @@ namespace UnitTest.Controllers
             }
             return Ok(true);
         }
+
+        [HttpGet("scrapContentManual/{mode}/{prjId}/{titles}")]
+        public async Task<IActionResult> ScrapContentManualAsync(String mode, String prjId, String titles)
+        {
+            bool ret = false;
+            if (mode == "0" && CommonModule.isManualAFScrapping == false || mode == "1" && CommonModule.isManualOpenAIScrapping == false)
+            {
+                if (mode == "0") CommonModule.isManualAFScrapping = true;
+                else if (mode == "1") CommonModule.isManualOpenAIScrapping = true;
+                Task.Run(() => new SerpapiScrap().ScrappingVideoManualThreadAsync(mode, prjId, titles));
+
+                ret = true;
+            }
+            return Ok(ret);
+        }
     }
 }

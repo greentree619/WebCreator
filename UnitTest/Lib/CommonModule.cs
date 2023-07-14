@@ -441,6 +441,71 @@ namespace UnitTest.Lib
             return status;
         }
 
+        public static async Task<bool> ScrapVideoByOpenAIAsync(String projId, OpenAIAPI openAI, String question, VideoDetail videoListMap)
+        {
+            bool status = false;
+            String orgLangQuetion = question;
+            String articleContent = "";
+            List<String> imageArray = new List<string>();
+            List<String> thumbImageArray = new List<string>();
+            List<String> orgImageArray = new List<string>();
+
+            CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync start", "scrap");
+            try
+            {
+                if (project2LanguageMap[projId].ToString()
+                    .CompareTo(CommonModule.baseLanguage) != 0)
+                {
+                    question = await CommonModule.deepLTranslate.TranslateForQuestion(question
+                        , project2LanguageMap[projId].ToString());
+                }
+
+                CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync > scrap image", "scrap");
+                ScrapArticleImages(projId, question, "", ref imageArray, ref thumbImageArray, ref orgImageArray);//Image auto generation
+                videoListMap.BackgroundImage = imageArray.First();
+                videoListMap.BackgroundThumbImage = thumbImageArray.First();
+                CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync > scrap image end", "scrap");
+
+                //{{Video Generate
+                var result = await openAI.Completions.CreateCompletionAsync(
+                    new CompletionRequest(CommonModule.openAISetting.GetVideoScriptPrompt(question)
+                    , model: CommonModule.openAISetting.setInf.Model
+                    , temperature: CommonModule.openAISetting.setInf.Temperature
+                    , max_tokens: CommonModule.openAISetting.setInf.MaxTokens
+                    , top_p: CommonModule.openAISetting.setInf.TopP
+                    , numOutputs: CommonModule.openAISetting.setInf.N
+                    , presencePenalty: CommonModule.openAISetting.setInf.PresencePenalty
+                    , frequencyPenalty: CommonModule.openAISetting.setInf.FrequencyPenalty));
+                String script = result.ToString();
+                CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync step 2/2 script len: {script.Length.ToString()}", "scrap");
+                if (script.Length > 0 && CommonModule.project2LanguageMap[projId].ToString()
+                    .CompareTo(CommonModule.baseLanguage) != 0)
+                {
+                    script = await CommonModule.deepLTranslate.Translate(script
+                        , CommonModule.project2LanguageMap[projId].ToString());
+                }
+                videoListMap.Script = script;
+
+                if (imageArray.Count > 0 && script.Length > 0)
+                {
+                    String url = await CommonModule.stupidVideoGen.GenerateStupidVideo(script, orgImageArray.Last());
+                    //if (url.Length > 0) articleContent += "<br/><video width=\"400\" controls> <source src=\"" + url + "\" type=\"video/mp4\"></video>";
+                    videoListMap.awsVideoLink = url;
+                }
+                //}}Video Generate
+
+                status = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync exception: {ex.Message}", "scrap");
+            }
+
+            CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync end", "scrap");
+            return status;
+        }
+
         public static String articleURL(String domain, String question, bool useHttps) {
             String filename = CommonModule.GetHtmlFileName("", question);
             String httpPrefix = ( useHttps ? "https" : "http" );
@@ -476,6 +541,7 @@ namespace UnitTest.Lib
         {
             try
             {
+                //{{Article Projects
                 CollectionReference col = Config.FirebaseDB.Collection("Projects");
                 QuerySnapshot projectsSnapshot = await col.GetSnapshotAsync();
 
@@ -486,6 +552,19 @@ namespace UnitTest.Lib
                     project2UseHttpsMap[document.Id] = (project.UseHttps == null ? false : project.UseHttps);
                     project2ImageAutoGenInfoMap[document.Id] = (project.ImageAutoGenInfo == null ? new _ImageAutoGenInfo() : project.ImageAutoGenInfo);
                 }
+                //}}
+
+                //{{Video Projects
+                col = Config.FirebaseDB.Collection("VideoProjects");
+                projectsSnapshot = await col.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot document in projectsSnapshot.Documents)
+                {
+                    var vproject = document.ConvertTo<VideoProject>();
+                    project2LanguageMap[document.Id] = vproject.Language.ToUpper();
+                    project2ImageAutoGenInfoMap[document.Id] = new _ImageAutoGenInfo();
+                }
+                //}}
 
                 Task.Run(() => UpdateArticleScrappingProgress());//Refresh Article Forge Scrapping status.
                 Task.Run(() => RestartBackgroundThreads());//If publish thread and scrapping thread is on, resume the threads.

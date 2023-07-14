@@ -183,6 +183,49 @@ namespace UnitTest.Controllers
             return Ok(new { result = updateOK, error = "" });
         }
 
+        [HttpPut("update_content/{prjId}")]
+        public async Task<IActionResult> UpdateVideoDetailAsync(string prjId, [FromBody] VideoDetail videoDetail)
+        {
+            CollectionReference projectCol = Config.FirebaseDB.Collection("VideoProjects");
+            DocumentReference docRef = projectCol.Document(prjId);
+            DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
+            var vCol = new List<VideoDetail>();
+            VideoProject vPrj = null;
+            Hashtable videoListMap = new Hashtable();
+            if (articleSnapshot.Exists)
+            {
+                vPrj = articleSnapshot.ConvertTo<VideoProject>();
+                vPrj.Id = articleSnapshot.Id;
+                if (vPrj.VideoCollection != null)
+                {
+                    foreach (var vd in vPrj.VideoCollection)
+                    {
+                        vCol.Add(vd);
+                        videoListMap[vd.Title.Trim('?').ToString()] = vd;
+                    }
+                }
+            }
+
+            try
+            {
+                var videoObj = (VideoDetail)videoListMap[videoDetail.Title.Trim('?')];
+                if (videoObj != null) {
+                    videoObj.Script = videoDetail.Script;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            Dictionary<string, object> userUpdate = new Dictionary<string, object>(){
+                { "VideoCollection", vCol }
+            };
+            await docRef.UpdateAsync(userUpdate);
+
+            return Ok(true);
+        }
+
         [HttpDelete("{projectid}")]
         public async Task<IActionResult> DeleteProjectAsync(String projectid)
         {

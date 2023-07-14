@@ -461,28 +461,38 @@ namespace UnitTest.Lib
             else if (mode == "1") CommonModule.isManualOpenAIScrapping = false;
         }
         
-        public async Task ScrappingVideoManualThreadAsync(String mode, String _id, String articleIds)
+        public async Task ScrappingVideoManualThreadAsync(String mode, String _id, String titles)
         {
             CommonModule.Log(_id.ToString(), $"ScrappingVideoManualThreadAsync start", "scrap");
+            CollectionReference projectCol = Config.FirebaseDB.Collection("VideoProjects");
+            DocumentReference docRef = projectCol.Document(_id);
+            DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
+            var vCol = new List<VideoDetail>();
+            VideoProject vPrj = null;
+            Hashtable videoListMap = new Hashtable();
+            if (articleSnapshot.Exists)
+            {
+                vPrj = articleSnapshot.ConvertTo<VideoProject>();
+                vPrj.Id = articleSnapshot.Id;
+                if (vPrj.VideoCollection != null)
+                {
+                    foreach (var vd in vPrj.VideoCollection)
+                    {
+                        vCol.Add(vd);
+                        videoListMap[vd.Title.Trim('?').ToString()] = vd;
+                    }
+                }
+            }
+
             try
             {
-                String lang = CommonModule.project2LanguageMap[_id].ToString();
-                CollectionReference col = Config.FirebaseDB.Collection("VideoProjects");
-                Query query = col.WhereIn(FieldPath.DocumentId, articleIds.Split(','));
-                QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
-
-                Stack<Article> scrapArticles = new Stack<Article>();
-                foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                string[] titleAry = titles.Split('#');
+                foreach (var tl in titleAry)
                 {
-                    var article = document.ConvertTo<Article>();
-                    article.Id = document.Id;
-                    scrapArticles.Push(article);
-                }
+                    bool afRet = false;
+                    var videoObj = (VideoDetail)videoListMap[tl.Trim('?')];
+                    if (videoObj == null) continue;
 
-                bool afRet = false;
-                while (scrapArticles.Count > 0)
-                {
-                    Article scrapAF = scrapArticles.Pop();
                     do
                     {
                         switch (mode)
@@ -490,7 +500,7 @@ namespace UnitTest.Lib
                             case "0"://AF
                                 break;
                             case "1"://OpenAI
-                                afRet = await CommonModule.ScrapArticleByOpenAIAsync(_id, CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                afRet = await CommonModule.ScrapVideoByOpenAIAsync(_id, CommonModule.manualOpenAI, tl, videoObj);
                                 break;
                         }
                     }
@@ -501,6 +511,11 @@ namespace UnitTest.Lib
             {
                 Console.WriteLine(ex.Message);
             }
+
+            Dictionary<string, object> userUpdate = new Dictionary<string, object>(){
+                { "VideoCollection", vCol }
+            };
+            await docRef.UpdateAsync(userUpdate);
 
             CommonModule.Log(_id.ToString(), $"ScrappingVideoManualThreadAsync end", "scrap");
             if (mode == "0") CommonModule.isManualAFScrapping = false;

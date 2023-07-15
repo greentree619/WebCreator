@@ -425,68 +425,90 @@ namespace UnitTest.Lib
                     while ((bool)CommonModule.articleScrappingThreadList[_id])
                     {
                         CommonModule.Log(_id.ToString(), $"VideoScrappingOpenAIThreadAsync step 1/3\n", "scrap");
-                        CollectionReference col = Config.FirebaseDB.Collection("Articles");
-                        Query query = col.WhereEqualTo("ProjectId", _id).WhereEqualTo("Progress", 0).WhereEqualTo("IsScrapping", false).OrderBy("CreatedTime");
-                        QuerySnapshot totalSnapshot = await query.GetSnapshotAsync();
-
-                        Stack<Article> scrapArticles = new Stack<Article>();
-                        foreach (DocumentSnapshot document in totalSnapshot.Documents)
+                        CollectionReference projectCol = Config.FirebaseDB.Collection("VideoProjects");
+                        DocumentReference videoDocRef = projectCol.Document(_id);
+                        DocumentSnapshot articleSnapshot = await videoDocRef.GetSnapshotAsync();
+                        Stack<VideoDetail> scrapVideos = new Stack<VideoDetail>();
+                        VideoProject vPrj = null;
+                        var vCol = new List<VideoDetail>();
+                        if (articleSnapshot.Exists)
                         {
-                            var article = document.ConvertTo<Article>();
-                            article.Id = document.Id;
-                            scrapArticles.Push(article);
+                            vPrj = articleSnapshot.ConvertTo<VideoProject>();
+                            vPrj.Id = articleSnapshot.Id;
+                            if (vPrj.VideoCollection != null)
+                            {
+                                foreach (var vd in vPrj.VideoCollection)
+                                {
+                                    vCol.Add(vd);
+                                    if (vd.Progress == 100) continue;
+                                    scrapVideos.Push(vd);
+                                }
+                            }
                         }
 
-                        ArticleForge af = new ArticleForge();
                         bool afRet = false;
-                        if (scheduleSnapshot.Exists && scrapArticles.Count > 0)
+                        if (scheduleSnapshot.Exists && scrapVideos.Count > 0)
                         {
                             CommonModule.Log(_id.ToString(), $"VideoScrappingOpenAIThreadAsync step 2/3\n", "scrap");
                             schedule = scheduleSnapshot.ConvertTo<Schedule>();
 
                             for (int i = 0; i < schedule.JustNowCount
                                 && (bool)CommonModule.articleScrappingThreadList[_id]
-                                && scrapArticles.Count > 0; i++)
+                                && scrapVideos.Count > 0; i++)
                             {
-                                Article scrapAF = scrapArticles.Pop();
+                                VideoDetail video = scrapVideos.Pop();
                                 do
                                 {
                                     Thread.Sleep(10000);
                                     //{{In case start manual scrap, sleep untile complete
                                     while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
                                     //}}In case start manual scrap, sleep untile complete
-                                    afRet = await CommonModule.ScrapArticleByOpenAIAsync(_id, CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                    afRet = await CommonModule.ScrapVideoByOpenAIAsync(_id, CommonModule.manualOpenAI, video.Title, video);
                                     await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                         , _id
-                                        , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok[{afRet}]");
+                                        , $"[Project ID={_id}] OpenAI Video Title={video.Title} Scrapping Ok[{afRet}]");
                                 }
                                 while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
+
+                                if (afRet) {
+                                    Dictionary<string, object> userUpdate = new Dictionary<string, object>(){
+                                        { "VideoCollection", vCol }
+                                    };
+                                    await videoDocRef.UpdateAsync(userUpdate);
+                                }
                             }
 
                             CommonModule.Log(_id.ToString(), $"VideoScrappingOpenAIThreadAsync step 3/3\n", "scrap");
-                            while ((bool)CommonModule.articleScrappingThreadList[_id] && scrapArticles.Count > 0)
+                            while ((bool)CommonModule.articleScrappingThreadList[_id] && scrapVideos.Count > 0)
                             {
                                 CommonModule.Log(_id.ToString(), $"VideoScrappingOpenAIThreadAsync step 3/3 > waiting for:{(schedule.SpanTime * schedule.SpanUnit).ToString()}\n", "scrap");
                                 Thread.Sleep(schedule.SpanTime * schedule.SpanUnit * 1000);
 
                                 for (int i = 0; i < schedule.EachCount
                                     && (bool)CommonModule.articleScrappingThreadList[_id]
-                                    && scrapArticles.Count > 0; i++)
+                                    && scrapVideos.Count > 0; i++)
                                 {
-                                    Article scrapAF = scrapArticles.Pop();
+                                    VideoDetail video = scrapVideos.Pop();
                                     do
                                     {
                                         Thread.Sleep(10000);
                                         //{{In case start manual scrap, sleep untile complete
                                         while (CommonModule.isManualOpenAIScrapping) Thread.Sleep(5000);
                                         //}}In case start manual scrap, sleep untile complete
-                                        afRet = await CommonModule.ScrapArticleByOpenAIAsync(_id, CommonModule.manualOpenAI, scrapAF.Title, scrapAF.Id);
+                                        afRet = await CommonModule.ScrapVideoByOpenAIAsync(_id, CommonModule.manualOpenAI, video.Title, video);
                                         await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                             , _id
-                                            , $"[Project ID={_id}] OpenAI Article Id={scrapAF.Id} Scrapping Ok[{afRet}]");
+                                            , $"[Project ID={_id}] OpenAI Video Title={video.Title} Scrapping Ok[{afRet}]");
                                     }
                                     while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
 
+                                    if (afRet)
+                                    {
+                                        Dictionary<string, object> userUpdate = new Dictionary<string, object>(){
+                                        { "VideoCollection", vCol }
+                                    };
+                                        await videoDocRef.UpdateAsync(userUpdate);
+                                    }
                                 }
                             }
                         }

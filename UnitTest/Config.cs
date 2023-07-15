@@ -22,6 +22,7 @@ namespace WebCreator
         public static String SerpApiKey = "e98e32704f4642aa6fbf1cf0086aed75474dab0b0d1f88e2c0a68266bab57b2f";
         public static String DeepLKey = "37f5f472-d0f2-44c2-3a5d-7896694f8cdc";
         public static String PixabayKey = "27944002-ca9bbda02c769f32ad5769e81";
+        public static String ElevenLabsKey = "2f761d0275bf7b9da485e68f6e58af09";
         public static String CloudFlareAPIKey = "vKQiwIFU0Eyz269KeOjBsliYyaaEQMqZRe3QA9TE";
         public static String CloudFlareAPIEmail= "uniqtop@gmail.com";
         public static String OpenAIKey = "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";

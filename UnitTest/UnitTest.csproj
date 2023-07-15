@@ -16,6 +16,7 @@
     <PackageReference Include="Aspose.Zip" Version="22.11.0" />
     <PackageReference Include="Consul" Version="1.6.10.8" />
     <PackageReference Include="DeepL.net" Version="1.6.0" />
+    <PackageReference Include="ElevenLabs-DotNet" Version="1.3.5" />
     <PackageReference Include="FirebaseSharp" Version="2.0.4" />
     <PackageReference Include="FireSharp" Version="2.0.4" />
     <PackageReference Include="google-search-results-dotnet" Version="2.0.1" />

@@ -1,5 +1,6 @@
 using Aspose.Zip;
 using Aspose.Zip.Saving;
+using ElevenLabs;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
 using Microsoft.AspNetCore.Builder;
@@ -186,6 +187,22 @@ if (!Directory.Exists(CommonModule.stupidVideoFolder)) Directory.CreateDirectory
 //var videoGen = new OpenAIVideoGen();
 //String url = await videoGen.GenerateStupidVideo();
 ////}}OpenAIVideoGen Test
+/// ElevenLabs Test
+/// 
+var api = new ElevenLabsClient(Config.ElevenLabsKey);
+//var allVoices = await api.VoicesEndpoint.GetAllVoicesAsync();
+
+//foreach (var voice in allVoices)
+//{
+//    Console.WriteLine($"{voice.Id} | {voice.Name} | similarity boost: {voice.Settings?.SimilarityBoost} | stability: {voice.Settings?.Stability}");
+//}
+
+var text = "The quick brown fox jumps over the lazy dog.";
+var voice = (await api.VoicesEndpoint.GetAllVoicesAsync()).FirstOrDefault();
+var defaultVoiceSettings = await api.VoicesEndpoint.GetDefaultVoiceSettingsAsync();
+var clipPath = await api.TextToSpeechEndpoint.TextToSpeechAsync(text, voice, defaultVoiceSettings);
+Console.WriteLine(clipPath);
+/// ElevenLabs Test
 
 var commonModule = new CommonModule();
 try

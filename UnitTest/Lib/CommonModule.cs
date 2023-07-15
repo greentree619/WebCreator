@@ -494,6 +494,8 @@ namespace UnitTest.Lib
                 }
                 //}}Video Generate
 
+                videoListMap.Progress = 100;
+                videoListMap.IsScrapping = false;
                 status = true;
             }
             catch (Exception ex)

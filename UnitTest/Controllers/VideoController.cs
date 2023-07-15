@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnitTest.Lib;
+using UnitTest.Models;
 using WebCreator;
 using WebCreator.Models;
 using static WebCreator.Controllers.ProjectController;
@@ -328,6 +329,67 @@ namespace UnitTest.Controllers
                 Task.Run(() => new SerpapiScrap().ScrappingVideoManualThreadAsync(mode, prjId, titles));
 
                 ret = true;
+            }
+            return Ok(ret);
+        }
+
+        [HttpGet("schedule/{prjId}")]
+        public async Task<IActionResult> GetScrapScheduleAsync( String prjId )
+        {
+            Schedule schedule = null;
+            try
+            {
+                schedule = await CommonModule.GetScheduleAsync(prjId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return Ok(new { id = prjId, data = schedule });
+        }
+
+        [HttpGet("publishSchedule/{prjId}")]
+        public async Task<IActionResult> GetPublishScheduleAsync(String prjId)
+        {
+            Schedule schedule = null;
+            try
+            {
+                schedule = await CommonModule.GetPublishScheduleAsync(prjId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return Ok(new { id = prjId, data = schedule });
+        }
+
+        //_id: project Id
+        //sid: schedule Id
+        [HttpGet("startOpenAI/{_id}/{sid}")]
+        public ActionResult StartOpenAIapi(String _id, String sid)
+        {
+            bool ret = false;
+            if (CommonModule.articleScrappingThreadList[_id] == null || (bool)CommonModule.articleScrappingThreadList[_id] == false)
+            {
+                CommonModule.articleScrappingThreadList[_id] = true;
+                if (CommonModule.domainScrappingScheduleStatus[_id] == null)
+                    CommonModule.domainScrappingScheduleStatus[_id] = new ScrappingScheduleStatus { isRunning = true, mode = 1 };
+                else
+                {
+                    ScrappingScheduleStatus status = (ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[_id];
+                    status.isRunning = true;
+                    status.mode = 1;
+                }
+
+                Task.Run(() => new SerpapiScrap().VideoScrappingOpenAIThreadAsync(_id, sid));
+                ret = true;
+            }
+            else
+            {
+                CommonModule.articleScrappingThreadList[_id] = false;
+                ScrappingScheduleStatus status = (ScrappingScheduleStatus)CommonModule.domainScrappingScheduleStatus[_id];
+                status.isRunning = false;
+                ret = false;
             }
             return Ok(ret);
         }

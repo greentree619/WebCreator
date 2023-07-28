@@ -470,7 +470,8 @@ namespace UnitTest.Lib
                                 }
                                 while (!afRet && (bool)CommonModule.articleScrappingThreadList[_id]);
 
-                                if (afRet) {
+                                if (afRet)
+                                {
                                     Dictionary<string, object> userUpdate = new Dictionary<string, object>(){
                                         { "VideoCollection", vCol }
                                     };
@@ -511,6 +512,10 @@ namespace UnitTest.Lib
                                     }
                                 }
                             }
+                        }
+                        else
+                        {
+                            CommonModule.Log(_id.ToString(), $"VideoScrappingOpenAIThreadAsync step 2/3 skipped Exists={scheduleSnapshot.Exists} count={scrapVideos.Count} \n", "scrap");
                         }
 
                         CommonModule.Log(_id.ToString(), $"VideoScrappingOpenAIThreadAsync Repeat", "scrap");
@@ -619,7 +624,7 @@ namespace UnitTest.Lib
 
             try
             {
-                string[] titleAry = titles.Split('#');
+                string[] titleAry = titles.Split("+NEXT+");
                 foreach (var tl in titleAry)
                 {
                     bool afRet = false;

@@ -171,6 +171,8 @@ namespace UnitTest.Controllers
                     { "UpdateTime", DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc) },
                 };
                 await docRef.UpdateAsync(userUpdate);
+                CommonModule.project2LanguageMap[docRef.Id] = projectInput.Language;
+
                 updateOK = true;
             }
             catch (RpcException ex)

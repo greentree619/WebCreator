@@ -522,7 +522,7 @@ namespace UnitTest.Lib
                         await CommonModule.historyLog.LogActionHistory(CommonModule.ArticleScrapCategory
                                             , _id
                                             , $"[Project ID={_id}] OpenAI Article Scrapping Repeat");
-                        Thread.Sleep(10000);
+                        Thread.Sleep(60000);
                     }
                 }
                 catch (Exception ex)

@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Diagnostics;
+using ElevenLabs;
 
 namespace UnitTest.Lib
 {
@@ -63,6 +64,7 @@ namespace UnitTest.Lib
         public static String stupidVideoFolder = Directory.GetCurrentDirectory() + "\\StupidVideo";
         public static OpenAIVideoGen stupidVideoGen = new OpenAIVideoGen();
         public static object logLock = new object();
+        public static ElevenLabsClient elevenLabsClientAPI = new ElevenLabsClient(Config.ElevenLabsKey);
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {

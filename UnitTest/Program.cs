@@ -200,6 +200,7 @@ if (!Directory.Exists(CommonModule.stupidVideoFolder)) Directory.CreateDirectory
 //var text = "The quick brown fox jumps over the lazy dog.";
 //var voice = (await api.VoicesEndpoint.GetAllVoicesAsync()).FirstOrDefault();
 //var defaultVoiceSettings = await api.VoicesEndpoint.GetDefaultVoiceSettingsAsync();
+//defaultVoiceSettings.Stability = 30.0f;
 //var clipPath = await api.TextToSpeechEndpoint.TextToSpeechAsync(text, voice, defaultVoiceSettings);
 //Console.WriteLine(clipPath);
 //return;

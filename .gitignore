@@ -1,6 +1,5 @@
 .vs
 
-lib/
 node_modules/
 bin
 obj

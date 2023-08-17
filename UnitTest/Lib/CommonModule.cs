@@ -464,6 +464,13 @@ namespace UnitTest.Lib
 
                 CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync > scrap image", "scrap");
                 ScrapArticleImages(projId, question, "", ref imageArray, ref thumbImageArray, ref orgImageArray);//Image auto generation
+                if (imageArray.Count == 0) {
+                    videoListMap.Progress = 0;
+                    videoListMap.IsScrapping = false;
+
+                    CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync > scrap image: image count (0) [question]: {question}", "scrap");
+                    return true;
+                }
                 videoListMap.BackgroundImage = imageArray.First();
                 videoListMap.BackgroundThumbImage = thumbImageArray.First();
                 CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync > scrap image end", "scrap");

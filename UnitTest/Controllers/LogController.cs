@@ -81,7 +81,7 @@ namespace WebCreator.Controllers
             String logFile = Directory.GetCurrentDirectory() + $"\\Log\\{projectId}-{category}.log";
             if (System.IO.File.Exists(logFile))
             {
-                for(int i=0; i<5 && !isDelete; i++)
+                for (int i = 0; i < 5 && !isDelete; i++)
                 {
                     try
                     {
@@ -92,6 +92,12 @@ namespace WebCreator.Controllers
                 }
             }
             return Ok(new { result = isDelete });
+        }
+
+        [HttpPost("/Log/{category}/{log}")]
+        public async Task PostAsync(String category, String log)
+        {
+            CommonModule.Log(category, log, "");
         }
     }
 }

@@ -335,6 +335,22 @@ namespace UnitTest.Controllers
             return Ok(ret);
         }
 
+        [HttpGet("scrapProgressState/{prjId}/{titles}")]
+        public async Task<IActionResult> scrapProgressState(String prjId, String titles)
+        {
+            Dictionary<string, ScrapProgress> scrapStatus = new Dictionary<string, ScrapProgress>();
+            string[] titleAry = titles.Split("+NEXT+");
+            foreach (var tl in titleAry)
+            {
+                var titleToken = tl.Trim('?');
+                if (CommonModule.videoScrapProgress[prjId] != null && ((Hashtable)CommonModule.videoScrapProgress[prjId])[titleToken] != null) {
+                    scrapStatus[titleToken] = (ScrapProgress)((Hashtable)CommonModule.videoScrapProgress[prjId])[titleToken];
+                }
+            }
+            
+            return new OkObjectResult(scrapStatus);
+        }
+
         [HttpGet("schedule/{prjId}")]
         public async Task<IActionResult> GetScrapScheduleAsync( String prjId )
         {

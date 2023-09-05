@@ -24,38 +24,52 @@ namespace UnitTest.Lib
     {
         String videoScript = "[Videotitel]Hvordan bliver Bitcoin lavet?[Video Introduction]Velkommen til denne video om Bitcoin. I denne video undersøger vi, hvordan Bitcoin fremstilles, og hvordan den fungerer.[Hovedindhold]Bitcoin er en digital valuta, der skabes og opbevares elektronisk. Den trykkes ikke som traditionelle valutaer, men skabes i stedet gennem en proces, der kaldes mining. Mining er processen med at verificere og tilføje transaktionsoptegnelser til den offentlige hovedbog, kendt som blockchain.Blockchain er en offentlig hovedbog, der registrerer alle Bitcoin-transaktioner. Den vedligeholdes af et netværk af computere, der konstant verificerer og opdaterer hovedbogen.For at udvinde Bitcoin bruger minearbejdere specialiserede computere til at løse komplekse matematiske problemer. Når en miner løser et problem, belønnes de med en vis mængde Bitcoin. Denne proces er kendt som proof-of-work.Mængden af Bitcoin, der belønnes for at løse et problem, halveres hvert fjerde år. Dette er kendt som &quot;halveringen&quot; og er designet til at kontrollere udbuddet af Bitcoin.Processen med mining bruges også til at sikre netværket og forhindre svindel. Minere har et incitament til at holde netværket sikkert ved at verificere transaktioner og forhindre dobbeltforbrug.[Konklusion]Så det er sådan, Bitcoin bliver lavet. Det er en interessant og kompleks proces, men den er afgørende for at holde netværket sikkert og forhindre svindel. Tak, fordi du så med!";
         String tmpFolder = CommonModule.stupidVideoFolder;
+        ScrapProgress scrapProgress = null;
+        int duration = 0;
         public OpenAIVideoGen()
         {            
         }
 
-        public async Task<String> GenerateStupidVideo(String script, String imageURL, string searchQuery = "nature") 
+        public async Task<String> GenerateStupidVideo(String projId, String script, String imageURL, ScrapProgress scrapProgress, string searchQuery = "nature") 
         {
             String url = "";
             videoScript = script;
             int resultsPerPage = 10; // Number of results to retrieve per page
             int pageNumber = 1; // Page number of the search results
             String imgLink = imageURL;
-            if(imageURL.Length == 0)
+            scrapProgress?.MoveNextStep();//5
+            if (imageURL.Length == 0)
             {
-                imageURL = await SearchImages(searchQuery, resultsPerPage, pageNumber);
+                imgLink = await SearchImages(searchQuery, resultsPerPage, pageNumber);
             }
-                
-            String saveFile = tmpFolder + "\\" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + CommonModule.GenerateRandomString(5) + Path.GetExtension(imgLink);
+
+            String imgExt = Path.GetExtension(imgLink);
+            imgExt = ((imgExt == null || imgExt.Length == 0) ? ".jpg" : imgExt);
+            String saveFile = tmpFolder + "\\" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + CommonModule.GenerateRandomString(5) + imgExt;
             bool ret = await DownloadMediaFile(imgLink, saveFile);
 
-            var voice = (await CommonModule.elevenLabsClientAPI.VoicesEndpoint.GetAllVoicesAsync()).FirstOrDefault();
-            var defaultVoiceSettings = await CommonModule.elevenLabsClientAPI.VoicesEndpoint.GetDefaultVoiceSettingsAsync();
-            defaultVoiceSettings.Stability = 0.9f;
-            var clipPath = await CommonModule.elevenLabsClientAPI.TextToSpeechEndpoint.TextToSpeechAsync(videoScript, voice, defaultVoiceSettings);
+            scrapProgress?.MoveNextStep();//6
+            var clipPath = "";
+            try
+            {
+                var voice = (await CommonModule.elevenLabsClientAPI.VoicesEndpoint.GetAllVoicesAsync()).FirstOrDefault();
+                var defaultVoiceSettings = await CommonModule.elevenLabsClientAPI.VoicesEndpoint.GetDefaultVoiceSettingsAsync();
+                defaultVoiceSettings.Stability = 0.9f;
+                clipPath = await CommonModule.elevenLabsClientAPI.TextToSpeechEndpoint.TextToSpeechAsync(videoScript, voice, defaultVoiceSettings);
+            }
+            catch (Exception e) {
+                CommonModule.Log(projId.ToString(), $"TextToSpeechEndpoint error: {e.Message.ToString()}", "scrap");
+            }
+            
 
             if (ret) {
-                url = await GenerateVideo(saveFile, clipPath, videoScript, GetTextWidthBy(700));
+                url = await GenerateVideo(saveFile, clipPath, videoScript, GetTextWidthBy(700), scrapProgress);
             }
 
             return url;
         }
 
-        async Task<String> GenerateVideo(String saveFile, String audioFile, String videoScript, int textWidth)
+        async Task<String> GenerateVideo(String saveFile, String audioFile, String videoScript, int textWidth, ScrapProgress scrapProgress)
         {
             int duration = 90;
             String scriptFileName = Path.GetFileName(saveFile);
@@ -69,17 +83,28 @@ namespace UnitTest.Lib
             string outputFilePath = CommonModule.stupidVideoFolder + $"\\{resultID}-bkg.mp4";
             string outputAudioFilePath = CommonModule.stupidVideoFolder + $"\\{resultID}-bkg-audio.mp4";
             string finalOutputFilePath = CommonModule.stupidVideoFolder + $"\\{resultID}-completed.mp4";
-            string ffmpegCommand = $"-y -loop 1 -t {duration} -i \"{saveFile}\" -vf scale=1024:-2 \"{outputFilePath}\"";
-            RunFFmpegCommand(ffmpegPath, ffmpegCommand);
+            string ffmpegCommand = $"-y -progress pipe:1 -loop 1 -t {duration} -i \"{saveFile}\" -vf scale=1024:-2 \"{outputFilePath}\"";
+            scrapProgress?.MoveNextStep();//7
+            RunFFmpegCommand(ffmpegPath, ffmpegCommand, scrapProgress, duration);
 
-            ffmpegCommand = $"-y -i \"{outputFilePath}\" -i \"{audioFile}\" -c:v copy -map 0:v -map 1:a -y \"{outputAudioFilePath}\"";
-            RunFFmpegCommand(ffmpegPath, ffmpegCommand);
+            scrapProgress?.MoveNextStep();//8
+            if (audioFile.Length > 0)
+            {
+                ffmpegCommand = $"-y -progress pipe:1 -i \"{outputFilePath}\" -i \"{audioFile}\" -c:v copy -map 0:v -map 1:a -y \"{outputAudioFilePath}\"";
+                RunFFmpegCommand(ffmpegPath, ffmpegCommand, scrapProgress, duration);
+            }
+            else 
+            {
+                outputAudioFilePath = outputFilePath;
+            }
 
             String scriptFileNameTmp = scriptFileName.Replace("\\", "/").Replace(":", "\\:");
-            string ffmpegCommand2 = $"-y -i \"{outputAudioFilePath}\" -filter_complex \"[0]split[txt][orig];[txt]drawtext=fontfile=tahoma.ttf:fontsize=55:fontcolor=white:x=(w-text_w)/2+20:y=h/2-30*t:textfile='{scriptFileNameTmp}':bordercolor=black:line_spacing=20:borderw=3[txt];[orig]crop=iw:50:0:0[orig];[txt][orig]overlay\" -c:v libx264 -y -preset ultrafast -t {duration} \"{finalOutputFilePath}\"";
-            RunFFmpegCommand(ffmpegPath, ffmpegCommand2);
+            string ffmpegCommand2 = $"-y -progress pipe:1 -i \"{outputAudioFilePath}\" -filter_complex \"[0]split[txt][orig];[txt]drawtext=fontfile=tahoma.ttf:fontsize=55:fontcolor=white:x=(w-text_w)/2+20:y=h/2-30*t:textfile='{scriptFileNameTmp}':bordercolor=black:line_spacing=20:borderw=3[txt];[orig]crop=iw:50:0:0[orig];[txt][orig]overlay\" -c:v libx264 -y -preset ultrafast -t {duration} \"{finalOutputFilePath}\"";
+            scrapProgress?.MoveNextStep();//9
+            RunFFmpegCommand(ffmpegPath, ffmpegCommand2, scrapProgress, duration);
 
-            UploadToS3(finalOutputFilePath);
+            scrapProgress?.MoveNextStep();//10
+            UploadToS3(finalOutputFilePath, scrapProgress);
 
             //Delete finalOutputFilePath, outputFilePath, scriptFileName, saveFile
             File.Delete(finalOutputFilePath);
@@ -87,11 +112,13 @@ namespace UnitTest.Lib
             File.Delete(outputFilePath);
             File.Delete(scriptFileName);
             File.Delete(saveFile);
+            scrapProgress?.SetDone();
 
             return $"https://article-image-bucket-live.s3.us-east-2.amazonaws.com/stupid-video/{resultID}-completed.mp4";
         }
 
-        void UploadToS3(String uploadFile) {
+        void UploadToS3(String uploadFile, ScrapProgress _scrapProgress) {
+            scrapProgress = _scrapProgress;
             string bucketName = "article-image-bucket-live";
             string keyName = "stupid-video/"+Path.GetFileName(uploadFile);
             string filePath = uploadFile;
@@ -113,6 +140,7 @@ namespace UnitTest.Lib
                         PartSize = 5 * 1024 * 1024,// 5M
                         CannedACL = S3CannedACL.PublicRead
                     };
+                uploadRequest.UploadProgressEvent += new EventHandler<UploadProgressArgs>(uploadRequest_UploadPartProgressEvent);
 
                 // Upload the file to Amazon S3
                 TransferUtility fileTransferUtility = new TransferUtility(s3Client);
@@ -127,6 +155,14 @@ namespace UnitTest.Lib
             {
                 Console.WriteLine("Unknown encountered on server. Message:'{0}' when writing an object", e.Message);
             }
+        }
+
+        void uploadRequest_UploadPartProgressEvent(object sender, UploadProgressArgs e)
+        {
+            // Process event.
+            //Console.WriteLine("{0}/{1}", e.TransferredBytes, e.TotalBytes);
+            float uploadProgress = ((float)e.TransferredBytes / (float)e.TotalBytes) * 100;
+            scrapProgress?.SetProgress((int)uploadProgress);
         }
 
         int GetTextWidthBy(int videoWidth) { 
@@ -170,20 +206,40 @@ namespace UnitTest.Lib
             }
         }
 
-        void RunFFmpegCommand(string ffmpegPath, string ffmpegCommand)
+        private void FfmpegOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
+            if (outLine.Data != null)
+            {
+                if (outLine.Data.Contains(" time="))
+                {
+                    String timeToken = outLine.Data.Split(" time=")[1].Split(" ")[0];
+                    float curSeconds = (float)TimeSpan.Parse(timeToken).TotalSeconds;
+                    scrapProgress?.SetProgress( (int)( curSeconds/ (float)duration * 100) );
+                }
+            }
+        }
+
+        void RunFFmpegCommand(string ffmpegPath, string ffmpegCommand, ScrapProgress _scrapProgress, int _duration)
+        {
+            scrapProgress = _scrapProgress;
+            duration = _duration;
             using (Process p = new Process())
             {
                 p.StartInfo.UseShellExecute = false;
                 p.StartInfo.CreateNoWindow = true;
                 p.StartInfo.RedirectStandardOutput = true;
-                //p.StartInfo.RedirectStandardError = true;
+                p.StartInfo.RedirectStandardError = true;
                 p.StartInfo.FileName = ffmpegPath;
                 p.StartInfo.Arguments = ffmpegCommand;
-                p.Start();                
+                p.OutputDataReceived += new DataReceivedEventHandler(FfmpegOutputHandler);
+                p.ErrorDataReceived += new DataReceivedEventHandler(FfmpegOutputHandler);
+                p.Start();
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
                 p.WaitForExit();
                 //string output = p.StandardOutput.ReadToEnd();
                 //string error = p.StandardError.ReadToEnd();
+                p.Close();
             }
 
             //Omitted

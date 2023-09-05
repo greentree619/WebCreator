@@ -65,6 +65,7 @@ namespace UnitTest.Lib
         public static OpenAIVideoGen stupidVideoGen = new OpenAIVideoGen();
         public static object logLock = new object();
         public static ElevenLabsClient elevenLabsClientAPI = new ElevenLabsClient(Config.ElevenLabsKey);
+        public static Hashtable videoScrapProgress = new Hashtable();
 
         public static async Task SetDomainScrappingAsync(String domainId, bool isScrapping)
         {
@@ -414,7 +415,7 @@ namespace UnitTest.Lib
                 }
 
                 if (imageArray.Count > 0 && script.Length > 0){
-                    String url = await CommonModule.stupidVideoGen.GenerateStupidVideo(script, orgImageArray.Last());
+                    String url = await CommonModule.stupidVideoGen.GenerateStupidVideo(domainId, script, orgImageArray.Last(), null);
                     if(url.Length > 0) articleContent += "<br/><video width=\"400\" controls> <source src=\"" + url + "\" type=\"video/mp4\"></video>";
                 }
                 //}}Video Generate
@@ -451,10 +452,13 @@ namespace UnitTest.Lib
             List<String> imageArray = new List<string>();
             List<String> thumbImageArray = new List<string>();
             List<String> orgImageArray = new List<string>();
+            Hashtable hashtbl = (Hashtable)CommonModule.videoScrapProgress[projId];
+            ScrapProgress scrapProgress = (hashtbl == null ? null : ((ScrapProgress)(hashtbl[question.Trim('?')])));
 
             CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync start", "scrap");
             try
             {
+                scrapProgress?.MoveNextStep();//1
                 if (project2LanguageMap[projId].ToString()
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
@@ -463,6 +467,7 @@ namespace UnitTest.Lib
                 }
 
                 CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync > scrap image", "scrap");
+                scrapProgress?.MoveNextStep();//2
                 ScrapArticleImages(projId, question, "", ref imageArray, ref thumbImageArray, ref orgImageArray);//Image auto generation
                 if (imageArray.Count == 0) {
                     videoListMap.Progress = 0;
@@ -476,6 +481,7 @@ namespace UnitTest.Lib
                 CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync > scrap image end", "scrap");
 
                 //{{Video Generate
+                scrapProgress?.MoveNextStep();//3
                 var result = await openAI.Completions.CreateCompletionAsync(
                     new CompletionRequest(CommonModule.openAISetting.GetVideoScriptPrompt(question)
                     , model: CommonModule.openAISetting.setInf.Model
@@ -487,6 +493,7 @@ namespace UnitTest.Lib
                     , frequencyPenalty: CommonModule.openAISetting.setInf.FrequencyPenalty));
                 String script = result.ToString();
                 CommonModule.Log(projId.ToString(), $"ScrapVideoByOpenAIAsync step 2/2 script len: {script.Length.ToString()}", "scrap");
+                scrapProgress?.MoveNextStep();//4
                 if (script.Length > 0 && CommonModule.project2LanguageMap[projId].ToString()
                     .CompareTo(CommonModule.baseLanguage) != 0)
                 {
@@ -497,7 +504,7 @@ namespace UnitTest.Lib
 
                 if (imageArray.Count > 0 && script.Length > 0)
                 {
-                    String url = await CommonModule.stupidVideoGen.GenerateStupidVideo(script, orgImageArray.Last());
+                    String url = await CommonModule.stupidVideoGen.GenerateStupidVideo(projId, script, orgImageArray.Last(), scrapProgress);
                     //if (url.Length > 0) articleContent += "<br/><video width=\"400\" controls> <source src=\"" + url + "\" type=\"video/mp4\"></video>";
                     videoListMap.awsVideoLink = url;
                 }

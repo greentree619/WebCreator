@@ -608,6 +608,7 @@ namespace UnitTest.Lib
             var vCol = new List<VideoDetail>();
             VideoProject vPrj = null;
             Hashtable videoListMap = new Hashtable();
+            if (CommonModule.videoScrapProgress[_id] == null) CommonModule.videoScrapProgress[_id] = new Hashtable();
             if (articleSnapshot.Exists)
             {
                 vPrj = articleSnapshot.ConvertTo<VideoProject>();
@@ -617,7 +618,13 @@ namespace UnitTest.Lib
                     foreach (var vd in vPrj.VideoCollection)
                     {
                         vCol.Add(vd);
-                        videoListMap[vd.Title.Trim('?').ToString()] = vd;
+                        var token = vd.Title.Trim('?').ToString();
+                        videoListMap[token] = vd;
+
+                        if (((Hashtable)CommonModule.videoScrapProgress[_id])[token] == null)
+                            ((Hashtable)CommonModule.videoScrapProgress[_id])[token] = new ScrapProgress();
+                        else
+                            ((ScrapProgress)(((Hashtable)CommonModule.videoScrapProgress[_id])[token])).InitProgress();
                     }
                 }
             }

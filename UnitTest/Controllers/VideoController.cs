@@ -335,16 +335,16 @@ namespace UnitTest.Controllers
             return Ok(ret);
         }
 
-        [HttpGet("scrapProgressState/{prjId}/{titles}")]
-        public async Task<IActionResult> scrapProgressState(String prjId, String titles)
+        [HttpPost("scrapProgressState")]
+        public async Task<IActionResult> scrapProgressState([FromBody] VideoTitles videoTitles)
         {
             Dictionary<string, ScrapProgress> scrapStatus = new Dictionary<string, ScrapProgress>();
-            string[] titleAry = titles.Split("+NEXT+");
+            string[] titleAry = videoTitles.articleIds.Split("+NEXT+");
             foreach (var tl in titleAry)
             {
                 var titleToken = tl.Trim('?');
-                if (CommonModule.videoScrapProgress[prjId] != null && ((Hashtable)CommonModule.videoScrapProgress[prjId])[titleToken] != null) {
-                    scrapStatus[titleToken] = (ScrapProgress)((Hashtable)CommonModule.videoScrapProgress[prjId])[titleToken];
+                if (CommonModule.videoScrapProgress[videoTitles.projectId] != null && ((Hashtable)CommonModule.videoScrapProgress[videoTitles.projectId])[titleToken] != null) {
+                    scrapStatus[titleToken] = (ScrapProgress)((Hashtable)CommonModule.videoScrapProgress[videoTitles.projectId])[titleToken];
                 }
             }
             

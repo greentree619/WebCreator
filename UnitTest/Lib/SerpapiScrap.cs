@@ -602,40 +602,51 @@ namespace UnitTest.Lib
         public async Task ScrappingVideoManualThreadAsync(String mode, String _id, String titles)
         {
             CommonModule.Log(_id.ToString(), $"ScrappingVideoManualThreadAsync start", "scrap");
-            CollectionReference projectCol = Config.FirebaseDB.Collection("VideoProjects");
-            DocumentReference docRef = projectCol.Document(_id);
-            DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
-            var vCol = new List<VideoDetail>();
-            VideoProject vPrj = null;
-            Hashtable videoListMap = new Hashtable();
-            if (CommonModule.videoScrapProgress[_id] == null) CommonModule.videoScrapProgress[_id] = new Hashtable();
-            if (articleSnapshot.Exists)
-            {
-                vPrj = articleSnapshot.ConvertTo<VideoProject>();
-                vPrj.Id = articleSnapshot.Id;
-                if (vPrj.VideoCollection != null)
-                {
-                    foreach (var vd in vPrj.VideoCollection)
-                    {
-                        vCol.Add(vd);
-                        var token = vd.Title.Trim('?').ToString();
-                        videoListMap[token] = vd;
-
-                        if (((Hashtable)CommonModule.videoScrapProgress[_id])[token] == null)
-                            ((Hashtable)CommonModule.videoScrapProgress[_id])[token] = new ScrapProgress();
-                        else
-                            ((ScrapProgress)(((Hashtable)CommonModule.videoScrapProgress[_id])[token])).InitProgress();
-                    }
-                }
-            }
 
             try
             {
+                CollectionReference projectCol = Config.FirebaseDB.Collection("VideoProjects");
+                DocumentReference docRef = projectCol.Document(_id);
+                DocumentSnapshot articleSnapshot = await docRef.GetSnapshotAsync();
+                var vCol = new List<VideoDetail>();
+                VideoProject vPrj = null;
+                Hashtable videoListMap = new Hashtable();
+                if (CommonModule.videoScrapProgress[_id] == null) CommonModule.videoScrapProgress[_id] = new Hashtable();
+                if (articleSnapshot.Exists)
+                {
+                    vPrj = articleSnapshot.ConvertTo<VideoProject>();
+                    vPrj.Id = articleSnapshot.Id;
+                    if (vPrj.VideoCollection != null)
+                    {
+                        foreach (var vd in vPrj.VideoCollection)
+                        {
+                            vCol.Add(vd);
+                            var token = vd.Title.Trim('?').ToString();
+                            videoListMap[token] = vd;
+                        }
+                    }
+                }
+
+                //try
+                //{
                 string[] titleAry = titles.Split("+NEXT+");
                 foreach (var tl in titleAry)
                 {
+                    var token = tl.Trim('?').ToString();
+                    var videoObj = (VideoDetail)videoListMap[token];
+                    if (videoObj == null) continue;
+
+                    if (((Hashtable)CommonModule.videoScrapProgress[_id])[token] == null)
+                        ((Hashtable)CommonModule.videoScrapProgress[_id])[token] = new ScrapProgress();
+                    else
+                        ((ScrapProgress)(((Hashtable)CommonModule.videoScrapProgress[_id])[token])).InitProgress();
+                }
+
+                foreach (var tl in titleAry)
+                {
                     bool afRet = false;
-                    var videoObj = (VideoDetail)videoListMap[tl.Trim('?')];
+                    var token = tl.Trim('?').ToString();
+                    var videoObj = (VideoDetail)videoListMap[token];
                     if (videoObj == null) continue;
 
                     do
@@ -651,20 +662,24 @@ namespace UnitTest.Lib
                     }
                     while (!afRet);
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine(ex.Message);
+                //}
 
-            Dictionary<string, object> userUpdate = new Dictionary<string, object>(){
+                Dictionary<string, object> userUpdate = new Dictionary<string, object>(){
                 { "VideoCollection", vCol }
-            };
-            await docRef.UpdateAsync(userUpdate);
+                };
+                await docRef.UpdateAsync(userUpdate);
 
-            CommonModule.Log(_id.ToString(), $"ScrappingVideoManualThreadAsync end", "scrap");
-            if (mode == "0") CommonModule.isManualAFScrapping = false;
-            else if (mode == "1") CommonModule.isManualOpenAIScrapping = false;
+                CommonModule.Log(_id.ToString(), $"ScrappingVideoManualThreadAsync end", "scrap");
+                if (mode == "0") CommonModule.isManualAFScrapping = false;
+                else if (mode == "1") CommonModule.isManualOpenAIScrapping = false;
+            }
+            catch(Exception e) {
+                CommonModule.Log(_id.ToString(), $"ScrappingVideoManualThreadAsync start Exception {e.Message}", "scrap");
+            }
         }
 
         public async Task ManualArticlesSyncAsync(String domainId, String domainName, String ipAddr, String s3Name, String region, String articleIds)

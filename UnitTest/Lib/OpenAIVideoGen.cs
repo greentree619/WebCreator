@@ -112,6 +112,7 @@ namespace UnitTest.Lib
             File.Delete(outputFilePath);
             File.Delete(scriptFileName);
             File.Delete(saveFile);
+            if (audioFile.Length > 0) File.Delete(audioFile);
             scrapProgress?.SetDone();
 
             return $"https://article-image-bucket-live.s3.us-east-2.amazonaws.com/stupid-video/{resultID}-completed.mp4";
@@ -221,6 +222,8 @@ namespace UnitTest.Lib
 
         void RunFFmpegCommand(string ffmpegPath, string ffmpegCommand, ScrapProgress _scrapProgress, int _duration)
         {
+            //Console.WriteLine($"RunFFmpegCommand ffmpegCommand = {ffmpegCommand}");
+            CommonModule.Log("FFMpegLog", $"RunFFmpegCommand ffmpegCommand = {ffmpegCommand}", "scrap");
             scrapProgress = _scrapProgress;
             duration = _duration;
             using (Process p = new Process())
